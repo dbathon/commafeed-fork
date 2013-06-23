@@ -1,0 +1,4 @@
+generally postgres works, but there are som problems...:
+* liquibase fails because of https://liquibase.jira.com/browse/CORE-1010, so databaseUpdater.update() needs to be disabled and hibernate.hbm2ddl.auto needs to be used
+* setTimeout is not supported, so query.setHint("javax.persistence.query.timeout", 20000) needs to be disabled
+* searching does not work...

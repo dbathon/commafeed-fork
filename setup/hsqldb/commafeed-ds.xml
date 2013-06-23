@@ -1,0 +1,13 @@
+<datasources xmlns="http://www.jboss.org/ironjacamar/schema">
+  <datasource jndi-name="java:jboss/datasources/CommafeedDS" pool-name="CommafeedDS" jta="true">
+    <connection-url>jdbc:hsqldb:file:~/commafeed.hsqldb;hsqldb.tx=mvcc</connection-url>
+    <driver>hsqldb.jar</driver>
+    <pool>
+      <max-pool-size>20</max-pool-size>
+    </pool>
+    <security>
+      <user-name>sa</user-name>
+      <password>sa</password>
+    </security>
+  </datasource>
+</datasources>

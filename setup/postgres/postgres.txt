@@ -1,0 +1,2 @@
+CREATE USER commafeed WITH superuser PASSWORD 'commafeed';
+CREATE DATABASE commafeed with owner commafeed;

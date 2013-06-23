@@ -457,6 +457,20 @@
 				<jpa.dialect>org.hibernate.dialect.PostgreSQLDialect</jpa.dialect>
 			</properties>
 		</profile>
+    <profile>
+      <id>pgsql-jboss</id>
+      <properties>
+        <jpa.datasource.name>java:jboss/datasources/CommafeedDS</jpa.datasource.name>
+        <jpa.dialect>org.hibernate.dialect.PostgreSQLDialect</jpa.dialect>
+      </properties>
+    </profile>
+    <profile>
+      <id>hsqldb-jboss</id>
+      <properties>
+        <jpa.datasource.name>java:jboss/datasources/CommafeedDS</jpa.datasource.name>
+        <jpa.dialect>org.hibernate.dialect.HSQLDialect</jpa.dialect>
+      </properties>
+    </profile>
 		<profile>
 			<id>prod</id>
 			<activation>
