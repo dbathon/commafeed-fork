@@ -138,7 +138,7 @@ function($scope, $timeout, $stateParams, $window, $location, $state, $route, Cat
 
 	$timeout(function refreshTree() {
 		AnalyticsService.track();
-		CategoryService.init(function() {
+		CategoryService.refresh(function() {
 			$timeout(refreshTree, 30000);
 		}, function() {
 			$timeout(refreshTree, 30000);
@@ -614,8 +614,7 @@ function($scope, $state, $filter, $timeout, CategoryService) {
 		$state.transitionTo('feeds.view', {
 			_type : 'feed', 
 			_id : id
-			}
-		);
+		});
 	};
 	
 	$scope.open = function() {
@@ -655,6 +654,7 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 	$scope.errorCount = 0;
 	$scope.timestamp = 0;
 	$scope.entries = [];
+	$scope.font_size = 0;
 
 	$scope.settingsService = SettingsService;
 	$scope.$watch('settingsService.settings.readingMode', function(newValue,
@@ -745,7 +745,7 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 			olderThan : olderThan || $scope.timestamp,
 			read : true
 		}, function() {
-			CategoryService.init(function() {
+			CategoryService.refresh(function() {
 				$scope.$emit('emitReload');
 			});
 		});
@@ -802,20 +802,22 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 
 	var openNextEntry = function(event) {
 		var entry = getNextEntry();
-		if (entry) {
-			openEntry(entry, event);
-		}
+		openEntry(entry, event);
 	};
 
 	var openPreviousEntry = function(event) {
 		var entry = getPreviousEntry();
-		if (entry) {
-			openEntry(entry, event);
-		}
+		openEntry(entry, event);
 	};
 
 	var focusNextEntry = function(event) {
 		var entry = getNextEntry();
+		
+		if (event) {
+			event.preventDefault();
+			event.stopPropagation();
+		}
+		
 		if (entry) {
 			$scope.current = entry;
 		}
@@ -823,6 +825,12 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 
 	var focusPreviousEntry = function(event) {
 		var entry = getPreviousEntry();
+	
+		if (event) {
+			event.preventDefault();
+			event.stopPropagation();
+		}
+		
 		if (entry) {
 			$scope.current = entry;
 		}
@@ -831,6 +839,15 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 	$scope.isOpen = SettingsService.settings.viewMode == 'expanded';
 	
 	var openEntry = function(entry, event) {
+		
+		if (event) {
+			event.preventDefault();
+			event.stopPropagation();
+		}
+		
+		if (!entry) {
+			return;
+		}
 		
 		if ($scope.current != entry || SettingsService.settings.viewMode == 'expanded') {
 			$scope.isOpen = true;
@@ -841,12 +858,7 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 			$scope.mark(entry, true);
 		}
 		$scope.current = entry;
-		
-		if (event) {
-			event.preventDefault();
-			event.stopPropagation();
-		}
-		
+			
 		if (getCurrentIndex() == $scope.entries.length - 1) {
 			$scope.loadMoreEntries();	
 		}
@@ -888,7 +900,7 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 			}
 		}
 	};
-
+	
 	Mousetrap.bind('j', function(e) {
 		$scope.$apply(function() {
 			$scope.navigationMode = 'keyboard';
@@ -974,6 +986,80 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 			$scope.markAll();
 		});
 	});
+	
+	Mousetrap.bind('+', function(e) {
+		$scope.$apply(function() {
+			$scope.font_size = Math.min($scope.font_size + 1, 5); 
+		});
+	});	
+	
+	Mousetrap.bind('-', function(e) {
+		$scope.$apply(function() {
+			$scope.font_size = Math.max($scope.font_size - 1, 0); 
+		});
+	});	
+	
+	Mousetrap.bind('space', function(e) {
+		if (!$scope.current) {
+			$scope.$apply(function() {
+				$scope.navigationMode = 'keyboard';
+				openNextEntry(e);
+			});	
+		} else if (!$scope.isOpen) {
+			$scope.$apply(function() {
+				$scope.navigationMode = 'keyboard';
+				if ($scope.current) {
+					openEntry($scope.current, e);
+				}
+			});
+		} else {
+			var docTop = $(window).scrollTop();
+			var docBottom = docTop + $(window).height();
+
+			var elem = $('#entry_' + $scope.current.id);
+			var elemTop = elem.offset().top;
+			var elemBottom = elemTop + elem.height();
+			
+			var bottomVisible = elemBottom < docBottom;
+			if (bottomVisible) {
+				$scope.$apply(function() {
+					$scope.navigationMode = 'keyboard';
+					openNextEntry(e);
+				});	
+			}
+		}
+	});
+	
+	Mousetrap.bind('shift+space', function(e) {
+		if (!$scope.current) {
+			return;
+		} else if (!$scope.isOpen) {
+			$scope.$apply(function() {
+				$scope.navigationMode = 'keyboard';
+				if ($scope.current) {
+					openEntry($scope.current, e);
+				}
+			});
+		} else {
+			var docTop = $(window).scrollTop();
+
+			var elem = $('#entry_' + $scope.current.id);
+			var elemTop = elem.offset().top;
+			
+			var topVisible = elemTop > docTop;
+			if (topVisible) {
+				$scope.$apply(function() {
+					$scope.navigationMode = 'keyboard';
+					openPreviousEntry(e);
+				});	
+			}
+		}
+	});
+	
+	Mousetrap.bind('f', function(e) {
+		$('body').toggleClass('full-screen');
+	});
+	
 	Mousetrap.bind('?', function(e) {
 		$scope.$apply(function() {
 			$scope.shortcutsModal = true;
@@ -1094,7 +1180,7 @@ function($scope, $location, SettingsService, AnalyticsService, ServerService) {
 	
 	$scope.ServerService = ServerService.get();
 	
-	$scope.themes = ['default'];
+	$scope.themes = ['default','MRACHINI'];
 	
 	$scope.settingsService = SettingsService;
 	$scope.$watch('settingsService.settings', function(value) {

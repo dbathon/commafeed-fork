@@ -49,7 +49,13 @@ module.factory('SettingsService', ['$resource', function($resource) {
 	s.init = function(callback) {
 		res.get(function(data) {
 			s.settings = data;
-			moment.lang(s.settings.language || 'en');
+			var lang = s.settings.language || 'en';
+			if (lang === 'zh') {
+				lang = 'zh-cn';
+			} else if (lang === 'ms') {
+				lang = 'ms-my';
+			}
+			moment.lang(lang, {});
 			if (callback) {
 				callback(data);
 			}
@@ -204,6 +210,13 @@ function($resource, $http) {
 			res.subscriptions = data;
 			res.flatCategories = flatten(data);
 			res.feeds = flatfeeds(data);
+			if (callback)
+				callback(data);
+		});
+	};
+	res.refresh = function(callback) {
+		res.get(function(data) {
+			_.merge(res.subscriptions, data);
 			if (callback)
 				callback(data);
 		});

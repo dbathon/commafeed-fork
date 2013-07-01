@@ -1,7 +1,7 @@
 package com.commafeed.backend.services;
 
-import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.UUID;
 
 import javax.ejb.Stateless;
@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 
 import com.commafeed.backend.dao.FeedCategoryDAO;
 import com.commafeed.backend.dao.FeedEntryStatusDAO;
@@ -50,12 +51,18 @@ public class UserService {
 			boolean authenticated = encryptionService.authenticate(password,
 					user.getPassword(), user.getSalt());
 			if (authenticated) {
-				user.setLastLogin(Calendar.getInstance().getTime());
-				userDAO.saveOrUpdate(user);
+				Date lastLogin = user.getLastLogin();
+				Date now = new Date();
+				// only update lastLogin field every hour in order to not
+				// invalidate the cache everytime someone logs in
+				if (lastLogin == null
+						|| lastLogin.before(DateUtils.addHours(now, -1))) {
+					user.setLastLogin(now);
+					userDAO.saveOrUpdate(user);
+				}
 				return user;
 			}
 		}
-
 		return null;
 	}
 
@@ -98,7 +105,7 @@ public class UserService {
 		byte[] salt = encryptionService.generateSalt();
 		user.setName(name);
 		user.setEmail(email);
-		user.setCreated(Calendar.getInstance().getTime());
+		user.setCreated(new Date());
 		user.setSalt(salt);
 		user.setPassword(encryptionService.getEncryptedPassword(password, salt));
 		for (Role role : roles) {

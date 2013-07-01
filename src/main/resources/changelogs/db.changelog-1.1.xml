@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
 
 	<changeSet author="athou" id="recreate-fes-index">
 		<preConditions onFail="MARK_RAN" onFailMessage="index already exists">
@@ -218,17 +218,30 @@
 	</changeSet>
 	
 	<changeSet author="athou" id="add-user-created">
+		<validCheckSum>3:b1bbf8d559ac25b785751704f2d24a91</validCheckSum>
+		<validCheckSum>7:5bd8b28aadce012b56f003539ce99957</validCheckSum>
 		<addColumn tableName="USERS">
 		    <column name="created" type="DATETIME" />
 		</addColumn>
-		<sql>update USERS set created = lastLogin</sql>
 	</changeSet>	
 		
 	<changeSet author="athou" id="add-proxy-setting">
+		<validCheckSum>7:ffca06665d2dc182bd3cb718e62e98f0</validCheckSum>
 		<addColumn tableName="APPLICATIONSETTINGS">
 		    <column name="imageProxyEnabled" type="BIT" />
 		</addColumn>
-		<sql>update APPLICATIONSETTINGS set imageProxyEnabled=false</sql>
+		<update tableName="APPLICATIONSETTINGS">
+			<column name="imageProxyEnabled" valueBoolean="false"></column>
+		</update>	
+	</changeSet>
+	
+	<changeSet author="athou" id="add-query-timeout-setting">
+		<addColumn tableName="APPLICATIONSETTINGS">
+		    <column name="queryTimeout" type="INT" />
+		</addColumn>
+		<update tableName="APPLICATIONSETTINGS">
+			<column name="queryTimeout" valueNumeric="0"></column>
+		</update>	
 	</changeSet>
 
 </databaseChangeLog>

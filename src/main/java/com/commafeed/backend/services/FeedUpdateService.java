@@ -1,6 +1,6 @@
 package com.commafeed.backend.services;
 
-import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -42,14 +42,15 @@ public class FeedUpdateService {
 
 		FeedEntry update = null;
 		if (existing == null) {
+			entry.setAuthor(FeedUtils.truncate(FeedUtils.handleContent(
+					entry.getAuthor(), feed.getLink(), true), 128));
 			FeedEntryContent content = entry.getContent();
-			content.setTitle(FeedUtils.truncate(
-					FeedUtils.handleContent(content.getTitle(), feed.getLink()),
-					2048));
+			content.setTitle(FeedUtils.truncate(FeedUtils.handleContent(
+					content.getTitle(), feed.getLink(), true), 2048));
 			content.setContent(FeedUtils.handleContent(content.getContent(),
-					feed.getLink()));
+					feed.getLink(), false));
 
-			entry.setInserted(Calendar.getInstance().getTime());
+			entry.setInserted(new Date());
 			entry.getFeeds().add(feed);
 
 			update = entry;
@@ -71,5 +72,4 @@ public class FeedUpdateService {
 			metricsBean.entryUpdated(statusUpdateList.size());
 		}
 	}
-
 }

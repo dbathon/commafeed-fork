@@ -3,7 +3,6 @@ package com.commafeed.backend.feeds;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -40,7 +39,7 @@ import com.steadystate.css.parser.CSSOMParser;
 public class FeedUtils {
 
 	protected static Logger log = LoggerFactory.getLogger(FeedUtils.class);
-	
+
 	private static final List<String> ALLOWED_IFRAME_CSS_RULES = Arrays.asList(
 			"height", "width", "border");
 	private static final char[] DISALLOWED_IFRAME_CSS_RULE_CHARACTERS = new char[] {
@@ -105,7 +104,8 @@ public class FeedUtils {
 		return encoding;
 	}
 
-	public static String handleContent(String content, String baseUri) {
+	public static String handleContent(String content, String baseUri,
+			boolean keepTextOnly) {
 		if (StringUtils.isNotBlank(content)) {
 			baseUri = StringUtils.trimToEmpty(baseUri);
 			Whitelist whitelist = new Whitelist();
@@ -126,8 +126,8 @@ public class FeedUtils {
 			whitelist.addAttributes("colgroup", "span", "width");
 			whitelist.addAttributes("iframe", "src", "height", "width",
 					"allowfullscreen", "frameborder", "style");
-			whitelist.addAttributes("img", "alt", "height", "src", "title",
-					"width");
+			whitelist.addAttributes("img", "align", "alt", "height", "src",
+					"title", "width");
 			whitelist.addAttributes("ol", "start", "type");
 			whitelist.addAttributes("q", "cite");
 			whitelist.addAttributes("table", "border", "bordercolor",
@@ -158,8 +158,12 @@ public class FeedUtils {
 
 			clean.outputSettings(new OutputSettings().escapeMode(
 					EscapeMode.base).prettyPrint(false));
-			content = clean.body().html();
-
+			Element body = clean.body();
+			if (keepTextOnly) {
+				content = body.text();
+			} else {
+				content = body.html();
+			}
 		}
 		return content;
 	}
@@ -269,7 +273,7 @@ public class FeedUtils {
 	 * 
 	 */
 	public static Date buildDisabledUntil(int errorCount) {
-		Date now = Calendar.getInstance().getTime();
+		Date now = new Date();
 		int retriesBeforeDisable = 3;
 
 		if (errorCount >= retriesBeforeDisable) {
@@ -285,7 +289,7 @@ public class FeedUtils {
 	 */
 	public static Date buildDisabledUntil(Date publishedDate,
 			Long averageEntryInterval) {
-		Date now = Calendar.getInstance().getTime();
+		Date now = new Date();
 
 		if (publishedDate == null) {
 			// feed with no entries, recheck in 24 hours
@@ -375,8 +379,8 @@ public class FeedUtils {
 		for (Element element : elements) {
 			String href = element.attr("src");
 			if (href != null) {
-				String proxy = removeTrailingSlash(publicUrl) + "/rest/server/proxy?u="
-						+ imageProxyEncoder(href);
+				String proxy = removeTrailingSlash(publicUrl)
+						+ "/rest/server/proxy?u=" + imageProxyEncoder(href);
 				element.attr("src", proxy);
 			}
 		}

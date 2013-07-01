@@ -1,6 +1,8 @@
 package com.commafeed.backend;
 
 import javax.ejb.Singleton;
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.InvocationContext;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -23,7 +25,8 @@ public class MetricsBean {
 	private long minuteTimestamp;
 	private long hourTimestamp;
 
-	public void feedRefreshed() {
+	@AroundInvoke
+	private Object roll(InvocationContext context) throws Exception {
 		long now = System.currentTimeMillis();
 		if (now - minuteTimestamp > 60000) {
 			lastMinute = thisMinute;
@@ -31,7 +34,6 @@ public class MetricsBean {
 			minuteTimestamp = now;
 
 		}
-		thisMinute.feedsRefreshed++;
 
 		if (now - hourTimestamp > 60000 * 60) {
 			lastHour = thisHour;
@@ -39,6 +41,11 @@ public class MetricsBean {
 			hourTimestamp = now;
 
 		}
+		return context.proceed();
+	}
+
+	public void feedRefreshed() {
+		thisMinute.feedsRefreshed++;
 		thisHour.feedsRefreshed++;
 	}
 
@@ -55,6 +62,25 @@ public class MetricsBean {
 
 		thisHour.statusesInserted += statusesCount;
 		thisMinute.statusesInserted += statusesCount;
+	}
+
+	public void entryCacheHit() {
+		thisHour.entryCacheHit++;
+		thisMinute.entryCacheHit++;
+	}
+
+	public void entryCacheMiss() {
+		thisHour.entryCacheMiss++;
+		thisMinute.entryCacheMiss++;
+	}
+
+	public void pushReceived(int feedCount) {
+
+		thisHour.pushNotificationsReceived++;
+		thisMinute.pushNotificationsReceived++;
+
+		thisHour.pushFeedsQueued += feedCount;
+		thisMinute.pushFeedsQueued += feedCount;
 	}
 
 	public void threadWaited() {
@@ -83,6 +109,10 @@ public class MetricsBean {
 		private int entriesInserted;
 		private int statusesInserted;
 		private int threadWaited;
+		private int pushNotificationsReceived;
+		private int pushFeedsQueued;
+		private int entryCacheHit;
+		private int entryCacheMiss;
 
 		public int getFeedsRefreshed() {
 			return feedsRefreshed;
@@ -122,6 +152,38 @@ public class MetricsBean {
 
 		public void setThreadWaited(int threadWaited) {
 			this.threadWaited = threadWaited;
+		}
+
+		public int getPushNotificationsReceived() {
+			return pushNotificationsReceived;
+		}
+
+		public void setPushNotificationsReceived(int pushNotificationsReceived) {
+			this.pushNotificationsReceived = pushNotificationsReceived;
+		}
+
+		public int getPushFeedsQueued() {
+			return pushFeedsQueued;
+		}
+
+		public void setPushFeedsQueued(int pushFeedsQueued) {
+			this.pushFeedsQueued = pushFeedsQueued;
+		}
+
+		public int getEntryCacheHit() {
+			return entryCacheHit;
+		}
+
+		public void setEntryCacheHit(int entryCacheHit) {
+			this.entryCacheHit = entryCacheHit;
+		}
+
+		public int getEntryCacheMiss() {
+			return entryCacheMiss;
+		}
+
+		public void setEntryCacheMiss(int entryCacheMiss) {
+			this.entryCacheMiss = entryCacheMiss;
 		}
 
 	}
