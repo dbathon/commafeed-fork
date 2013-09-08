@@ -37,7 +37,7 @@ public class FeedFetcher {
 		log.debug("Fetching feed {}", feedUrl);
 		FetchedFeed fetchedFeed = null;
 
-		int timeout = 20000;
+		int timeout = 120000;
 		HttpResult result = getter.getBinary(feedUrl, lastModified, eTag, timeout);
 		if (extractFeedUrlFromHtml) {
 			String extractedUrl = extractFeedUrl(
