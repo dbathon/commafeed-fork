@@ -3,13 +3,12 @@ package com.commafeed.backend.feeds;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.css.sac.InputSource;
 import org.w3c.dom.css.CSSStyleDeclaration;
 
-import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.FeedEntry;
 import com.commafeed.backend.model.FeedSubscription;
 import com.google.api.client.util.Base64;
@@ -36,10 +34,13 @@ import com.google.gwt.i18n.client.HasDirection.Direction;
 import com.google.gwt.i18n.shared.BidiUtils;
 import com.steadystate.css.parser.CSSOMParser;
 
+import edu.uci.ics.crawler4j.url.URLCanonicalizer;
+
 public class FeedUtils {
 
 	protected static Logger log = LoggerFactory.getLogger(FeedUtils.class);
 
+	private static final String ESCAPED_QUESTION_MARK = Pattern.quote("?");
 	private static final List<String> ALLOWED_IFRAME_CSS_RULES = Arrays.asList(
 			"height", "width", "border");
 	private static final char[] DISALLOWED_IFRAME_CSS_RULE_CHARACTERS = new char[] {
@@ -86,6 +87,47 @@ public class FeedUtils {
 	}
 
 	/**
+	 * Normalize the url. The resulting url is not meant to be fetched but
+	 * rather used as a mean to identify a feed and avoid duplicates
+	 */
+	public static String normalizeURL(String url) {
+		if (url == null) {
+			return null;
+		}
+		String normalized = URLCanonicalizer.getCanonicalURL(url);
+		if (normalized == null) {
+			normalized = url;
+		}
+
+		// convert to lower case, the url probably won't work in some cases
+		// after that but we don't care we just want to compare urls to avoid
+		// duplicates
+		normalized = normalized.toLowerCase();
+
+		// store all urls as http
+		if (normalized.startsWith("https")) {
+			normalized = "http" + normalized.substring(5);
+		}
+
+		// remove the www. part
+		normalized = normalized.replace("//www.", "//");
+
+		// feedproxy redirects to feedburner
+		normalized = normalized.replace("feedproxy.google.com",
+				"feeds.feedburner.com");
+
+		// feedburner feeds have a special treatment
+		if (normalized.split(ESCAPED_QUESTION_MARK)[0].contains("feedburner.com")) {
+			normalized = normalized.replace("feeds2.feedburner.com",
+					"feeds.feedburner.com");
+			normalized = normalized.split(ESCAPED_QUESTION_MARK)[0];
+			normalized = StringUtils.removeEnd(normalized, "/");
+		}
+
+		return normalized;
+	}
+
+	/**
 	 * Extract the declared encoding from the xml
 	 */
 	public static String extractDeclaredEncoding(byte[] bytes) {
@@ -120,6 +162,7 @@ public class FeedUtils {
 			whitelist.addAttributes("pre", "dir");
 			whitelist.addAttributes("code", "dir");
 			whitelist.addAttributes("table", "dir");
+			whitelist.addAttributes("p", "dir");
 			whitelist.addAttributes("a", "href", "title");
 			whitelist.addAttributes("blockquote", "cite");
 			whitelist.addAttributes("col", "span", "width");
@@ -194,30 +237,6 @@ public class FeedUtils {
 			log.error(e.getMessage(), e);
 		}
 		return StringUtils.join(rules, "");
-	}
-
-	public static FeedEntry findEntry(Collection<FeedEntry> list,
-			FeedEntry entry) {
-		FeedEntry found = null;
-		for (FeedEntry e : list) {
-			if (StringUtils.equals(entry.getGuid(), e.getGuid())
-					&& StringUtils.equals(entry.getUrl(), e.getUrl())) {
-				found = e;
-				break;
-			}
-		}
-		return found;
-	}
-
-	public static Feed findFeed(Collection<Feed> list, Feed feed) {
-		Feed found = null;
-		for (Feed f : list) {
-			if (ObjectUtils.equals(feed.getId(), f.getId())) {
-				found = f;
-				break;
-			}
-		}
-		return found;
 	}
 
 	public static boolean isRTL(FeedEntry entry) {

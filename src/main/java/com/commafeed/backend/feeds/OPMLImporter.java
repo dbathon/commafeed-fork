@@ -13,10 +13,12 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.commafeed.backend.cache.CacheService;
 import com.commafeed.backend.dao.FeedCategoryDAO;
 import com.commafeed.backend.model.FeedCategory;
 import com.commafeed.backend.model.User;
 import com.commafeed.backend.services.FeedSubscriptionService;
+import com.commafeed.backend.services.FeedSubscriptionService.FeedSubscriptionException;
 import com.sun.syndication.feed.opml.Opml;
 import com.sun.syndication.feed.opml.Outline;
 import com.sun.syndication.io.WireFeedInput;
@@ -33,10 +35,13 @@ public class OPMLImporter {
 	@Inject
 	FeedCategoryDAO feedCategoryDAO;
 
+	@Inject
+	CacheService cache;
+
 	@SuppressWarnings("unchecked")
 	@Asynchronous
 	public void importOpml(User user, String xml) {
-
+		xml = xml.substring(xml.indexOf('<'));
 		WireFeedInput input = new WireFeedInput();
 		try {
 			Opml feed = (Opml) input.build(new StringReader(xml));
@@ -54,14 +59,19 @@ public class OPMLImporter {
 	private void handleOutline(User user, Outline outline, FeedCategory parent) {
 
 		if (StringUtils.isEmpty(outline.getType())) {
-			FeedCategory category = feedCategoryDAO.findByName(user,
-					outline.getText(), parent);
+			String name = FeedUtils.truncate(outline.getText(), 128);
+			if (name == null) {
+				name = FeedUtils.truncate(outline.getTitle(), 128);
+			}
+			FeedCategory category = feedCategoryDAO.findByName(user, name,
+					parent);
 			if (category == null) {
-				category = new FeedCategory();
-				category.setName(FeedUtils.truncate(outline.getText(), 128));
-				if (StringUtils.isBlank(category.getName())) {
-					category.setName("Unnamed category");
+				if (StringUtils.isBlank(name)) {
+					name = "Unnamed category";
 				}
+				
+				category = new FeedCategory();
+				category.setName(name);
 				category.setParent(parent);
 				category.setUser(user);
 				feedCategoryDAO.saveOrUpdate(category);
@@ -72,12 +82,24 @@ public class OPMLImporter {
 				handleOutline(user, child, category);
 			}
 		} else {
-			String title = outline.getText();
-			if (StringUtils.isBlank(title)) {
-				title = "Unnamed subscription";
+			String name = FeedUtils.truncate(outline.getText(), 128);
+			if (name == null) {
+				name = FeedUtils.truncate(outline.getTitle(), 128);
 			}
-			feedSubscriptionService.subscribe(user, outline.getXmlUrl(), title,
-					parent);
+			if (StringUtils.isBlank(name)) {
+				name = "Unnamed subscription";
+			}
+			// make sure we continue with the import process even a feed failed
+			try {
+				feedSubscriptionService.subscribe(user, outline.getXmlUrl(),
+						name, parent);
+			} catch (FeedSubscriptionException e) {
+				throw e;
+			} catch (Exception e) {
+				log.error("error while importing {}: {}", outline.getXmlUrl(),
+						e.getMessage());
+			}
 		}
+		cache.invalidateUserData(user);
 	}
 }

@@ -75,7 +75,7 @@ function($resource, $http) {
 			}
 		},
 		fetch : {
-			method : 'GET',
+			method : 'POST',
 			params : {
 				_method : 'fetch'
 			}
@@ -148,7 +148,7 @@ function($resource, $http) {
 	};
 
 	// flatten feeds
-	var flatfeeds = function(category) {
+	var flatFeeds = function(category) {
 		var subs = [];
 		var callback = function(category) {
 			subs.push.apply(subs, category.feeds);
@@ -156,6 +156,18 @@ function($resource, $http) {
 		traverse(callback, category);
 		return subs;
 	};
+	
+	// flatten everything
+	var flatAll = function(category, a) {
+		a.push([ category.id, 'category' ]);
+		_.each(category.children, function(child) {
+			flatAll(child, a);
+		});
+		_.each(category.feeds, function(feed) {
+			a.push([ feed.id, 'feed' ]);
+		});
+	};
+	
 	var actions = {
 		get : {
 			method : 'GET',
@@ -209,7 +221,12 @@ function($resource, $http) {
 		res.get(function(data) {
 			res.subscriptions = data;
 			res.flatCategories = flatten(data);
-			res.feeds = flatfeeds(data);
+			res.feeds = flatFeeds(data);
+			
+			res.flatAll = [];
+			flatAll(data, res.flatAll);
+			res.flatAll.splice(1, 0, ['starred', 'category']);
+
 			if (callback)
 				callback(data);
 		});
@@ -241,6 +258,12 @@ function($resource, $http) {
 				_method : 'mark'
 			}
 		},
+		markMultiple : {
+			method : 'POST',
+			params : {
+				_method : 'markMultiple'
+			}
+		},
 		star : {
 			method : 'POST',
 			params : {
@@ -263,6 +286,26 @@ module.factory('AdminUsersService', ['$resource', function($resource) {
 
 module.factory('AdminSettingsService', ['$resource', function($resource) {
 	var res = $resource('rest/admin/settings/');
+	return res;
+}]);
+
+module.factory('AdminCleanupService', ['$resource', function($resource) {
+	var actions = {
+		findDuplicateFeeds : {
+			method : 'GET',
+			isArray: true,
+			params : {
+				_method : 'findDuplicateFeeds'
+			}
+		},
+		mergeFeeds : {
+			method : 'POST',
+			params : {
+				_method : 'merge'
+			}
+		}
+	};
+	var res = $resource('rest/admin/cleanup/:_method', {}, actions);
 	return res;
 }]);
 

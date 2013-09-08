@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -22,11 +23,17 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.commafeed.backend.cache.CacheService;
+import com.commafeed.backend.dao.FeedCategoryDAO;
+import com.commafeed.backend.dao.FeedEntryStatusDAO;
+import com.commafeed.backend.dao.FeedSubscriptionDAO;
 import com.commafeed.backend.model.FeedCategory;
 import com.commafeed.backend.model.FeedEntryStatus;
 import com.commafeed.backend.model.FeedSubscription;
+import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserRole.Role;
 import com.commafeed.backend.model.UserSettings.ReadingOrder;
+import com.commafeed.backend.services.FeedSubscriptionService;
 import com.commafeed.frontend.SecurityCheck;
 import com.commafeed.frontend.model.Category;
 import com.commafeed.frontend.model.Entries;
@@ -58,6 +65,21 @@ public class CategoryREST extends AbstractResourceREST {
 	public static final String ALL = "all";
 	public static final String STARRED = "starred";
 
+	@Inject
+	FeedEntryStatusDAO feedEntryStatusDAO;
+
+	@Inject
+	FeedCategoryDAO feedCategoryDAO;
+
+	@Inject
+	FeedSubscriptionDAO feedSubscriptionDAO;
+
+	@Inject
+	FeedSubscriptionService feedSubscriptionService;
+
+	@Inject
+	CacheService cache;
+
 	@Path("/entries")
 	@GET
 	@ApiOperation(value = "Get category entries", notes = "Get a list of category entries", responseClass = "com.commafeed.frontend.model.Entries")
@@ -85,12 +107,14 @@ public class CategoryREST extends AbstractResourceREST {
 		if (ALL.equals(id)) {
 			entries.setName("All");
 			List<FeedEntryStatus> list = null;
+			List<FeedSubscription> subscriptions = feedSubscriptionDAO
+					.findAll(getUser());
 			if (unreadOnly) {
 				list = feedEntryStatusDAO.findAllUnread(getUser(),
 						newerThanDate, offset, limit + 1, order, true);
 			} else {
-				list = feedEntryStatusDAO.findAll(getUser(), newerThanDate,
-						offset, limit + 1, order, true);
+				list = feedEntryStatusDAO.findBySubscriptions(subscriptions,
+						null, newerThanDate, offset, limit + 1, order, true);
 			}
 			for (FeedEntryStatus status : list) {
 				entries.getEntries().add(
@@ -110,20 +134,20 @@ public class CategoryREST extends AbstractResourceREST {
 								.get().isImageProxyEnabled()));
 			}
 		} else {
-			FeedCategory feedCategory = feedCategoryDAO.findById(getUser(),
+			FeedCategory parent = feedCategoryDAO.findById(getUser(),
 					Long.valueOf(id));
-			if (feedCategory != null) {
-				List<FeedCategory> childrenCategories = feedCategoryDAO
-						.findAllChildrenCategories(getUser(), feedCategory);
+			if (parent != null) {
+				List<FeedCategory> categories = feedCategoryDAO
+						.findAllChildrenCategories(getUser(), parent);
+				List<FeedSubscription> subs = feedSubscriptionDAO
+						.findByCategories(getUser(), categories);
 				List<FeedEntryStatus> list = null;
 				if (unreadOnly) {
-					list = feedEntryStatusDAO.findUnreadByCategories(
-							childrenCategories, newerThanDate, offset,
-							limit + 1, order, true);
+					list = feedEntryStatusDAO.findUnreadBySubscriptions(subs,
+							newerThanDate, offset, limit + 1, order, true);
 				} else {
-					list = feedEntryStatusDAO.findByCategories(
-							childrenCategories, newerThanDate, offset,
-							limit + 1, order, true);
+					list = feedEntryStatusDAO.findBySubscriptions(subs, null,
+							newerThanDate, offset, limit + 1, order, true);
 				}
 				for (FeedEntryStatus status : list) {
 					entries.getEntries().add(
@@ -132,7 +156,7 @@ public class CategoryREST extends AbstractResourceREST {
 									applicationSettingsService.get()
 											.isImageProxyEnabled()));
 				}
-				entries.setName(feedCategory.getName());
+				entries.setName(parent.getName());
 			}
 
 		}
@@ -205,15 +229,15 @@ public class CategoryREST extends AbstractResourceREST {
 		} else if (STARRED.equals(req.getId())) {
 			feedEntryStatusDAO.markStarredEntries(getUser(), olderThan);
 		} else {
+			FeedCategory parent = feedCategoryDAO.findById(getUser(),
+					Long.valueOf(req.getId()));
 			List<FeedCategory> categories = feedCategoryDAO
-					.findAllChildrenCategories(
-							getUser(),
-							feedCategoryDAO.findById(getUser(),
-									Long.valueOf(req.getId())));
-			feedEntryStatusDAO.markCategoryEntries(getUser(), categories,
-					olderThan);
+					.findAllChildrenCategories(getUser(), parent);
+			List<FeedSubscription> subs = feedSubscriptionDAO.findByCategories(
+					getUser(), categories);
+			feedEntryStatusDAO.markSubscriptionEntries(subs, olderThan);
 		}
-
+		cache.invalidateUserData(getUser());
 		return Response.ok(Status.OK).build();
 	}
 
@@ -236,6 +260,7 @@ public class CategoryREST extends AbstractResourceREST {
 			cat.setParent(parent);
 		}
 		feedCategoryDAO.saveOrUpdate(cat);
+		cache.invalidateUserData(getUser());
 		return Response.ok().build();
 	}
 
@@ -266,6 +291,7 @@ public class CategoryREST extends AbstractResourceREST {
 			feedCategoryDAO.saveOrUpdate(categories);
 
 			feedCategoryDAO.delete(cat);
+			cache.invalidateUserData(getUser());
 			return Response.ok().build();
 		} else {
 			return Response.status(Status.NOT_FOUND).build();
@@ -330,7 +356,7 @@ public class CategoryREST extends AbstractResourceREST {
 		}
 
 		feedCategoryDAO.saveOrUpdate(category);
-
+		cache.invalidateUserData(getUser());
 		return Response.ok(Status.OK).build();
 	}
 
@@ -348,7 +374,7 @@ public class CategoryREST extends AbstractResourceREST {
 		}
 		category.setCollapsed(req.isCollapse());
 		feedCategoryDAO.saveOrUpdate(category);
-
+		cache.invalidateUserData(getUser());
 		return Response.ok(Status.OK).build();
 	}
 
@@ -357,7 +383,7 @@ public class CategoryREST extends AbstractResourceREST {
 	@ApiOperation(value = "Get unread count for feed subscriptions", responseClass = "List[com.commafeed.frontend.model.UnreadCount]")
 	public Response getUnreadCount() {
 		List<UnreadCount> list = Lists.newArrayList();
-		Map<Long, Long> unreadCount = feedEntryStatusDAO
+		Map<Long, Long> unreadCount = feedSubscriptionService
 				.getUnreadCount(getUser());
 		for (Map.Entry<Long, Long> e : unreadCount.entrySet()) {
 			list.add(new UnreadCount(e.getKey(), e.getValue()));
@@ -369,18 +395,22 @@ public class CategoryREST extends AbstractResourceREST {
 	@Path("/get")
 	@ApiOperation(value = "Get feed categories", notes = "Get all categories and subscriptions of the user", responseClass = "com.commafeed.frontend.model.Category")
 	public Response getSubscriptions() {
+		User user = getUser();
 
-		List<FeedCategory> categories = feedCategoryDAO.findAll(getUser());
-		List<FeedSubscription> subscriptions = feedSubscriptionDAO
-				.findAll(getUser());
-		Map<Long, Long> unreadCount = feedEntryStatusDAO
-				.getUnreadCount(getUser());
+		Category root = cache.getRootCategory(user);
+		if (root == null) {
+			log.debug("root category cache miss for {}", user.getName());
+			List<FeedCategory> categories = feedCategoryDAO.findAll(user);
+			List<FeedSubscription> subscriptions = feedSubscriptionDAO
+					.findAll(getUser());
+			Map<Long, Long> unreadCount = feedSubscriptionService
+					.getUnreadCount(getUser());
 
-		Category root = buildCategory(null, categories, subscriptions,
-				unreadCount);
-		root.setId("all");
-		root.setName("All");
-
+			root = buildCategory(null, categories, subscriptions, unreadCount);
+			root.setId("all");
+			root.setName("All");
+			cache.setRootCategory(user, root);
+		}
 		return Response.ok(root).build();
 	}
 

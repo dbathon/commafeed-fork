@@ -72,8 +72,7 @@ public class FeedRefreshUpdater {
 	public void init() {
 		ApplicationSettings settings = applicationSettingsService.get();
 		int threads = Math.max(settings.getDatabaseUpdateThreads(), 1);
-		log.info("Creating database pool with {} threads", threads);
-		pool = new FeedRefreshExecutor("FeedRefreshUpdater", threads, 500 * threads);
+		pool = new FeedRefreshExecutor("feed-refresh-updater", threads, 500 * threads);
 		locks = Striped.lazyWeakLock(threads * 100000);
 	}
 
@@ -106,7 +105,7 @@ public class FeedRefreshUpdater {
 
 				List<FeedSubscription> subscriptions = null;
 				for (FeedEntry entry : entries) {
-					String cacheKey = cache.buildKey(feed, entry);
+					String cacheKey = cache.buildUniqueEntryKey(feed, entry);
 					if (!lastEntries.contains(cacheKey)) {
 						log.debug("cache miss for {}", entry.getUrl());
 						if (subscriptions == null) {
@@ -183,6 +182,10 @@ public class FeedRefreshUpdater {
 
 	public int getQueueSize() {
 		return pool.getQueueSize();
+	}
+
+	public int getActiveCount() {
+		return pool.getActiveCount();
 	}
 
 }

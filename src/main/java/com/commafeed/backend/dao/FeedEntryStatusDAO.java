@@ -1,44 +1,39 @@
 package com.commafeed.backend.dao;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.NoResultException;
 import javax.persistence.Query;
-import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
-import javax.persistence.criteria.SetJoin;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Hibernate;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.commafeed.backend.model.Feed;
-import com.commafeed.backend.model.FeedCategory;
+import com.commafeed.backend.FixedSizeSortedSet;
 import com.commafeed.backend.model.FeedEntry;
 import com.commafeed.backend.model.FeedEntryContent;
 import com.commafeed.backend.model.FeedEntryContent_;
 import com.commafeed.backend.model.FeedEntryStatus;
 import com.commafeed.backend.model.FeedEntryStatus_;
 import com.commafeed.backend.model.FeedEntry_;
+import com.commafeed.backend.model.FeedFeedEntry;
+import com.commafeed.backend.model.FeedFeedEntry_;
 import com.commafeed.backend.model.FeedSubscription;
-import com.commafeed.backend.model.FeedSubscription_;
-import com.commafeed.backend.model.Feed_;
+import com.commafeed.backend.model.Models;
 import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserSettings.ReadingOrder;
 import com.commafeed.backend.services.ApplicationSettingsService;
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -49,33 +44,38 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 	protected static Logger log = LoggerFactory
 			.getLogger(FeedEntryStatusDAO.class);
 
+	private static final Comparator<FeedEntry> ENTRY_COMPARATOR_DESC = new Comparator<FeedEntry>() {
+		@Override
+		public int compare(FeedEntry o1, FeedEntry o2) {
+			return ObjectUtils.compare(o2.getUpdated(), o1.getUpdated());
+		};
+	};
+
+	private static final Comparator<FeedEntry> ENTRY_COMPARATOR_ASC = new Comparator<FeedEntry>() {
+		@Override
+		public int compare(FeedEntry o1, FeedEntry o2) {
+			return ObjectUtils.compare(o1.getUpdated(), o2.getUpdated());
+		};
+	};
+
+	private static final Comparator<FeedEntryStatus> STATUS_COMPARATOR_DESC = new Comparator<FeedEntryStatus>() {
+		@Override
+		public int compare(FeedEntryStatus o1, FeedEntryStatus o2) {
+			return ObjectUtils.compare(o2.getEntryUpdated(), o1.getEntryUpdated());
+		};
+	};
+
+	private static final Comparator<FeedEntryStatus> STATUS_COMPARATOR_ASC = new Comparator<FeedEntryStatus>() {
+		@Override
+		public int compare(FeedEntryStatus o1, FeedEntryStatus o2) {
+			return ObjectUtils.compare(o1.getEntryUpdated(), o2.getEntryUpdated());
+		};
+	};
+
 	@Inject
 	ApplicationSettingsService applicationSettingsService;
 
-	@SuppressWarnings("unchecked")
-	public FeedEntryStatus findById(User user, Long id) {
-
-		CriteriaQuery<FeedEntryStatus> query = builder.createQuery(getType());
-		Root<FeedEntryStatus> root = query.from(getType());
-
-		Join<FeedEntryStatus, FeedSubscription> join = (Join<FeedEntryStatus, FeedSubscription>) root
-				.fetch(FeedEntryStatus_.subscription);
-
-		Predicate p1 = builder.equal(root.get(FeedEntryStatus_.id), id);
-		Predicate p2 = builder.equal(join.get(FeedSubscription_.user), user);
-
-		query.where(p1, p2);
-
-		FeedEntryStatus status = null;
-		try {
-			status = em.createQuery(query).getSingleResult();
-		} catch (NoResultException e) {
-			status = null;
-		}
-		return status;
-	}
-
-	public FeedEntryStatus findByEntry(FeedEntry entry, FeedSubscription sub) {
+	public FeedEntryStatus getStatus(FeedSubscription sub, FeedEntry entry) {
 
 		CriteriaQuery<FeedEntryStatus> query = builder.createQuery(getType());
 		Root<FeedEntryStatus> root = query.from(getType());
@@ -87,110 +87,12 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 		query.where(p1, p2);
 
 		List<FeedEntryStatus> statuses = em.createQuery(query).getResultList();
-		return Iterables.getFirst(statuses, null);
-	}
-
-	public List<FeedEntryStatus> findByEntries(List<FeedEntry> entries,
-			FeedSubscription sub) {
-		List<FeedEntryStatus> results = Lists.newArrayList();
-
-		if (CollectionUtils.isEmpty(entries)) {
-			return results;
+		FeedEntryStatus status = Iterables.getFirst(statuses, null);
+		if (status == null) {
+			status = new FeedEntryStatus(sub.getUser(), sub, entry);
+			status.setRead(true);
 		}
-
-		CriteriaQuery<FeedEntryStatus> query = builder.createQuery(getType());
-		Root<FeedEntryStatus> root = query.from(getType());
-
-		Predicate p1 = root.get(FeedEntryStatus_.entry).in(entries);
-		Predicate p2 = builder.equal(root.get(FeedEntryStatus_.subscription),
-				sub);
-
-		query.where(p1, p2);
-
-		Map<Long, FeedEntryStatus> existing = Maps.uniqueIndex(
-				em.createQuery(query).getResultList(),
-				new Function<FeedEntryStatus, Long>() {
-					@Override
-					public Long apply(FeedEntryStatus input) {
-						return input.getEntry().getId();
-					}
-				});
-
-		for (FeedEntry entry : entries) {
-			FeedEntryStatus s = existing.get(entry.getId());
-			if (s == null) {
-				s = new FeedEntryStatus();
-				s.setEntry(entry);
-				s.setSubscription(sub);
-				s.setRead(true);
-			}
-			results.add(s);
-		}
-		return results;
-	}
-
-	public List<FeedEntryStatus> findByKeywords(User user, String keywords,
-			int offset, int limit) {
-
-		String joinedKeywords = StringUtils.join(
-				keywords.toLowerCase().split(" "), "%");
-		joinedKeywords = "%" + joinedKeywords + "%";
-
-		CriteriaQuery<Tuple> query = builder.createTupleQuery();
-		Root<FeedEntry> root = query.from(FeedEntry.class);
-
-		SetJoin<FeedEntry, Feed> feedJoin = root.join(FeedEntry_.feeds);
-		SetJoin<Feed, FeedSubscription> subJoin = feedJoin
-				.join(Feed_.subscriptions);
-		Join<FeedEntry, FeedEntryContent> contentJoin = root
-				.join(FeedEntry_.content);
-
-		Selection<FeedEntry> entryAlias = root.alias("entry");
-		Selection<FeedSubscription> subAlias = subJoin.alias("subscription");
-		query.multiselect(entryAlias, subAlias);
-
-		List<Predicate> predicates = Lists.newArrayList();
-
-		predicates
-				.add(builder.equal(subJoin.get(FeedSubscription_.user), user));
-
-		Predicate content = builder.like(
-				builder.lower(contentJoin.get(FeedEntryContent_.content)),
-				joinedKeywords);
-		Predicate title = builder.like(
-				builder.lower(contentJoin.get(FeedEntryContent_.title)),
-				joinedKeywords);
-		predicates.add(builder.or(content, title));
-
-		query.where(predicates.toArray(new Predicate[0]));
-		orderBy(query, root, ReadingOrder.desc);
-
-		TypedQuery<Tuple> q = em.createQuery(query);
-		limit(q, offset, limit);
-		setTimeout(q);
-
-		List<Tuple> list = q.getResultList();
-		List<FeedEntryStatus> results = Lists.newArrayList();
-		for (Tuple tuple : list) {
-			FeedEntry entry = tuple.get(entryAlias);
-			FeedSubscription subscription = tuple.get(subAlias);
-
-			FeedEntryStatus status = findByEntry(entry, subscription);
-			if (status == null) {
-				status = new FeedEntryStatus();
-				status.setEntry(entry);
-				status.setRead(true);
-				status.setSubscription(subscription);
-			}
-			results.add(status);
-		}
-
-		return lazyLoadContent(true, results);
-	}
-
-	public List<FeedEntryStatus> findStarred(User user, ReadingOrder order,
-			boolean includeContent) {
-		return findStarred(user, null, -1, -1, order, includeContent);
+		return status;
 	}
 
 	public List<FeedEntryStatus> findStarred(User user, Date newerThan,
@@ -201,23 +103,16 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 
 		List<Predicate> predicates = Lists.newArrayList();
 
-		Join<FeedEntryStatus, FeedEntry> entryJoin = root
-				.join(FeedEntryStatus_.entry);
-
-		Join<FeedEntryStatus, FeedSubscription> subJoin = root
-				.join(FeedEntryStatus_.subscription);
-
-		predicates
-				.add(builder.equal(subJoin.get(FeedSubscription_.user), user));
+		predicates.add(builder.equal(root.get(FeedEntryStatus_.user), user));
 		predicates.add(builder.equal(root.get(FeedEntryStatus_.starred), true));
 		query.where(predicates.toArray(new Predicate[0]));
 
 		if (newerThan != null) {
 			predicates.add(builder.greaterThanOrEqualTo(
-					entryJoin.get(FeedEntry_.inserted), newerThan));
+					root.get(FeedEntryStatus_.entryInserted), newerThan));
 		}
 
-		orderBy(query, entryJoin, order);
+		orderStatusesBy(query, root, order);
 
 		TypedQuery<FeedEntryStatus> q = em.createQuery(query);
 		limit(q, offset, limit);
@@ -225,264 +120,175 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 		return lazyLoadContent(includeContent, q.getResultList());
 	}
 
-	public List<FeedEntryStatus> findAll(User user, Date newerThan, int offset,
-			int limit, ReadingOrder order, boolean includeContent) {
+	public List<FeedEntryStatus> findBySubscriptions(
+			List<FeedSubscription> subscriptions, String keywords,
+			Date newerThan, int offset, int limit, ReadingOrder order,
+			boolean includeContent) {
 
-		CriteriaQuery<Tuple> query = builder.createTupleQuery();
-		Root<FeedEntry> root = query.from(FeedEntry.class);
+		int capacity = offset + limit;
+		Comparator<FeedEntry> comparator = order == ReadingOrder.desc ? ENTRY_COMPARATOR_DESC
+				: ENTRY_COMPARATOR_ASC;
+		FixedSizeSortedSet<FeedEntry> set = new FixedSizeSortedSet<FeedEntry>(
+				capacity < 0 ? Integer.MAX_VALUE : capacity, comparator);
+		for (FeedSubscription sub : subscriptions) {
+			CriteriaQuery<FeedEntry> query = builder
+					.createQuery(FeedEntry.class);
+			Root<FeedEntry> root = query.from(FeedEntry.class);
+			Join<FeedEntry, FeedFeedEntry> ffeJoin = root
+					.join(FeedEntry_.feedRelationships);
 
-		SetJoin<FeedEntry, Feed> feedJoin = root.join(FeedEntry_.feeds);
-		SetJoin<Feed, FeedSubscription> subJoin = feedJoin
-				.join(Feed_.subscriptions);
+			List<Predicate> predicates = Lists.newArrayList();
+			predicates.add(builder.equal(ffeJoin.get(FeedFeedEntry_.feed),
+					sub.getFeed()));
 
-		Selection<FeedEntry> entryAlias = root.alias("entry");
-		Selection<FeedSubscription> subAlias = subJoin.alias("subscription");
-		query.multiselect(entryAlias, subAlias);
+			if (newerThan != null) {
+				predicates.add(builder.greaterThanOrEqualTo(
+						root.get(FeedEntry_.inserted), newerThan));
+			}
 
-		List<Predicate> predicates = Lists.newArrayList();
+			if (keywords != null) {
+				Join<FeedEntry, FeedEntryContent> contentJoin = root
+						.join(FeedEntry_.content);
 
-		predicates
-				.add(builder.equal(subJoin.get(FeedSubscription_.user), user));
+				String joinedKeywords = StringUtils.join(keywords.toLowerCase()
+						.split(" "), "%");
+				joinedKeywords = "%" + joinedKeywords + "%";
 
-		if (newerThan != null) {
-			predicates.add(builder.greaterThanOrEqualTo(
-					root.get(FeedEntry_.inserted), newerThan));
+				Predicate content = builder.like(builder.lower(contentJoin
+						.get(FeedEntryContent_.content)), joinedKeywords);
+				Predicate title = builder
+						.like(builder.lower(contentJoin
+								.get(FeedEntryContent_.title)), joinedKeywords);
+				predicates.add(builder.or(content, title));
+			}
+
+			if (order != null && !set.isEmpty() && set.isFull()) {
+				Predicate filter = null;
+				FeedEntry last = set.last();
+				if (order == ReadingOrder.desc) {
+					filter = builder.greaterThan(
+							ffeJoin.get(FeedFeedEntry_.entryUpdated),
+							last.getUpdated());
+				} else {
+					filter = builder.lessThan(
+							ffeJoin.get(FeedFeedEntry_.entryUpdated),
+							last.getUpdated());
+				}
+				predicates.add(filter);
+			}
+			query.where(predicates.toArray(new Predicate[0]));
+			orderEntriesBy(query, ffeJoin, order);
+			TypedQuery<FeedEntry> q = em.createQuery(query);
+			limit(q, 0, capacity);
+			setTimeout(q);
+
+			List<FeedEntry> list = q.getResultList();
+			for (FeedEntry entry : list) {
+				entry.setSubscription(sub);
+			}
+			set.addAll(list);
 		}
 
-		query.where(predicates.toArray(new Predicate[0]));
-		orderBy(query, root, order);
+		List<FeedEntry> entries = set.asList();
+		int size = entries.size();
+		if (size < offset) {
+			return Lists.newArrayList();
+		}
 
-		TypedQuery<Tuple> q = em.createQuery(query);
-		limit(q, offset, limit);
-		setTimeout(q);
+		entries = entries.subList(Math.max(offset, 0), size);
 
-		List<Tuple> list = q.getResultList();
 		List<FeedEntryStatus> results = Lists.newArrayList();
-		for (Tuple tuple : list) {
-			FeedEntry entry = tuple.get(entryAlias);
-			FeedSubscription subscription = tuple.get(subAlias);
-
-			FeedEntryStatus status = findByEntry(entry, subscription);
-			if (status == null) {
-				status = new FeedEntryStatus();
-				status.setEntry(entry);
-				status.setRead(true);
-				status.setSubscription(subscription);
-			}
-			results.add(status);
+		for (FeedEntry entry : entries) {
+			FeedSubscription subscription = entry.getSubscription();
+			results.add(getStatus(subscription, entry));
 		}
 
 		return lazyLoadContent(includeContent, results);
 	}
 
-	public List<FeedEntryStatus> findAllUnread(User user, ReadingOrder order,
-			boolean includeContent) {
-		return findAllUnread(user, null, -1, -1, order, includeContent);
+	public List<FeedEntryStatus> findUnreadBySubscriptions(
+			List<FeedSubscription> subscriptions, Date newerThan, int offset,
+			int limit, ReadingOrder order, boolean includeContent) {
+
+		int capacity = offset + limit;
+		Comparator<FeedEntryStatus> comparator = order == ReadingOrder.desc ? STATUS_COMPARATOR_DESC
+				: STATUS_COMPARATOR_ASC;
+		FixedSizeSortedSet<FeedEntryStatus> set = new FixedSizeSortedSet<FeedEntryStatus>(
+				capacity < 0 ? Integer.MAX_VALUE : capacity, comparator);
+		for (FeedSubscription sub : subscriptions) {
+			CriteriaQuery<FeedEntryStatus> query = builder
+					.createQuery(getType());
+			Root<FeedEntryStatus> root = query.from(getType());
+
+			List<Predicate> predicates = Lists.newArrayList();
+
+			predicates.add(builder.equal(
+					root.get(FeedEntryStatus_.subscription), sub));
+			predicates.add(builder.isFalse(root.get(FeedEntryStatus_.read)));
+
+			if (newerThan != null) {
+				predicates.add(builder.greaterThanOrEqualTo(
+						root.get(FeedEntryStatus_.entryInserted), newerThan));
+			}
+
+			if (order != null && !set.isEmpty() && set.isFull()) {
+				Predicate filter = null;
+				FeedEntryStatus last = set.last();
+				if (order == ReadingOrder.desc) {
+					filter = builder.greaterThan(
+							root.get(FeedEntryStatus_.entryUpdated),
+							last.getEntryUpdated());
+				} else {
+					filter = builder.lessThan(
+							root.get(FeedEntryStatus_.entryUpdated),
+							last.getEntryUpdated());
+				}
+				predicates.add(filter);
+			}
+			query.where(predicates.toArray(new Predicate[0]));
+			orderStatusesBy(query, root, order);
+
+			TypedQuery<FeedEntryStatus> q = em.createQuery(query);
+			limit(q, -1, limit);
+			setTimeout(q);
+
+			List<FeedEntryStatus> list = q.getResultList();
+			set.addAll(list);
+		}
+
+		List<FeedEntryStatus> entries = set.asList();
+		int size = entries.size();
+		if (size < offset) {
+			return Lists.newArrayList();
+		}
+
+		entries = entries.subList(Math.max(offset, 0), size);
+		return lazyLoadContent(includeContent, entries);
 	}
 
 	public List<FeedEntryStatus> findAllUnread(User user, Date newerThan,
 			int offset, int limit, ReadingOrder order, boolean includeContent) {
-		CriteriaQuery<FeedEntryStatus> query = builder.createQuery(getType());
-		Root<FeedEntryStatus> root = query.from(getType());
-
-		List<Predicate> predicates = Lists.newArrayList();
-
-		Join<FeedEntryStatus, FeedEntry> entryJoin = root
-				.join(FeedEntryStatus_.entry);
-		Join<FeedEntryStatus, FeedSubscription> subJoin = root
-				.join(FeedEntryStatus_.subscription);
-
-		predicates
-				.add(builder.equal(subJoin.get(FeedSubscription_.user), user));
-		predicates.add(builder.isFalse(root.get(FeedEntryStatus_.read)));
-
-		if (newerThan != null) {
-			predicates.add(builder.greaterThanOrEqualTo(
-					entryJoin.get(FeedEntry_.inserted), newerThan));
-		}
-
-		query.where(predicates.toArray(new Predicate[0]));
-		orderBy(query, entryJoin, order);
-
-		TypedQuery<FeedEntryStatus> q = em.createQuery(query);
-		limit(q, offset, limit);
-		setTimeout(q);
-		return lazyLoadContent(includeContent, q.getResultList());
-	}
-
-	public List<FeedEntryStatus> findBySubscription(
-			FeedSubscription subscription, Date newerThan, int offset,
-			int limit, ReadingOrder order, boolean includeContent) {
-
-		CriteriaQuery<FeedEntry> query = builder.createQuery(FeedEntry.class);
-		Root<FeedEntry> root = query.from(FeedEntry.class);
-
-		SetJoin<FeedEntry, Feed> feedJoin = root.join(FeedEntry_.feeds);
-		SetJoin<Feed, FeedSubscription> subJoin = feedJoin
-				.join(Feed_.subscriptions);
-
-		List<Predicate> predicates = Lists.newArrayList();
-
-		predicates.add(builder.equal(subJoin.get(FeedSubscription_.id),
-				subscription.getId()));
-
-		if (newerThan != null) {
-			predicates.add(builder.greaterThanOrEqualTo(
-					root.get(FeedEntry_.inserted), newerThan));
-		}
-
-		query.where(predicates.toArray(new Predicate[0]));
-		orderBy(query, root, order);
-
-		TypedQuery<FeedEntry> q = em.createQuery(query);
-		limit(q, offset, limit);
-		setTimeout(q);
-
-		List<FeedEntry> list = q.getResultList();
-		return lazyLoadContent(includeContent,
-				findByEntries(list, subscription));
-	}
-
-	public List<FeedEntryStatus> findUnreadBySubscription(
-			FeedSubscription subscription, ReadingOrder order,
-			boolean includeContent) {
-		return findUnreadBySubscription(subscription, null, -1, -1, order,
-				includeContent);
-	}
-
-	public List<FeedEntryStatus> findUnreadBySubscription(
-			FeedSubscription subscription, Date newerThan, int offset,
-			int limit, ReadingOrder order, boolean includeContent) {
 
 		CriteriaQuery<FeedEntryStatus> query = builder.createQuery(getType());
 		Root<FeedEntryStatus> root = query.from(getType());
 
 		List<Predicate> predicates = Lists.newArrayList();
 
-		Join<FeedEntryStatus, FeedEntry> entryJoin = root
-				.join(FeedEntryStatus_.entry);
-
-		predicates.add(builder.equal(root.get(FeedEntryStatus_.subscription),
-				subscription));
+		predicates.add(builder.equal(root.get(FeedEntryStatus_.user), user));
 		predicates.add(builder.isFalse(root.get(FeedEntryStatus_.read)));
 
 		if (newerThan != null) {
 			predicates.add(builder.greaterThanOrEqualTo(
-					entryJoin.get(FeedEntry_.inserted), newerThan));
+					root.get(FeedEntryStatus_.entryInserted), newerThan));
 		}
 
 		query.where(predicates.toArray(new Predicate[0]));
-
-		orderBy(query, entryJoin, order);
+		orderStatusesBy(query, root, order);
 
 		TypedQuery<FeedEntryStatus> q = em.createQuery(query);
 		limit(q, offset, limit);
 		setTimeout(q);
-		return lazyLoadContent(includeContent, q.getResultList());
-	}
 
-	public List<FeedEntryStatus> findByCategories(
-			List<FeedCategory> categories, Date newerThan, int offset,
-			int limit, ReadingOrder order, boolean includeContent) {
-
-		CriteriaQuery<Tuple> query = builder.createTupleQuery();
-		Root<FeedEntry> root = query.from(FeedEntry.class);
-
-		SetJoin<FeedEntry, Feed> feedJoin = root.join(FeedEntry_.feeds);
-		SetJoin<Feed, FeedSubscription> subJoin = feedJoin
-				.join(Feed_.subscriptions);
-
-		Selection<FeedEntry> entryAlias = root.alias("entry");
-		Selection<FeedSubscription> subAlias = subJoin.alias("subscription");
-		query.multiselect(entryAlias, subAlias);
-
-		List<Predicate> predicates = Lists.newArrayList();
-
-		if (categories.size() == 1) {
-			predicates.add(builder.equal(subJoin
-					.get(FeedSubscription_.category), categories.iterator()
-					.next()));
-		} else {
-			predicates.add(subJoin.get(FeedSubscription_.category).in(
-					categories));
-		}
-
-		if (newerThan != null) {
-			predicates.add(builder.greaterThanOrEqualTo(
-					root.get(FeedEntry_.inserted), newerThan));
-		}
-
-		query.where(predicates.toArray(new Predicate[0]));
-		orderBy(query, root, order);
-
-		TypedQuery<Tuple> q = em.createQuery(query);
-		limit(q, offset, limit);
-		setTimeout(q);
-
-		List<Tuple> list = q.getResultList();
-		List<FeedEntryStatus> results = Lists.newArrayList();
-		for (Tuple tuple : list) {
-			FeedEntry entry = tuple.get(entryAlias);
-			FeedSubscription subscription = tuple.get(subAlias);
-
-			FeedEntryStatus status = findByEntry(entry, subscription);
-			if (status == null) {
-				status = new FeedEntryStatus();
-				status.setEntry(entry);
-				status.setSubscription(subscription);
-				status.setRead(true);
-			}
-			results.add(status);
-		}
-
-		return lazyLoadContent(includeContent, results);
-
-	}
-
-	public List<FeedEntryStatus> findUnreadByCategories(
-			List<FeedCategory> categories, ReadingOrder order,
-			boolean includeContent) {
-		return findUnreadByCategories(categories, null, -1, -1, order,
-				includeContent);
-	}
-
-	public List<FeedEntryStatus> findUnreadByCategories(
-			List<FeedCategory> categories, Date newerThan, int offset,
-			int limit, ReadingOrder order, boolean includeContent) {
-
-		CriteriaQuery<FeedEntryStatus> query = builder.createQuery(getType());
-		Root<FeedEntryStatus> root = query.from(getType());
-
-		List<Predicate> predicates = Lists.newArrayList();
-
-		Join<FeedEntryStatus, FeedEntry> entryJoin = root
-				.join(FeedEntryStatus_.entry);
-		Join<FeedEntryStatus, FeedSubscription> subJoin = root
-				.join(FeedEntryStatus_.subscription);
-
-		if (categories.size() == 1) {
-			predicates.add(builder.equal(subJoin
-					.get(FeedSubscription_.category), categories.iterator()
-					.next()));
-		} else {
-			predicates.add(subJoin.get(FeedSubscription_.category).in(
-					categories));
-		}
-
-		predicates.add(builder.isFalse(root.get(FeedEntryStatus_.read)));
-
-		if (newerThan != null) {
-			predicates.add(builder.greaterThanOrEqualTo(
-					entryJoin.get(FeedEntry_.inserted), newerThan));
-		}
-
-		query.where(predicates.toArray(new Predicate[0]));
-
-		orderBy(query, entryJoin, order);
-
-		TypedQuery<FeedEntryStatus> q = em.createQuery(query);
-		limit(q, offset, limit);
-		setTimeout(q);
 		return lazyLoadContent(includeContent, q.getResultList());
 	}
 
@@ -507,21 +313,30 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 			List<FeedEntryStatus> results) {
 		if (includeContent) {
 			for (FeedEntryStatus status : results) {
-				Hibernate.initialize(status.getSubscription().getFeed());
-				Hibernate.initialize(status.getEntry().getContent());
+				Models.initialize(status.getSubscription().getFeed());
+				Models.initialize(status.getEntry().getContent());
 			}
 		}
 		return results;
 	}
 
-	private void orderBy(CriteriaQuery<?> query, Path<FeedEntry> entryJoin,
+	private void orderEntriesBy(CriteriaQuery<?> query,
+			Path<FeedFeedEntry> ffeJoin, ReadingOrder order) {
+		orderBy(query, ffeJoin.get(FeedFeedEntry_.entryUpdated), order);
+	}
+
+	private void orderStatusesBy(CriteriaQuery<?> query,
+			Path<FeedEntryStatus> statusJoin, ReadingOrder order) {
+		orderBy(query, statusJoin.get(FeedEntryStatus_.entryUpdated), order);
+	}
+
+	private void orderBy(CriteriaQuery<?> query, Path<Date> date,
 			ReadingOrder order) {
 		if (order != null) {
-			Path<Date> orderPath = entryJoin.get(FeedEntry_.updated);
 			if (order == ReadingOrder.asc) {
-				query.orderBy(builder.asc(orderPath));
+				query.orderBy(builder.asc(date));
 			} else {
-				query.orderBy(builder.desc(orderPath));
+				query.orderBy(builder.desc(date));
 			}
 		}
 	}
@@ -530,27 +345,22 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 		setTimeout(query, applicationSettingsService.get().getQueryTimeout());
 	}
 
-	public void markSubscriptionEntries(FeedSubscription subscription,
-			Date olderThan) {
-		List<FeedEntryStatus> statuses = findUnreadBySubscription(subscription,
+	public void markAllEntries(User user, Date olderThan) {
+		List<FeedEntryStatus> statuses = findAllUnread(user, null, -1, -1,
 				null, false);
 		markList(statuses, olderThan);
 	}
 
-	public void markCategoryEntries(User user, List<FeedCategory> categories,
+	public void markSubscriptionEntries(List<FeedSubscription> subscriptions,
 			Date olderThan) {
-		List<FeedEntryStatus> statuses = findUnreadByCategories(categories,
-				null, false);
+		List<FeedEntryStatus> statuses = findUnreadBySubscriptions(
+				subscriptions, null, -1, -1, null, false);
 		markList(statuses, olderThan);
 	}
 
 	public void markStarredEntries(User user, Date olderThan) {
-		List<FeedEntryStatus> statuses = findStarred(user, null, false);
-		markList(statuses, olderThan);
-	}
-
-	public void markAllEntries(User user, Date olderThan) {
-		List<FeedEntryStatus> statuses = findAllUnread(user, null, false);
+		List<FeedEntryStatus> statuses = findStarred(user, null, -1, -1, null,
+				false);
 		markList(statuses, olderThan);
 	}
 

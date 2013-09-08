@@ -32,6 +32,8 @@
 	</changeSet>
 
 	<changeSet author="athou" id="recreate-sequences">
+		<validCheckSum>7:094e881ed7e4fa14fb1f61147ce44acc</validCheckSum>
+		<validCheckSum>7:f4bf2004a72bb41daa128df5771af902</validCheckSum>
 		<preConditions onFail="MARK_RAN" onFailMessage="table already exists">
 			<not>
 				<tableExists tableName="hibernate_sequences" />
@@ -41,16 +43,16 @@
 			<column name="sequence_name" type="VARCHAR(255)" />
 			<column name="sequence_next_hi_value" type="INT" />
 		</createTable>
-		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'APPLICATIONSETTINGS', COALESCE(ceil(max(id) / 1000 + 2), 1) from APPLICATIONSETTINGS</sql>
-		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'FEEDCATEGORIES', COALESCE(ceil(max(id) / 1000 + 2), 1) from FEEDCATEGORIES</sql>
-		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'FEEDENTRIES', COALESCE(ceil(max(id) / 1000 + 2), 1) from FEEDENTRIES</sql>
-		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'FEEDENTRYCONTENTS', COALESCE(ceil(max(id) / 1000 + 2), 1) from FEEDENTRYCONTENTS</sql>
-		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'FEEDENTRYSTATUSES', COALESCE(ceil(max(id) / 1000 + 2), 1) from FEEDENTRYSTATUSES</sql>
-		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'FEEDS', COALESCE(ceil(max(id) / 1000 + 2), 1) from FEEDS</sql>
-		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'FEEDSUBSCRIPTIONS', COALESCE(ceil(max(id) / 1000 + 2), 1) from FEEDSUBSCRIPTIONS</sql>
-		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'USERROLES', COALESCE(ceil(max(id) / 1000 + 2), 1) from USERROLES</sql>
-		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'USERS', COALESCE(ceil(max(id) / 1000 + 2), 1) from USERS</sql>
-		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'USERSETTINGS', COALESCE(ceil(max(id) / 1000 + 2), 1) from USERSETTINGS</sql>
+		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'APPLICATIONSETTINGS', COALESCE(ceiling(max(id) / 1000 + 2), 1) from APPLICATIONSETTINGS</sql>
+		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'FEEDCATEGORIES', COALESCE(ceiling(max(id) / 1000 + 2), 1) from FEEDCATEGORIES</sql>
+		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'FEEDENTRIES', COALESCE(ceiling(max(id) / 1000 + 2), 1) from FEEDENTRIES</sql>
+		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'FEEDENTRYCONTENTS', COALESCE(ceiling(max(id) / 1000 + 2), 1) from FEEDENTRYCONTENTS</sql>
+		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'FEEDENTRYSTATUSES', COALESCE(ceiling(max(id) / 1000 + 2), 1) from FEEDENTRYSTATUSES</sql>
+		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'FEEDS', COALESCE(ceiling(max(id) / 1000 + 2), 1) from FEEDS</sql>
+		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'FEEDSUBSCRIPTIONS', COALESCE(ceiling(max(id) / 1000 + 2), 1) from FEEDSUBSCRIPTIONS</sql>
+		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'USERROLES', COALESCE(ceiling(max(id) / 1000 + 2), 1) from USERROLES</sql>
+		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'USERS', COALESCE(ceiling(max(id) / 1000 + 2), 1) from USERS</sql>
+		<sql>insert into hibernate_sequences(sequence_name, sequence_next_hi_value) select 'USERSETTINGS', COALESCE(ceiling(max(id) / 1000 + 2), 1) from USERSETTINGS</sql>
 	</changeSet>
 
 	<changeSet author="athou" id="add-log-level">
@@ -243,5 +245,105 @@
 			<column name="queryTimeout" valueNumeric="0"></column>
 		</update>	
 	</changeSet>
-
+	
+	<changeSet author="athou" id="add-normalized-url">
+		<addColumn tableName="FEEDS">
+		    <column name="normalizedUrl" type="VARCHAR(2048)" />
+		</addColumn>
+		<addColumn tableName="FEEDS">
+		    <column name="normalizedUrlHash" type="VARCHAR(40)" />
+		</addColumn>
+		<createIndex indexName="norm_url_hash_index" tableName="FEEDS"
+			unique="false">
+			<column name="normalizedUrlHash" />
+		</createIndex>
+	</changeSet>
+	
+	<changeSet author="athou" id="add-pause-crawling">
+		<addColumn tableName="APPLICATIONSETTINGS">
+		    <column name="crawlingPaused" type="BIT" />
+		</addColumn>
+		<update tableName="APPLICATIONSETTINGS">
+			<column name="crawlingPaused" valueBoolean="false"></column>
+		</update>	
+	</changeSet>
+	
+	<changeSet author="athou" id="add-content-hash-index">
+		<createIndex tableName="FEEDS" indexName="last_content_hash_index">
+			<column name="lastContentHash"></column>
+		</createIndex>
+	</changeSet>
+	
+	<changeSet author="athou" id="create-settings-index">
+		<createIndex tableName="USERSETTINGS" indexName="user_id_index" unique="true">
+			<column name="user_id"></column>
+		</createIndex>
+	</changeSet>
+	
+	<changeSet author="athou" id="denormalize-statuses">
+		<validCheckSum>7:c73f70fbcbc8bb30f9629028ec8ddb06</validCheckSum>
+		<addColumn tableName="FEEDENTRYSTATUSES">
+			<column name="user_id" type="BIGINT" defaultValue="1">
+				<constraints nullable="false" />
+			</column>
+			<column name="entryInserted" type="DATETIME" />
+			<column name="entryUpdated" type="DATETIME" />
+		</addColumn>
+	</changeSet>
+	
+	<changeSet author="athou" id="populate-status-dates">
+		<validCheckSum>7:d6b5ab6920948b0a84e614870128e2f5</validCheckSum>
+		<sql>update FEEDENTRYSTATUSES SET entryUpdated = (select e.updated from FEEDENTRIES e where e.id = FEEDENTRYSTATUSES.entry_id)</sql>
+	</changeSet>
+	
+	<changeSet author="athou" id="populate-status-users">
+		<validCheckSum>7:4227fdf2e7b9fe8e59544d536a7ee963</validCheckSum>
+		<sql>update FEEDENTRYSTATUSES SET user_id = (select sub.user_id from FEEDSUBSCRIPTIONS sub where sub.id = FEEDENTRYSTATUSES.subscription_id)</sql>
+	</changeSet>
+	
+	<changeSet author="athou" id="recreate-fes-index-2">		
+		<createIndex indexName="sub_entry_index" tableName="FEEDENTRYSTATUSES">
+			<column name="subscription_id" />
+			<column name="entry_id" />
+		</createIndex>
+		<createIndex indexName="sub_read_updated_index" tableName="FEEDENTRYSTATUSES">
+			<column name="subscription_id" />
+			<column name="read_status" />
+			<column name="entryUpdated" />
+		</createIndex>
+		<createIndex indexName="user_read_updated_index" tableName="FEEDENTRYSTATUSES">
+			<column name="user_id" />
+			<column name="read_status" />
+			<column name="entryUpdated" />
+		</createIndex>
+	</changeSet>
+	
+	<changeSet author="athou" id="drop-fes-index-2">
+		<dropIndex tableName="FEEDENTRYSTATUSES" indexName="sub_entry_read_index" />
+	</changeSet>
+	
+	<changeSet author="athou" id="add-entry-updated-to-ffe">
+		<addColumn tableName="FEED_FEEDENTRIES">
+			<column name="entryUpdated" type="DATETIME"></column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet author="athou" id="populate-entry-dates">
+		<sql>update FEED_FEEDENTRIES SET entryUpdated = (select e.updated from FEEDENTRIES e where e.id = FEED_FEEDENTRIES.feedentry_id)</sql>
+	</changeSet>
+	
+	<changeSet author="athou" id="create-ffe-entry-updated-index">
+		<createIndex tableName="FEED_FEEDENTRIES" indexName="feed_updated_index">
+			<column name="FEED_ID"></column>
+			<column name="entryUpdated"></column>
+		</createIndex>
+	</changeSet>
+	
+	<changeSet author="athou" id="create-count-index">
+		<createIndex indexName="user_read_sub_index" tableName="FEEDENTRYSTATUSES">
+			<column name="user_id" />
+			<column name="read_status" />
+			<column name="subscription_id" />
+		</createIndex>
+	</changeSet>
 </databaseChangeLog>

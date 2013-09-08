@@ -5,6 +5,10 @@
 			<small>
 				<a ng-click="toUsers()" class="pointer">Manage users</a>
 			</small>
+			- 
+			<small>
+				<a ng-click="toCleanup()" class="pointer">Cleanup feeds</a>
+			</small>
 		</h1>
 	</div>
 
@@ -129,6 +133,7 @@
 						<label class="control-label" for="heavyLoad">Heavy load</label>
 						<div class="controls">
 							<input type="checkbox" name="heavyLoad" ng-model="settings.heavyLoad" />
+							<span class="help-block">Don't use this unless you know what you're doing!</span>
 						</div>
 					</div>
 					<div class="control-group">
@@ -156,6 +161,12 @@
 						<div class="controls">
 							<input type="number" name="queryTimeout" class="input-block-level"
 								ng-model="settings.queryTimeout" />
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="crawlingPaused">Pause crawling</label>
+						<div class="controls">
+							<input type="checkbox" name="crawlingPaused" ng-model="settings.crawlingPaused" />
 						</div>
 					</div>
 				</div>

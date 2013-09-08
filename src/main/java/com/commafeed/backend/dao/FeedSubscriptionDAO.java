@@ -8,17 +8,18 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.hibernate.Hibernate;
-
 import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.FeedCategory;
 import com.commafeed.backend.model.FeedCategory_;
 import com.commafeed.backend.model.FeedSubscription;
 import com.commafeed.backend.model.FeedSubscription_;
 import com.commafeed.backend.model.Feed_;
+import com.commafeed.backend.model.Models;
 import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.User_;
+import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 @Stateless
 public class FeedSubscriptionDAO extends GenericDAO<FeedSubscription> {
@@ -118,6 +119,27 @@ public class FeedSubscriptionDAO extends GenericDAO<FeedSubscription> {
 		initRelations(list);
 		return list;
 	}
+	
+	public List<FeedSubscription> findByCategories(User user,
+			List<FeedCategory> categories) {
+
+		List<Long> categoryIds = Lists.transform(categories,
+				new Function<FeedCategory, Long>() {
+					@Override
+					public Long apply(FeedCategory input) {
+						return input.getId();
+					}
+				});
+
+		List<FeedSubscription> subscriptions = Lists.newArrayList();
+		for (FeedSubscription sub : findAll(user)) {
+			if (sub.getCategory() != null
+					&& categoryIds.contains(sub.getCategory().getId())) {
+				subscriptions.add(sub);
+			}
+		}
+		return subscriptions;
+	}
 
 	private void initRelations(List<FeedSubscription> list) {
 		for (FeedSubscription sub : list) {
@@ -127,8 +149,8 @@ public class FeedSubscriptionDAO extends GenericDAO<FeedSubscription> {
 
 	private void initRelations(FeedSubscription sub) {
 		if (sub != null) {
-			Hibernate.initialize(sub.getFeed());
-			Hibernate.initialize(sub.getCategory());
+			Models.initialize(sub.getFeed());
+			Models.initialize(sub.getCategory());
 		}
 	}
 }

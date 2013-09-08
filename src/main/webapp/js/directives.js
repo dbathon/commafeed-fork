@@ -185,7 +185,7 @@ module.directive('recursive', [ '$compile', function($compile) {
 		priority : 100000,
 		compile : function(tElement, tAttr) {
 			var contents = tElement.contents().remove();
-			var compiledContents;
+			var compiledContents = null;
 			return function(scope, iElement, iAttr) {
 				if (!compiledContents) {
 					compiledContents = $compile(contents);
@@ -257,16 +257,24 @@ module.directive('category', [ function() {
 					return label;
 				};
 
-				$scope.feedClicked = function(id) {
-					MobileService.toggleLeftMenu();
-					if ($scope.selectedType == 'feed'
-							&& id == $scope.selectedId) {
-						$scope.$emit('emitReload');
-					} else {
-						$state.transitionTo('feeds.view', {
-							_type : 'feed',
-							_id : id
-						});
+				$scope.feedClicked = function(id, event) {
+					// Could be called by a middle click
+					if (!event || (!event.ctrlKey && event.which == 1)) {
+						MobileService.toggleLeftMenu();
+						if ($scope.selectedType == 'feed'
+								&& id == $scope.selectedId) {
+							$scope.$emit('emitReload');
+						} else {
+							$state.transitionTo('feeds.view', {
+								_type : 'feed',
+								_id : id
+							});
+						}
+
+						if (event) {
+							event.preventDefault();
+							event.stopPropagation();
+						}
 					}
 				};
 

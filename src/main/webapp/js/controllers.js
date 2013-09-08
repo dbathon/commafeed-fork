@@ -46,7 +46,7 @@ function($scope, FeedService, CategoryService, MobileService) {
 
 	$scope.open = function() {
 		$scope.sub = {
-			categoryId: 'all'
+			categoryId: $scope.sub.categoryId
 		};
 		$scope.isOpen = true;
 	};
@@ -194,24 +194,6 @@ function($scope, $timeout, $stateParams, $window, $location, $state, $route, Cat
 		}
 	};
 	
-	var flat = function() {
-		var a = [];
-		a.push([ 'all', 'category' ]);
-		a.push([ 'starred', 'category' ]);
-		for ( var i = 1; i < CategoryService.flatCategories.length; i++) {
-			var cat = CategoryService.flatCategories[i];
-			a.push([ cat.id, 'category' ]);
-			
-			var feeds = cat.orig.feeds;
-			if (feeds) {
-				for ( var j = 0; j < feeds.length; j++) {
-					a.push([ feeds[j].id, 'feed' ]);
-				}
-			}
-		}
-		return a;
-	};
-	
 	var getCurrentIndex = function (id, type, flat) {
 		var index = -1;
 		for ( var i = 0; i < flat.length; i++) {
@@ -225,7 +207,7 @@ function($scope, $timeout, $stateParams, $window, $location, $state, $route, Cat
 	};
 	
 	var openNextNode = function() {
-		var f = flat();
+		var f = CategoryService.flatAll;
 		var current = getCurrentIndex($scope.selectedId, $scope.selectedType, f);
 		current++;
 		if(current < f.length) {
@@ -237,7 +219,7 @@ function($scope, $timeout, $stateParams, $window, $location, $state, $route, Cat
 	};
 	
 	var openPreviousNode = function() {
-		var f = flat();
+		var f = CategoryService.flatAll;
 		var current = getCurrentIndex($scope.selectedId, $scope.selectedType, f);
 		current--;
 		if(current >= 0) {
@@ -252,22 +234,26 @@ function($scope, $timeout, $stateParams, $window, $location, $state, $route, Cat
 		$scope.$apply(function() {
 			openNextNode();
 		});
+		return false;
 	});
 	Mousetrap.bind('shift+n', function(e) {
 		$scope.$apply(function() {
 			openNextNode();
 		});
+		return false;
 	});
 	
 	Mousetrap.bind('shift+p', function(e) {
 		$scope.$apply(function() {
 			openPreviousNode();
 		});
+		return false;
 	});
 	Mousetrap.bind('shift+k', function(e) {
 		$scope.$apply(function() {
 			openPreviousNode();
 		});
+		return false;
 	});
 
 	$scope.$on('mark', function(event, args) {
@@ -298,7 +284,7 @@ module.controller('FeedDetailsCtrl', ['$scope', '$state', '$stateParams', 'FeedS
 	$scope.unsubscribe = function() {
 		var sub = $scope.sub;
 		var title = 'Unsubscribe';
-		var msg = 'Unsubscribe from ' + sub.name + ' ?';
+		var msg = 'Unsubscribe from ' + sub.name + '?';
 		var btns = [ {
 			result : 'cancel',
 			label : 'Cancel'
@@ -625,6 +611,26 @@ function($scope, $state, $filter, $timeout, CategoryService) {
 	$scope.close = function() {
 		$scope.feedSearchModal = false;
 	};
+	
+	Mousetrap.bind('g a', function(e) {
+		$scope.$apply(function() {
+			$state.transitionTo('feeds.view', {
+				_type : 'category', 
+				_id : 'all'
+			});
+		});
+		return false;
+	});
+	
+	Mousetrap.bind('g s', function(e) {
+		$scope.$apply(function() {
+			$state.transitionTo('feeds.view', {
+				_type : 'category', 
+				_id : 'starred'
+			});
+		});
+		return false;
+	});
 
 	Mousetrap.bind('g u', function(e) {
 		$scope.$apply(function() {
@@ -639,9 +645,9 @@ function($scope, $state, $filter, $timeout, CategoryService) {
 
 }]);
 
-module.controller('FeedListCtrl', ['$scope', '$stateParams', '$http', '$route', 
+module.controller('FeedListCtrl', ['$scope', '$stateParams', '$http', '$route', '$state',
 	'$window', 'EntryService', 'SettingsService', 'FeedService', 'CategoryService', 'AnalyticsService',
-function($scope, $stateParams, $http, $route, $window, EntryService, SettingsService, FeedService, CategoryService, AnalyticsService) {
+function($scope, $stateParams, $http, $route, $state, $window, EntryService, SettingsService, FeedService, CategoryService, AnalyticsService) {
 	
 	AnalyticsService.track();
 
@@ -703,6 +709,7 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 			$scope.timestamp = data.timestamp;
 			$scope.busy = false;
 			$scope.hasMore = data.hasMore;
+			$scope.feedLink = data.feedLink;
 		};
 		if (!$scope.keywords) {
 			var service = $scope.selectedType == 'feed' ? FeedService
@@ -721,6 +728,13 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 				limit : limit
 			}, callback);
 		}
+	};
+	
+	$scope.goToFeed = function(id) {		
+		$state.transitionTo('feeds.view', {
+			_type : 'feed', 
+			_id : id
+		});
 	};
 
 	$scope.mark = function(entry, read) {
@@ -748,6 +762,29 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 			CategoryService.refresh(function() {
 				$scope.$emit('emitReload');
 			});
+		});
+	};
+	
+	$scope.markUpTo = function(entry) {
+		var entries = [];
+		for (var i = 0; i < $scope.entries.length; i++) {
+			var e = $scope.entries[i];
+			if (!e.read) {
+				entries.push({
+					id : e.id,
+					feedId : e.feedId,
+					read: true
+				});
+				e.read = true;
+			}
+			if (e == entry) {
+				break;
+			}
+		}
+		EntryService.markMultiple({
+			requests : entries
+		}, function() {
+			CategoryService.refresh();
 		});
 	};
 	
@@ -906,24 +943,28 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 			$scope.navigationMode = 'keyboard';
 			openNextEntry(e);
 		});
+		return false;
 	});
 	Mousetrap.bind('n', function(e) {
 		$scope.$apply(function() {
 			$scope.navigationMode = 'keyboard';
 			focusNextEntry(e);
 		});
+		return false;
 	});
 	Mousetrap.bind('k', function(e) {
 		$scope.$apply(function() {
 			$scope.navigationMode = 'keyboard';
 			openPreviousEntry(e);
 		});
+		return false;
 	});
 	Mousetrap.bind('p', function(e) {
 		$scope.$apply(function() {
 			$scope.navigationMode = 'keyboard';
 			focusPreviousEntry(e);
 		});
+		return false;
 	});
 	Mousetrap.bind('o', function(e) {
 		$scope.$apply(function() {
@@ -932,6 +973,7 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 				openEntry($scope.current, e);
 			}
 		});
+		return false;
 	});
 	Mousetrap.bind('enter', function(e) {
 		$scope.$apply(function() {
@@ -945,12 +987,14 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 		$scope.$apply(function() {
 			$scope.$emit('emitReload');
 		});
+		return false;
 	});
 	Mousetrap.bind('v', function(e) {
 		if ($scope.current) {
 			$scope.mark($scope.current, true);
 			window.open($scope.current.url);
 		}
+		return false;
 	});
 	Mousetrap.bind('b', function(e) {
 		if ($scope.current) {
@@ -966,6 +1010,7 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 					false, true, 0, null);
 			a.dispatchEvent(evt);
 		}
+		return false;
 	});
 	Mousetrap.bind('s', function(e) {
 		$scope.$apply(function() {
@@ -973,6 +1018,7 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 				$scope.star($scope.current, !$scope.current.starred);
 			}
 		});
+		return false;
 	});
 	Mousetrap.bind('m', function(e) {
 		$scope.$apply(function() {
@@ -980,23 +1026,27 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 				$scope.mark($scope.current, !$scope.current.read);
 			}
 		});
+		return false;
 	});
 	Mousetrap.bind('shift+a', function(e) {
 		$scope.$apply(function() {
 			$scope.markAll();
 		});
+		return false;
 	});
 	
 	Mousetrap.bind('+', function(e) {
 		$scope.$apply(function() {
 			$scope.font_size = Math.min($scope.font_size + 1, 5); 
 		});
+		return false;
 	});	
 	
 	Mousetrap.bind('-', function(e) {
 		$scope.$apply(function() {
 			$scope.font_size = Math.max($scope.font_size - 1, 0); 
 		});
+		return false;
 	});	
 	
 	Mousetrap.bind('space', function(e) {
@@ -1058,12 +1108,14 @@ function($scope, $stateParams, $http, $route, $window, EntryService, SettingsSer
 	
 	Mousetrap.bind('f', function(e) {
 		$('body').toggleClass('full-screen');
+		return false;
 	});
 	
 	Mousetrap.bind('?', function(e) {
 		$scope.$apply(function() {
 			$scope.shortcutsModal = true;
 		});
+		return false;
 	});
 
 	$scope.$on('previousEntry', function(event, args) {
@@ -1173,6 +1225,55 @@ function($scope, $state, $stateParams,	$dialog, AdminUsersService) {
 	};
 }]);
 
+module.controller('ManageDuplicateFeedsCtrl', [
+	'$scope', 'AdminCleanupService',
+	function($scope, AdminCleanupService) {
+	
+	$scope.limit = 10;
+	$scope.page = 0;
+	$scope.minCount = 1;
+	$scope.mode = 'NORMALIZED_URL';
+	$scope.mergeData = {};
+	$scope.refreshData = function() {
+		AdminCleanupService.findDuplicateFeeds({
+			mode: $scope.mode,
+			limit : $scope.limit,
+			page : $scope.page, 
+			minCount: $scope.minCount
+		}, function(data) {
+			$scope.counts = data;
+		});
+	};
+	
+	$scope.autoMerge = function() {
+		var callback = function() {
+			alert('done!');
+		};
+		for (var i = 0; i < $scope.counts.length; i++) {
+			var count = $scope.counts[i];
+			if (count.autoMerge) {
+				AdminCleanupService.mergeFeeds({
+					intoFeedId: count.feeds[0].id,
+					feedIds: _.pluck(count.feeds, 'id')
+				}, callback);
+			}
+		}
+	};
+	
+	$scope.focus = function(count) {
+		$scope.current = count;
+		$scope.mergeData.intoFeedId = count.feeds[0].id;
+		$scope.mergeData.feedIds = _.pluck(count.feeds, 'id');
+	};
+	
+	$scope.merge = function() {
+		AdminCleanupService.mergeFeeds($scope.mergeData, function() {
+			alert('done!');
+		});
+	};
+	
+}]);
+
 module.controller('SettingsCtrl', ['$scope', '$location', 'SettingsService', 'AnalyticsService', 'ServerService',
 function($scope, $location, SettingsService, AnalyticsService, ServerService) {
 	
@@ -1180,7 +1281,7 @@ function($scope, $location, SettingsService, AnalyticsService, ServerService) {
 	
 	$scope.ServerService = ServerService.get();
 	
-	$scope.themes = ['default','MRACHINI'];
+	$scope.themes = ['default', 'ebraminio', 'MRACHINI', 'svetla'];
 	
 	$scope.settingsService = SettingsService;
 	$scope.$watch('settingsService.settings', function(value) {
@@ -1262,15 +1363,20 @@ function($scope, $location, $state,	AdminSettingsService) {
 	$scope.toUsers = function() {
 		$state.transitionTo('admin.userlist');
 	};
+	$scope.toCleanup = function() {
+		$state.transitionTo('admin.duplicate_feeds');
+	};
 }]);
 
 module.controller('HelpController', [ '$scope', 'CategoryService',
-		'AnalyticsService',
-function($scope, CategoryService, AnalyticsService) {
+		'AnalyticsService', 'ServerService',
+function($scope, CategoryService, AnalyticsService, ServerService) {
 
 	AnalyticsService.track();
 	$scope.CategoryService = CategoryService;
+	$scope.infos = ServerService.get();
 	$scope.categoryId = 'all';
+	$scope.order = 'desc';
 
 } ]);
 

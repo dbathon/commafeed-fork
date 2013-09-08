@@ -2,6 +2,7 @@ package com.commafeed.frontend.rest.resources;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -11,6 +12,10 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang.StringUtils;
 
 import com.commafeed.backend.StartupBean;
+import com.commafeed.backend.cache.CacheService;
+import com.commafeed.backend.dao.UserDAO;
+import com.commafeed.backend.dao.UserRoleDAO;
+import com.commafeed.backend.dao.UserSettingsDAO;
 import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserRole;
 import com.commafeed.backend.model.UserRole.Role;
@@ -18,6 +23,9 @@ import com.commafeed.backend.model.UserSettings;
 import com.commafeed.backend.model.UserSettings.ReadingMode;
 import com.commafeed.backend.model.UserSettings.ReadingOrder;
 import com.commafeed.backend.model.UserSettings.ViewMode;
+import com.commafeed.backend.services.ApplicationSettingsService;
+import com.commafeed.backend.services.PasswordEncryptionService;
+import com.commafeed.backend.services.UserService;
 import com.commafeed.frontend.SecurityCheck;
 import com.commafeed.frontend.model.Settings;
 import com.commafeed.frontend.model.UserModel;
@@ -32,6 +40,30 @@ import com.wordnik.swagger.annotations.ApiParam;
 @Api(value = "/user", description = "Operations about the user")
 public class UserREST extends AbstractResourceREST {
 
+	@Inject
+	UserDAO userDAO;
+
+	@Inject
+	UserSettingsDAO userSettingsDAO;
+
+	@Inject
+	UserRoleDAO userRoleDAO;
+
+	@Inject
+	StartupBean startupBean;
+
+	@Inject
+	UserService userService;
+
+	@Inject
+	PasswordEncryptionService encryptionService;
+
+	@Inject
+	CacheService cache;
+
+	@Inject
+	ApplicationSettingsService applicationSettingsService;
+
 	@Path("/settings")
 	@GET
 	@ApiOperation(value = "Retrieve user settings", notes = "Retrieve user settings", responseClass = "com.commafeed.frontend.model.Settings")
@@ -39,10 +71,12 @@ public class UserREST extends AbstractResourceREST {
 		Settings s = new Settings();
 		UserSettings settings = userSettingsDAO.findByUser(getUser());
 		if (settings != null) {
-			// force unread for the moment
-			// s.setReadingMode(settings.getReadingMode().name());
-			s.setReadingMode(ReadingMode.unread.name());
-			
+			if (applicationSettingsService.get().isHeavyLoad()) {
+				s.setReadingMode(ReadingMode.unread.name());
+			} else {
+				s.setReadingMode(settings.getReadingMode().name());
+			}
+
 			s.setReadingOrder(settings.getReadingOrder().name());
 			s.setViewMode(settings.getViewMode().name());
 			s.setShowRead(settings.isShowRead());
@@ -170,6 +204,7 @@ public class UserREST extends AbstractResourceREST {
 			return Response.status(Status.FORBIDDEN).build();
 		}
 		userService.unregister(getUser());
+		cache.invalidateUserData(getUser());
 		return Response.ok().build();
 	}
 }
