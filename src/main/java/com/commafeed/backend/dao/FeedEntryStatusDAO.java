@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -14,13 +13,13 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.commafeed.backend.FixedSizeSortedSet;
+import com.commafeed.backend.model.AbstractModel;
+import com.commafeed.backend.model.AbstractModel_;
 import com.commafeed.backend.model.FeedEntry;
 import com.commafeed.backend.model.FeedEntryContent;
 import com.commafeed.backend.model.FeedEntryContent_;
@@ -44,32 +43,41 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 	protected static Logger log = LoggerFactory
 			.getLogger(FeedEntryStatusDAO.class);
 
+	private static int compareDatesAndIds(Date date1, Date date2, AbstractModel e1, AbstractModel e2) {
+		int c1 = ObjectUtils.compare(date1, date2);
+		if (c1 == 0) {
+			return ObjectUtils.compare(e1.getId(), e2.getId());
+		} else {
+			return c1;
+		}
+	}
+
 	private static final Comparator<FeedEntry> ENTRY_COMPARATOR_DESC = new Comparator<FeedEntry>() {
 		@Override
 		public int compare(FeedEntry o1, FeedEntry o2) {
-			return ObjectUtils.compare(o2.getUpdated(), o1.getUpdated());
-		};
+			return compareDatesAndIds(o2.getUpdated(), o1.getUpdated(), o2, o1);
+		}
 	};
 
 	private static final Comparator<FeedEntry> ENTRY_COMPARATOR_ASC = new Comparator<FeedEntry>() {
 		@Override
 		public int compare(FeedEntry o1, FeedEntry o2) {
-			return ObjectUtils.compare(o1.getUpdated(), o2.getUpdated());
-		};
+			return compareDatesAndIds(o1.getUpdated(), o2.getUpdated(), o1, o2);
+		}
 	};
 
 	private static final Comparator<FeedEntryStatus> STATUS_COMPARATOR_DESC = new Comparator<FeedEntryStatus>() {
 		@Override
 		public int compare(FeedEntryStatus o1, FeedEntryStatus o2) {
-			return ObjectUtils.compare(o2.getEntryUpdated(), o1.getEntryUpdated());
-		};
+			return compareDatesAndIds(o2.getEntryUpdated(), o1.getEntryUpdated(), o2, o1);
+		}
 	};
 
 	private static final Comparator<FeedEntryStatus> STATUS_COMPARATOR_ASC = new Comparator<FeedEntryStatus>() {
 		@Override
 		public int compare(FeedEntryStatus o1, FeedEntryStatus o2) {
-			return ObjectUtils.compare(o1.getEntryUpdated(), o2.getEntryUpdated());
-		};
+			return compareDatesAndIds(o1.getEntryUpdated(), o2.getEntryUpdated(), o1, o2);
+		}
 	};
 
 	@Inject
@@ -112,7 +120,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 					root.get(FeedEntryStatus_.entryInserted), newerThan));
 		}
 
-		orderStatusesBy(query, root, order);
+		orderStatusesBy(query, root, order, root.get(AbstractModel_.id));
 
 		TypedQuery<FeedEntryStatus> q = em.createQuery(query);
 		limit(q, offset, limit);
@@ -177,7 +185,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 				predicates.add(filter);
 			}
 			query.where(predicates.toArray(new Predicate[0]));
-			orderEntriesBy(query, ffeJoin, order);
+			orderEntriesBy(query, ffeJoin, order, root.get(AbstractModel_.id));
 			TypedQuery<FeedEntry> q = em.createQuery(query);
 			limit(q, 0, capacity);
 			setTimeout(q);
@@ -246,10 +254,10 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 				predicates.add(filter);
 			}
 			query.where(predicates.toArray(new Predicate[0]));
-			orderStatusesBy(query, root, order);
+			orderStatusesBy(query, root, order, root.get(AbstractModel_.id));
 
 			TypedQuery<FeedEntryStatus> q = em.createQuery(query);
-			limit(q, -1, limit);
+			limit(q, 0, capacity);
 			setTimeout(q);
 
 			List<FeedEntryStatus> list = q.getResultList();
@@ -283,7 +291,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 		}
 
 		query.where(predicates.toArray(new Predicate[0]));
-		orderStatusesBy(query, root, order);
+		orderStatusesBy(query, root, order, root.get(AbstractModel_.id));
 
 		TypedQuery<FeedEntryStatus> q = em.createQuery(query);
 		limit(q, offset, limit);
@@ -321,22 +329,22 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 	}
 
 	private void orderEntriesBy(CriteriaQuery<?> query,
-			Path<FeedFeedEntry> ffeJoin, ReadingOrder order) {
-		orderBy(query, ffeJoin.get(FeedFeedEntry_.entryUpdated), order);
+			Path<FeedFeedEntry> ffeJoin, ReadingOrder order, Path<Long> id) {
+		orderBy(query, ffeJoin.get(FeedFeedEntry_.entryUpdated), order, id);
 	}
 
 	private void orderStatusesBy(CriteriaQuery<?> query,
-			Path<FeedEntryStatus> statusJoin, ReadingOrder order) {
-		orderBy(query, statusJoin.get(FeedEntryStatus_.entryUpdated), order);
+			Path<FeedEntryStatus> statusJoin, ReadingOrder order, Path<Long> id) {
+		orderBy(query, statusJoin.get(FeedEntryStatus_.entryUpdated), order, id);
 	}
 
 	private void orderBy(CriteriaQuery<?> query, Path<Date> date,
-			ReadingOrder order) {
+			ReadingOrder order, Path<Long> id) {
 		if (order != null) {
 			if (order == ReadingOrder.asc) {
-				query.orderBy(builder.asc(date));
+				query.orderBy(builder.asc(date), builder.asc(id));
 			} else {
-				query.orderBy(builder.desc(date));
+				query.orderBy(builder.desc(date), builder.desc(id));
 			}
 		}
 	}
