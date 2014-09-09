@@ -46,8 +46,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 					<compilerArgument>-proc:none</compilerArgument>
 				</configuration>
 			</plugin>
@@ -66,58 +66,6 @@
 							</includes>
 						</resource>
 					</webResources>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.openejb.maven</groupId>
-				<artifactId>tomee-maven-plugin</artifactId>
-				<version>1.5.2</version>
-				<configuration>
-					<tomeeVersion>1.5.2</tomeeVersion>
-					<tomeeClassifier>plus</tomeeClassifier>
-					<tomeeHttpPort>8082</tomeeHttpPort>
-					<args>-Xmx1024m -XX:MaxPermSize=512m -XX:+CMSClassUnloadingEnabled</args>
-					<config>${project.basedir}/src/main/tomee/conf</config>
-					<reloadOnUpdate>true</reloadOnUpdate>
-					<synchronization>
-						<updateInterval>1</updateInterval>
-						<extensions>
-							<extension>.class</extension>
-						</extensions>
-						<updateOnlyExtensions>
-							<updateOnlyExtension>.properties</updateOnlyExtension>
-							<updateOnlyExtension>.html</updateOnlyExtension>
-							<updateOnlyExtension>.js</updateOnlyExtension>
-							<updateOnlyExtension>.css</updateOnlyExtension>
-							<updateOnlyExtension>.scss</updateOnlyExtension>
-						</updateOnlyExtensions>
-					</synchronization>
-					<libs>
-						<lib>org.hibernate:hibernate-entitymanager:4.1.11.Final</lib>
-						<lib>org.hibernate:hibernate-core:4.1.11.Final</lib>
-						<lib>org.hibernate.common:hibernate-commons-annotations:4.0.1.Final</lib>
-						<lib>org.hibernate:hibernate-validator:4.3.1.Final</lib>
-						<lib>org.jboss.logging:jboss-logging:3.1.3.GA</lib>
-
-						<lib>dom4j:dom4j:1.6.1</lib>
-						<lib>antlr:antlr:2.7.7</lib>
-						<lib>remove:openjpa-</lib>
-						<lib>remove:hsqldb</lib>
-						<lib>org.hsqldb:hsqldb:2.3.0</lib>
-						<lib>mysql:mysql-connector-java:5.1.24</lib>
-						<lib>postgresql:postgresql:9.1-901.jdbc4</lib>
-						<lib>net.sourceforge.jtds:jtds:1.3.1</lib>
-
-						<lib>org.infinispan:infinispan-core:5.1.4.FINAL</lib>
-						<lib>org.hibernate:hibernate-infinispan:4.1.11.Final</lib>
-						<lib>org.jgroups:jgroups:3.0.9.Final</lib>
-						<lib>org.jboss.marshalling:jboss-marshalling-river:1.3.11.GA</lib>
-						<lib>org.jboss.marshalling:jboss-marshalling:1.3.11.GA</lib>
-						<lib>org.codehaus.woodstox:woodstox-core-asl:4.1.1</lib>
-						<lib>org.codehaus.woodstox:stax2-api:3.1.1</lib>
-						<lib>org.rhq.helpers:rhq-pluginAnnotations:3.0.4</lib>
-						<lib>org.jboss.logmanager:jboss-logmanager:1.2.2.GA</lib>
-					</libs>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -437,33 +385,6 @@
 								</configuration>
 							</execution>
 						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>openshift</id>
-			<properties>
-				<jpa.datasource.name>java:jboss/datasources/MysqlDS</jpa.datasource.name>
-				<jpa.table.encoding>utf8</jpa.table.encoding>
-			</properties>
-			<build>
-				<finalName>commafeed</finalName>
-				<plugins>
-					<plugin>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<version>2.14.1</version>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</plugin>
-					<plugin>
-						<artifactId>maven-war-plugin</artifactId>
-						<version>2.4</version>
-						<configuration>
-							<outputDirectory>deployments</outputDirectory>
-							<warName>ROOT</warName>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
