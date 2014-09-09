@@ -1,5 +1,15 @@
-CommaFeed [![Build Status](https://buildhive.cloudbees.com/job/Athou/job/commafeed/badge/icon)](https://buildhive.cloudbees.com/job/Athou/job/commafeed/)
-=========
+CommaFeed Fork
+==============
+
+A fork of [commafeed](https://github.com/Athou/commafeed) with some changes and improvements.
+
+The fork is based on version 1.0.0 (commit e9cc6fd518c144302efa08a487c5590ba3652d7f from 2013-07-21 12:37:34) before the "persist read status instead of unread status" refactoring.
+
+I use this version for my personal commafeed instance. The main reason for not merging newer changes is that I didn't want to lose old read-statuses during the migration for that refactoring...
+
+
+Original Readme Below
+=====================
 Sources for [CommaFeed.com](http://www.commafeed.com/).
 
 Google Reader inspired self-hosted RSS reader, based on JAX-RS, Wicket and AngularJS.
