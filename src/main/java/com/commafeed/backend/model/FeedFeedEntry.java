@@ -23,51 +23,51 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 public class FeedFeedEntry implements Serializable {
 
-	@Id
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "FEED_ID")
-	private Feed feed;
+  @Id
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "FEED_ID")
+  private Feed feed;
 
-	@Id
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "FEEDENTRY_ID")
-	private FeedEntry entry;
+  @Id
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "FEEDENTRY_ID")
+  private FeedEntry entry;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date entryUpdated;
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date entryUpdated;
 
-	public FeedFeedEntry() {
+  public FeedFeedEntry() {
 
-	}
+  }
 
-	public FeedFeedEntry(Feed feed, FeedEntry entry) {
-		this.feed = feed;
-		this.entry = entry;
-		this.entryUpdated = entry.getUpdated();
-	}
+  public FeedFeedEntry(Feed feed, FeedEntry entry) {
+    this.feed = feed;
+    this.entry = entry;
+    entryUpdated = entry.getUpdated();
+  }
 
-	public Feed getFeed() {
-		return feed;
-	}
+  public Feed getFeed() {
+    return feed;
+  }
 
-	public void setFeed(Feed feed) {
-		this.feed = feed;
-	}
+  public void setFeed(Feed feed) {
+    this.feed = feed;
+  }
 
-	public FeedEntry getEntry() {
-		return entry;
-	}
+  public FeedEntry getEntry() {
+    return entry;
+  }
 
-	public void setEntry(FeedEntry entry) {
-		this.entry = entry;
-	}
+  public void setEntry(FeedEntry entry) {
+    this.entry = entry;
+  }
 
-	public Date getEntryUpdated() {
-		return entryUpdated;
-	}
+  public Date getEntryUpdated() {
+    return entryUpdated;
+  }
 
-	public void setEntryUpdated(Date entryUpdated) {
-		this.entryUpdated = entryUpdated;
-	}
+  public void setEntryUpdated(Date entryUpdated) {
+    this.entryUpdated = entryUpdated;
+  }
 
 }

@@ -14,14 +14,13 @@ import ro.isdc.wro.model.resource.processor.ResourcePreProcessor;
 @SupportedResourceType(ResourceType.JS)
 public class TimestampProcessor implements ResourcePreProcessor {
 
-	private static final String NOW = "" + System.currentTimeMillis();
+  private static final String NOW = "" + System.currentTimeMillis();
 
-	@Override
-	public void process(Resource resource, Reader reader, Writer writer)
-			throws IOException {
-		String content = IOUtils.toString(reader);
-		content = content.replace("${timestamp}", NOW);
-		writer.write(content);
-	}
+  @Override
+  public void process(Resource resource, Reader reader, Writer writer) throws IOException {
+    String content = IOUtils.toString(reader);
+    content = content.replace("${timestamp}", NOW);
+    writer.write(content);
+  }
 
 }

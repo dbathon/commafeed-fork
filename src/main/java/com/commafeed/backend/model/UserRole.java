@@ -20,41 +20,43 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 public class UserRole extends AbstractModel {
 
-	public static enum Role {
-		USER, ADMIN, NONE
-	}
+  public static enum Role {
+    USER,
+    ADMIN,
+    NONE
+  }
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", nullable = false)
-	private User user;
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
-	@Column(name = "roleName", nullable = false)
-	@Enumerated(EnumType.STRING)
-	private Role role;
+  @Column(name = "roleName", nullable = false)
+  @Enumerated(EnumType.STRING)
+  private Role role;
 
-	public UserRole() {
+  public UserRole() {
 
-	}
+  }
 
-	public UserRole(User user, Role role) {
-		this.user = user;
-		this.role = role;
-	}
+  public UserRole(User user, Role role) {
+    this.user = user;
+    this.role = role;
+  }
 
-	public User getUser() {
-		return user;
-	}
+  public User getUser() {
+    return user;
+  }
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+  public void setUser(User user) {
+    this.user = user;
+  }
 
-	public Role getRole() {
-		return role;
-	}
+  public Role getRole() {
+    return role;
+  }
 
-	public void setRole(Role role) {
-		this.role = role;
-	}
+  public void setRole(Role role) {
+    this.role = role;
+  }
 
 }

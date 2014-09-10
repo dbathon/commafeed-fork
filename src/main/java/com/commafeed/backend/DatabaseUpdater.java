@@ -24,55 +24,54 @@ import com.commafeed.backend.services.ApplicationPropertiesService;
 @TransactionManagement(TransactionManagementType.BEAN)
 public class DatabaseUpdater {
 
-	public void update() {
-		ApplicationPropertiesService properties = ApplicationPropertiesService.get();
-		String datasourceName = properties.getDatasource();
-		try {
-			Context context = null;
-			Connection connection = null;
-			try {
-				Thread currentThread = Thread.currentThread();
-				ClassLoader classLoader = currentThread.getContextClassLoader();
-				ResourceAccessor accessor = new ClassLoaderResourceAccessor(
-						classLoader);
+  public void update() {
+    final ApplicationPropertiesService properties = ApplicationPropertiesService.get();
+    final String datasourceName = properties.getDatasource();
+    try {
+      Context context = null;
+      Connection connection = null;
+      try {
+        final Thread currentThread = Thread.currentThread();
+        final ClassLoader classLoader = currentThread.getContextClassLoader();
+        final ResourceAccessor accessor = new ClassLoaderResourceAccessor(classLoader);
 
-				context = new InitialContext();
-				DataSource dataSource = (DataSource) context
-						.lookup(datasourceName);
-				connection = dataSource.getConnection();
-				JdbcConnection jdbcConnection = new JdbcConnection(connection);
+        context = new InitialContext();
+        final DataSource dataSource = (DataSource) context.lookup(datasourceName);
+        connection = dataSource.getConnection();
+        final JdbcConnection jdbcConnection = new JdbcConnection(connection);
 
-				Database database = DatabaseFactory.getInstance()
-						.findCorrectDatabaseImplementation(
-								jdbcConnection);
+        Database database =
+            DatabaseFactory.getInstance().findCorrectDatabaseImplementation(jdbcConnection);
 
-				if (database instanceof PostgresDatabase) {
-					database = new PostgresDatabase() {
-						@Override
-						public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-							return objectName;
-						}
-					};
-					database.setConnection(jdbcConnection);
-				}
+        if (database instanceof PostgresDatabase) {
+          database = new PostgresDatabase() {
+            @Override
+            public String escapeObjectName(String objectName,
+                Class<? extends DatabaseObject> objectType) {
+              return objectName;
+            }
+          };
+          database.setConnection(jdbcConnection);
+        }
 
-				Liquibase liq = new Liquibase(
-						"changelogs/db.changelog-master.xml", accessor,
-						database);
-				liq.update("prod");
-			} finally {
-				if (context != null) {
-					context.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			}
+        final Liquibase liq =
+            new Liquibase("changelogs/db.changelog-master.xml", accessor, database);
+        liq.update("prod");
+      }
+      finally {
+        if (context != null) {
+          context.close();
+        }
+        if (connection != null) {
+          connection.close();
+        }
+      }
 
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+    }
+    catch (final Exception e) {
+      throw new RuntimeException(e);
+    }
 
-	}
+  }
 
 }

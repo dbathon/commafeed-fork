@@ -14,23 +14,21 @@ import com.commafeed.frontend.pages.PasswordRecoveryPage;
 @SuppressWarnings("serial")
 public class LoginPanel extends SignInPanel {
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	public LoginPanel(String id) {
-		super(id);
-		replace(new BootstrapFeedbackPanel("feedback",
-				new ContainerFeedbackMessageFilter(this)));
-		Form<?> form = (Form<?>) get("signInForm");
-		form.add(new BookmarkablePageLink<Void>("recover",
-				PasswordRecoveryPage.class){
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				String smtpHost = applicationSettingsService.get().getSmtpHost();
-				setVisibilityAllowed(StringUtils.isNotBlank(smtpHost));
-			}
-		});
-	}
+  public LoginPanel(String id) {
+    super(id);
+    replace(new BootstrapFeedbackPanel("feedback", new ContainerFeedbackMessageFilter(this)));
+    final Form<?> form = (Form<?>) get("signInForm");
+    form.add(new BookmarkablePageLink<Void>("recover", PasswordRecoveryPage.class) {
+      @Override
+      protected void onConfigure() {
+        super.onConfigure();
+        final String smtpHost = applicationSettingsService.get().getSmtpHost();
+        setVisibilityAllowed(StringUtils.isNotBlank(smtpHost));
+      }
+    });
+  }
 
 }

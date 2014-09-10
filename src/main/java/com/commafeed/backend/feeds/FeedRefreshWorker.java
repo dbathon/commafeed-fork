@@ -25,161 +25,157 @@ import com.sun.syndication.io.FeedException;
 @ApplicationScoped
 public class FeedRefreshWorker {
 
-	private static Logger log = LoggerFactory
-			.getLogger(FeedRefreshWorker.class);
+  private static Logger log = LoggerFactory.getLogger(FeedRefreshWorker.class);
 
-	@Inject
-	FeedRefreshUpdater feedRefreshUpdater;
+  @Inject
+  FeedRefreshUpdater feedRefreshUpdater;
 
-	@Inject
-	FeedFetcher fetcher;
+  @Inject
+  FeedFetcher fetcher;
 
-	@Inject
-	FeedRefreshTaskGiver taskGiver;
+  @Inject
+  FeedRefreshTaskGiver taskGiver;
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	@Inject
-	MetricsBean metricsBean;
+  @Inject
+  MetricsBean metricsBean;
 
-	@Inject
-	FeedEntryDAO feedEntryDAO;
+  @Inject
+  FeedEntryDAO feedEntryDAO;
 
-	private FeedRefreshExecutor pool;
+  private FeedRefreshExecutor pool;
 
-	@PostConstruct
-	private void init() {
-		ApplicationSettings settings = applicationSettingsService.get();
-		int threads = settings.getBackgroundThreads();
-		pool = new FeedRefreshExecutor("feed-refresh-worker", threads,
-				20 * threads);
-	}
+  @PostConstruct
+  private void init() {
+    final ApplicationSettings settings = applicationSettingsService.get();
+    final int threads = settings.getBackgroundThreads();
+    pool = new FeedRefreshExecutor("feed-refresh-worker", threads, 20 * threads);
+  }
 
-	@PreDestroy
-	public void shutdown() {
-		pool.shutdown();
-	}
+  @PreDestroy
+  public void shutdown() {
+    pool.shutdown();
+  }
 
-	public void updateFeed(Feed feed) {
-		pool.execute(new FeedTask(feed));
-	}
+  public void updateFeed(Feed feed) {
+    pool.execute(new FeedTask(feed));
+  }
 
-	public int getQueueSize() {
-		return pool.getQueueSize();
-	}
+  public int getQueueSize() {
+    return pool.getQueueSize();
+  }
 
-	public int getActiveCount() {
-		return pool.getActiveCount();
-	}
+  public int getActiveCount() {
+    return pool.getActiveCount();
+  }
 
-	private class FeedTask implements Task {
+  private class FeedTask implements Task {
 
-		private Feed feed;
+    private final Feed feed;
 
-		public FeedTask(Feed feed) {
-			this.feed = feed;
-		}
+    public FeedTask(Feed feed) {
+      this.feed = feed;
+    }
 
-		@Override
-		public void run() {
-			update(feed);
-		}
+    @Override
+    public void run() {
+      update(feed);
+    }
 
-		@Override
-		public boolean isUrgent() {
-			return feed.isUrgent();
-		}
-	}
+    @Override
+    public boolean isUrgent() {
+      return feed.isUrgent();
+    }
+  }
 
-	private void update(Feed feed) {
-		Date now = new Date();
-		try {
-			FetchedFeed fetchedFeed = fetcher.fetch(feed.getUrl(), false,
-					feed.getLastModifiedHeader(), feed.getEtagHeader(),
-					feed.getLastPublishedDate(), feed.getLastContentHash());
-			// stops here if NotModifiedException or any other exception is
-			// thrown
-			List<FeedEntry> entries = fetchedFeed.getEntries();
+  private void update(Feed feed) {
+    final Date now = new Date();
+    try {
+      final FetchedFeed fetchedFeed =
+          fetcher.fetch(feed.getUrl(), false, feed.getLastModifiedHeader(), feed.getEtagHeader(),
+              feed.getLastPublishedDate(), feed.getLastContentHash());
+      // stops here if NotModifiedException or any other exception is
+      // thrown
+      final List<FeedEntry> entries = fetchedFeed.getEntries();
 
-			Date disabledUntil = null;
-			if (applicationSettingsService.get().isHeavyLoad()) {
-				disabledUntil = FeedUtils.buildDisabledUntil(fetchedFeed
-						.getFeed().getLastEntryDate(), fetchedFeed.getFeed()
-						.getAverageEntryInterval());
-			}
+      Date disabledUntil = null;
+      if (applicationSettingsService.get().isHeavyLoad()) {
+        disabledUntil =
+            FeedUtils.buildDisabledUntil(fetchedFeed.getFeed().getLastEntryDate(), fetchedFeed
+                .getFeed().getAverageEntryInterval());
+      }
 
-			feed.setLastUpdateSuccess(now);
-			feed.setLink(fetchedFeed.getFeed().getLink());
-			feed.setLastModifiedHeader(fetchedFeed.getFeed()
-					.getLastModifiedHeader());
-			feed.setEtagHeader(fetchedFeed.getFeed().getEtagHeader());
-			feed.setLastContentHash(fetchedFeed.getFeed().getLastContentHash());
-			feed.setLastPublishedDate(fetchedFeed.getFeed()
-					.getLastPublishedDate());
-			feed.setAverageEntryInterval(fetchedFeed.getFeed()
-					.getAverageEntryInterval());
-			feed.setLastEntryDate(fetchedFeed.getFeed().getLastEntryDate());
+      feed.setLastUpdateSuccess(now);
+      feed.setLink(fetchedFeed.getFeed().getLink());
+      feed.setLastModifiedHeader(fetchedFeed.getFeed().getLastModifiedHeader());
+      feed.setEtagHeader(fetchedFeed.getFeed().getEtagHeader());
+      feed.setLastContentHash(fetchedFeed.getFeed().getLastContentHash());
+      feed.setLastPublishedDate(fetchedFeed.getFeed().getLastPublishedDate());
+      feed.setAverageEntryInterval(fetchedFeed.getFeed().getAverageEntryInterval());
+      feed.setLastEntryDate(fetchedFeed.getFeed().getLastEntryDate());
 
-			feed.setErrorCount(0);
-			feed.setMessage(null);
-			feed.setDisabledUntil(disabledUntil);
+      feed.setErrorCount(0);
+      feed.setMessage(null);
+      feed.setDisabledUntil(disabledUntil);
 
-			handlePubSub(feed, fetchedFeed.getFeed());
-			feedRefreshUpdater.updateFeed(feed, entries);
+      handlePubSub(feed, fetchedFeed.getFeed());
+      feedRefreshUpdater.updateFeed(feed, entries);
 
-		} catch (NotModifiedException e) {
-			log.debug("Feed not modified : {} - {}", feed.getUrl(),
-					e.getMessage());
+    }
+    catch (final NotModifiedException e) {
+      log.debug("Feed not modified : {} - {}", feed.getUrl(), e.getMessage());
 
-			Date disabledUntil = null;
-			if (applicationSettingsService.get().isHeavyLoad()) {
-				disabledUntil = FeedUtils
-						.buildDisabledUntil(feed.getLastEntryDate(),
-								feed.getAverageEntryInterval());
-			}
-			feed.setErrorCount(0);
-			feed.setMessage(null);
-			feed.setDisabledUntil(disabledUntil);
+      Date disabledUntil = null;
+      if (applicationSettingsService.get().isHeavyLoad()) {
+        disabledUntil =
+            FeedUtils.buildDisabledUntil(feed.getLastEntryDate(), feed.getAverageEntryInterval());
+      }
+      feed.setErrorCount(0);
+      feed.setMessage(null);
+      feed.setDisabledUntil(disabledUntil);
 
-			taskGiver.giveBack(feed);
-		} catch (Exception e) {
-			String message = "Unable to refresh feed " + feed.getUrl() + " : "
-					+ e.getMessage();
-			if (e instanceof FeedException) {
-				log.debug(e.getClass().getName() + " " + message, e);
-			} else {
-				log.debug(e.getClass().getName() + " " + message, e);
-			}
+      taskGiver.giveBack(feed);
+    }
+    catch (final Exception e) {
+      final String message = "Unable to refresh feed " + feed.getUrl() + " : " + e.getMessage();
+      if (e instanceof FeedException) {
+        log.debug(e.getClass().getName() + " " + message, e);
+      }
+      else {
+        log.debug(e.getClass().getName() + " " + message, e);
+      }
 
-			feed.setErrorCount(feed.getErrorCount() + 1);
-			feed.setMessage(message);
-			feed.setDisabledUntil(FeedUtils.buildDisabledUntil(feed
-					.getErrorCount()));
+      feed.setErrorCount(feed.getErrorCount() + 1);
+      feed.setMessage(message);
+      feed.setDisabledUntil(FeedUtils.buildDisabledUntil(feed.getErrorCount()));
 
-			taskGiver.giveBack(feed);
-		}
-	}
+      taskGiver.giveBack(feed);
+    }
+  }
 
-	private void handlePubSub(Feed feed, Feed fetchedFeed) {
-		String hub = fetchedFeed.getPushHub();
-		String topic = fetchedFeed.getPushTopic();
-		if (hub != null && topic != null) {
-			if (hub.contains("hubbub.api.typepad.com")) {
-				// that hub does not exist anymore
-				return;
-			}
-			if (topic.startsWith("www.")) {
-				topic = "http://" + topic;
-			} else if (topic.startsWith("feed://")) {
-				topic = "http://" + topic.substring(7);
-			} else if (topic.startsWith("http") == false) {
-				topic = "http://" + topic;
-			}
-			log.debug("feed {} has pubsub info: {}", feed.getUrl(), topic);
-			feed.setPushHub(hub);
-			feed.setPushTopic(topic);
-			feed.setPushTopicHash(DigestUtils.sha1Hex(topic));
-		}
-	}
+  private void handlePubSub(Feed feed, Feed fetchedFeed) {
+    final String hub = fetchedFeed.getPushHub();
+    String topic = fetchedFeed.getPushTopic();
+    if (hub != null && topic != null) {
+      if (hub.contains("hubbub.api.typepad.com")) {
+        // that hub does not exist anymore
+        return;
+      }
+      if (topic.startsWith("www.")) {
+        topic = "http://" + topic;
+      }
+      else if (topic.startsWith("feed://")) {
+        topic = "http://" + topic.substring(7);
+      }
+      else if (topic.startsWith("http") == false) {
+        topic = "http://" + topic;
+      }
+      log.debug("feed {} has pubsub info: {}", feed.getUrl(), topic);
+      feed.setPushHub(hub);
+      feed.setPushTopic(topic);
+      feed.setPushTopicHash(DigestUtils.sha1Hex(topic));
+    }
+  }
 }

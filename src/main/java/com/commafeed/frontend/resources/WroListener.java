@@ -7,16 +7,16 @@ import com.commafeed.backend.services.ApplicationPropertiesService;
 
 public class WroListener extends WroServletContextListener {
 
-	@Override
-	protected WroConfiguration newConfiguration() {
-		WroConfiguration conf = super.newConfiguration();
-		ApplicationPropertiesService properties = ApplicationPropertiesService.get();
-		boolean prod = properties.isProduction();
+  @Override
+  protected WroConfiguration newConfiguration() {
+    final WroConfiguration conf = super.newConfiguration();
+    final ApplicationPropertiesService properties = ApplicationPropertiesService.get();
+    final boolean prod = properties.isProduction();
 
-		conf.setResourceWatcherUpdatePeriod(prod ? 0 : 1);
-		conf.setDisableCache(!prod);
-		conf.setDebug(!prod);
-		return conf;
-	}
+    conf.setResourceWatcherUpdatePeriod(prod ? 0 : 1);
+    conf.setDisableCache(!prod);
+    conf.setDebug(!prod);
+    return conf;
+  }
 
 }

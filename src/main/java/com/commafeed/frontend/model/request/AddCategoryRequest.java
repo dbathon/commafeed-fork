@@ -15,26 +15,26 @@ import com.wordnik.swagger.annotations.ApiProperty;
 @ApiClass("Add Category Request")
 public class AddCategoryRequest implements Serializable {
 
-	@ApiProperty(value = "name", required = true)
-	private String name;
+  @ApiProperty(value = "name", required = true)
+  private String name;
 
-	@ApiProperty(value = "parent category id, if any")
-	private String parentId;
+  @ApiProperty(value = "parent category id, if any")
+  private String parentId;
 
-	public String getName() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public String getParentId() {
-		return parentId;
-	}
+  public String getParentId() {
+    return parentId;
+  }
 
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
-	}
+  public void setParentId(String parentId) {
+    this.parentId = parentId;
+  }
 
 }

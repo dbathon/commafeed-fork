@@ -15,37 +15,37 @@ import com.wordnik.swagger.annotations.ApiProperty;
 @ApiClass("Star Request")
 public class StarRequest implements Serializable {
 
-	@ApiProperty(value = "id", required = true)
-	private String id;
+  @ApiProperty(value = "id", required = true)
+  private String id;
 
-	@ApiProperty(value = "feed id", required = true)
-	private Long feedId;
+  @ApiProperty(value = "feed id", required = true)
+  private Long feedId;
 
-	@ApiProperty(value = "starred or not")
-	private boolean starred;
+  @ApiProperty(value = "starred or not")
+  private boolean starred;
 
-	public String getId() {
-		return id;
-	}
+  public String getId() {
+    return id;
+  }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+  public void setId(String id) {
+    this.id = id;
+  }
 
-	public boolean isStarred() {
-		return starred;
-	}
+  public boolean isStarred() {
+    return starred;
+  }
 
-	public void setStarred(boolean starred) {
-		this.starred = starred;
-	}
+  public void setStarred(boolean starred) {
+    this.starred = starred;
+  }
 
-	public Long getFeedId() {
-		return feedId;
-	}
+  public Long getFeedId() {
+    return feedId;
+  }
 
-	public void setFeedId(Long feedId) {
-		this.feedId = feedId;
-	}
+  public void setFeedId(Long feedId) {
+    this.feedId = feedId;
+  }
 
 }

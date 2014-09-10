@@ -30,80 +30,82 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 @SuppressWarnings("serial")
 public class GoogleImportCallbackPage extends WebPage {
 
-	private static final String TOKEN_URL = "https://accounts.google.com/o/oauth2/token";
-	private static final String EXPORT_URL = "https://www.google.com/reader/subscriptions/export";
+  private static final String TOKEN_URL = "https://accounts.google.com/o/oauth2/token";
+  private static final String EXPORT_URL = "https://www.google.com/reader/subscriptions/export";
 
-	public static final String PAGE_PATH = "google/import/callback";
+  public static final String PAGE_PATH = "google/import/callback";
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	@Inject
-	OPMLImporter importer;
+  @Inject
+  OPMLImporter importer;
 
-	@Inject
-	UserDAO userDAO;
+  @Inject
+  UserDAO userDAO;
 
-	public static String getCallbackUrl(String publicUrl) {
-		return FeedUtils.removeTrailingSlash(publicUrl) + "/" + PAGE_PATH;
-	}
+  public static String getCallbackUrl(String publicUrl) {
+    return FeedUtils.removeTrailingSlash(publicUrl) + "/" + PAGE_PATH;
+  }
 
-	public GoogleImportCallbackPage(PageParameters params) {
+  public GoogleImportCallbackPage(PageParameters params) {
 
-		HttpServletRequest request = WicketUtils.getHttpServletRequest();
-		StringBuffer urlBuffer = request.getRequestURL();
-		if (request.getQueryString() != null) {
-			urlBuffer.append('?').append(request.getQueryString());
-		}
-		AuthorizationCodeResponseUrl responseUrl = new AuthorizationCodeResponseUrl(
-				urlBuffer.toString());
-		String code = responseUrl.getCode();
+    final HttpServletRequest request = WicketUtils.getHttpServletRequest();
+    final StringBuffer urlBuffer = request.getRequestURL();
+    if (request.getQueryString() != null) {
+      urlBuffer.append('?').append(request.getQueryString());
+    }
+    final AuthorizationCodeResponseUrl responseUrl =
+        new AuthorizationCodeResponseUrl(urlBuffer.toString());
+    final String code = responseUrl.getCode();
 
-		if (responseUrl.getError() != null) {
-			// user declined
-			throw new RestartResponseException(getApplication().getHomePage());
-		} else if (code == null) {
-			throw new DisplayException("Missing authorization code");
-		} else {
-			ApplicationSettings settings = applicationSettingsService.get();
-			String redirectUri = getCallbackUrl(settings.getPublicUrl());
-			String clientId = settings.getGoogleClientId();
-			String clientSecret = settings.getGoogleClientSecret();
+    if (responseUrl.getError() != null) {
+      // user declined
+      throw new RestartResponseException(getApplication().getHomePage());
+    }
+    else if (code == null) {
+      throw new DisplayException("Missing authorization code");
+    }
+    else {
+      final ApplicationSettings settings = applicationSettingsService.get();
+      final String redirectUri = getCallbackUrl(settings.getPublicUrl());
+      final String clientId = settings.getGoogleClientId();
+      final String clientSecret = settings.getGoogleClientSecret();
 
-			HttpTransport httpTransport = new NetHttpTransport();
-			JacksonFactory jsonFactory = new JacksonFactory();
+      final HttpTransport httpTransport = new NetHttpTransport();
+      final JacksonFactory jsonFactory = new JacksonFactory();
 
-			AuthorizationCodeTokenRequest tokenRequest = new AuthorizationCodeTokenRequest(
-					httpTransport, jsonFactory, new GenericUrl(TOKEN_URL), code);
-			tokenRequest.setRedirectUri(redirectUri);
-			tokenRequest.put("client_id", clientId);
-			tokenRequest.put("client_secret", clientSecret);
-			tokenRequest.setGrantType("authorization_code");
+      final AuthorizationCodeTokenRequest tokenRequest =
+          new AuthorizationCodeTokenRequest(httpTransport, jsonFactory, new GenericUrl(TOKEN_URL),
+              code);
+      tokenRequest.setRedirectUri(redirectUri);
+      tokenRequest.put("client_id", clientId);
+      tokenRequest.put("client_secret", clientSecret);
+      tokenRequest.setGrantType("authorization_code");
 
-			try {
-				// potential fix for invalid_grant error, happens if local
-				// system time is ahead of google servers time
-				Thread.sleep(1000);
-				TokenResponse tokenResponse = tokenRequest.execute();
-				String accessToken = tokenResponse.getAccessToken();
+      try {
+        // potential fix for invalid_grant error, happens if local
+        // system time is ahead of google servers time
+        Thread.sleep(1000);
+        final TokenResponse tokenResponse = tokenRequest.execute();
+        final String accessToken = tokenResponse.getAccessToken();
 
-				HttpRequest httpRequest = httpTransport.createRequestFactory()
-						.buildGetRequest(new GenericUrl(EXPORT_URL));
-				BearerToken.authorizationHeaderAccessMethod().intercept(
-						httpRequest, accessToken);
-				String opml = httpRequest.execute().parseAsString();
-				User user = CommaFeedSession.get().getUser();
-				if (user != null) {
-					if (StartupBean.USERNAME_DEMO.equals(user.getName())) {
-						throw new DisplayException(
-								"Import is disabled for the demo account");
-					}
-					importer.importOpml(CommaFeedSession.get().getUser(), opml);
-				}
-			} catch (Exception e) {
-				throw new DisplayException(e);
-			}
-		}
-		setResponsePage(getApplication().getHomePage());
-	}
+        final HttpRequest httpRequest =
+            httpTransport.createRequestFactory().buildGetRequest(new GenericUrl(EXPORT_URL));
+        BearerToken.authorizationHeaderAccessMethod().intercept(httpRequest, accessToken);
+        final String opml = httpRequest.execute().parseAsString();
+        final User user = CommaFeedSession.get().getUser();
+        if (user != null) {
+          if (StartupBean.USERNAME_DEMO.equals(user.getName())) {
+            throw new DisplayException("Import is disabled for the demo account");
+          }
+          importer.importOpml(CommaFeedSession.get().getUser(), opml);
+        }
+      }
+      catch (final Exception e) {
+        throw new DisplayException(e);
+      }
+    }
+    setResponsePage(getApplication().getHomePage());
+  }
 }

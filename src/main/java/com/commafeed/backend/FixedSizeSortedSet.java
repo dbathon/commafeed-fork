@@ -11,52 +11,54 @@ import com.google.common.collect.Lists;
 
 public class FixedSizeSortedSet<E> extends TreeSet<E> {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	private final Comparator<? super E> comparator;
-	private final int maxSize;
+  private final Comparator<? super E> comparator;
+  private final int maxSize;
 
-	public FixedSizeSortedSet(int maxSize, Comparator<? super E> comparator) {
-		super(comparator);
-		this.maxSize = maxSize;
-		this.comparator = comparator;
-	}
+  public FixedSizeSortedSet(int maxSize, Comparator<? super E> comparator) {
+    super(comparator);
+    this.maxSize = maxSize;
+    this.comparator = comparator;
+  }
 
-	@Override
-	public boolean add(E e) {
-		if (isFull()) {
-			E last = last();
-			int comparison = comparator.compare(e, last);
-			if (comparison < 0) {
-				remove(last);
-				return super.add(e);
-			} else {
-				return false;
-			}
-		} else {
-			return super.add(e);
-		}
-	}
+  @Override
+  public boolean add(E e) {
+    if (isFull()) {
+      final E last = last();
+      final int comparison = comparator.compare(e, last);
+      if (comparison < 0) {
+        remove(last);
+        return super.add(e);
+      }
+      else {
+        return false;
+      }
+    }
+    else {
+      return super.add(e);
+    }
+  }
 
-	@Override
-	public boolean addAll(Collection<? extends E> c) {
-		if (CollectionUtils.isEmpty(c)) {
-			return false;
-		}
+  @Override
+  public boolean addAll(Collection<? extends E> c) {
+    if (CollectionUtils.isEmpty(c)) {
+      return false;
+    }
 
-		boolean success = true;
-		for (E e : c) {
-			success &= add(e);
-		}
-		return success;
-	}
-	
-	public boolean isFull() {
-		return size() == maxSize;
-	}
+    boolean success = true;
+    for (final E e : c) {
+      success &= add(e);
+    }
+    return success;
+  }
 
-	@SuppressWarnings("unchecked")
-	public List<E> asList() {
-		return (List<E>) Lists.newArrayList(toArray());
-	}
+  public boolean isFull() {
+    return size() == maxSize;
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<E> asList() {
+    return (List<E>) Lists.newArrayList(toArray());
+  }
 }

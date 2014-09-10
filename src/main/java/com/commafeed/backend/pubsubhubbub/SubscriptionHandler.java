@@ -26,76 +26,72 @@ import com.google.common.collect.Lists;
 
 public class SubscriptionHandler {
 
-	private static Logger log = LoggerFactory
-			.getLogger(SubscriptionHandler.class);
+  private static Logger log = LoggerFactory.getLogger(SubscriptionHandler.class);
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	@Inject
-	FeedRefreshTaskGiver taskGiver;
+  @Inject
+  FeedRefreshTaskGiver taskGiver;
 
-	public void subscribe(Feed feed) {
+  public void subscribe(Feed feed) {
 
-		try {
-			// make sure the feed has been updated in the database so that the
-			// callback works
-			Thread.sleep(30000);
-		} catch (InterruptedException e1) {
-			// do nothing
-		}
+    try {
+      // make sure the feed has been updated in the database so that the
+      // callback works
+      Thread.sleep(30000);
+    }
+    catch (final InterruptedException e1) {
+      // do nothing
+    }
 
-		String hub = feed.getPushHub();
-		String topic = feed.getPushTopic();
-		String publicUrl = FeedUtils
-				.removeTrailingSlash(applicationSettingsService.get()
-						.getPublicUrl());
+    final String hub = feed.getPushHub();
+    final String topic = feed.getPushTopic();
+    final String publicUrl =
+        FeedUtils.removeTrailingSlash(applicationSettingsService.get().getPublicUrl());
 
-		log.debug("sending new pubsub subscription to {} for {}", hub, topic);
+    log.debug("sending new pubsub subscription to {} for {}", hub, topic);
 
-		HttpPost post = new HttpPost(hub);
-		List<NameValuePair> nvp = Lists.newArrayList();
-		nvp.add(new BasicNameValuePair("hub.callback", publicUrl
-				+ "/rest/push/callback"));
-		nvp.add(new BasicNameValuePair("hub.topic", topic));
-		nvp.add(new BasicNameValuePair("hub.mode", "subscribe"));
-		nvp.add(new BasicNameValuePair("hub.verify", "async"));
-		nvp.add(new BasicNameValuePair("hub.secret", ""));
-		nvp.add(new BasicNameValuePair("hub.verify_token", ""));
-		nvp.add(new BasicNameValuePair("hub.lease_seconds", ""));
+    final HttpPost post = new HttpPost(hub);
+    final List<NameValuePair> nvp = Lists.newArrayList();
+    nvp.add(new BasicNameValuePair("hub.callback", publicUrl + "/rest/push/callback"));
+    nvp.add(new BasicNameValuePair("hub.topic", topic));
+    nvp.add(new BasicNameValuePair("hub.mode", "subscribe"));
+    nvp.add(new BasicNameValuePair("hub.verify", "async"));
+    nvp.add(new BasicNameValuePair("hub.secret", ""));
+    nvp.add(new BasicNameValuePair("hub.verify_token", ""));
+    nvp.add(new BasicNameValuePair("hub.lease_seconds", ""));
 
-		post.setHeader(HttpHeaders.USER_AGENT, "CommaFeed");
-		post.setHeader(HttpHeaders.CONTENT_TYPE,
-				MediaType.APPLICATION_FORM_URLENCODED);
+    post.setHeader(HttpHeaders.USER_AGENT, "CommaFeed");
+    post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
 
-		HttpClient client = HttpGetter.newClient(20000);
-		try {
-			post.setEntity(new UrlEncodedFormEntity(nvp));
-			HttpResponse response = client.execute(post);
+    final HttpClient client = HttpGetter.newClient(20000);
+    try {
+      post.setEntity(new UrlEncodedFormEntity(nvp));
+      final HttpResponse response = client.execute(post);
 
-			int code = response.getStatusLine().getStatusCode();
-			if (code != 204 && code != 202 && code != 200) {
-				String message = EntityUtils.toString(response.getEntity());
-				String pushpressError = " is value is not allowed.  You may only subscribe to";
-				if (code == 400
-						&& StringUtils.contains(message, pushpressError)) {
-					String[] tokens = message.split(" ");
-					feed.setPushTopic(tokens[tokens.length - 1]);
-					taskGiver.giveBack(feed);
-					log.debug("handled pushpress subfeed {} : {}", topic,
-							feed.getPushTopic());
-				} else {
-					throw new Exception("Unexpected response code: " + code
-							+ " " + response.getStatusLine().getReasonPhrase()
-							+ " - " + message);
-				}
-			}
-			log.debug("subscribed to {} for {}", hub, topic);
-		} catch (Exception e) {
-			log.error("Could not subscribe to {} for {} : " + e.getMessage(),
-					hub, topic);
-		} finally {
-			client.getConnectionManager().shutdown();
-		}
-	}
+      final int code = response.getStatusLine().getStatusCode();
+      if (code != 204 && code != 202 && code != 200) {
+        final String message = EntityUtils.toString(response.getEntity());
+        final String pushpressError = " is value is not allowed.  You may only subscribe to";
+        if (code == 400 && StringUtils.contains(message, pushpressError)) {
+          final String[] tokens = message.split(" ");
+          feed.setPushTopic(tokens[tokens.length - 1]);
+          taskGiver.giveBack(feed);
+          log.debug("handled pushpress subfeed {} : {}", topic, feed.getPushTopic());
+        }
+        else {
+          throw new Exception("Unexpected response code: " + code + " "
+              + response.getStatusLine().getReasonPhrase() + " - " + message);
+        }
+      }
+      log.debug("subscribed to {} for {}", hub, topic);
+    }
+    catch (final Exception e) {
+      log.error("Could not subscribe to {} for {} : " + e.getMessage(), hub, topic);
+    }
+    finally {
+      client.getConnectionManager().shutdown();
+    }
+  }
 }

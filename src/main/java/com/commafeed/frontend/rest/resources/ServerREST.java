@@ -21,44 +21,43 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "/server", description = "Operations about server infos")
 public class ServerREST extends AbstractResourceREST {
 
-	@Inject
-	StartupBean startupBean;
+  @Inject
+  StartupBean startupBean;
 
-	@Inject
-	HttpGetter httpGetter;
+  @Inject
+  HttpGetter httpGetter;
 
-	@Path("/get")
-	@GET
-	@ApiOperation(value = "Get server infos", notes = "Get server infos", responseClass = "com.commafeed.frontend.model.ServerInfo")
-	public Response get() {
-		ApplicationPropertiesService properties = ApplicationPropertiesService.get();
+  @Path("/get")
+  @GET
+  @ApiOperation(value = "Get server infos", notes = "Get server infos",
+      responseClass = "com.commafeed.frontend.model.ServerInfo")
+  public Response get() {
+    final ApplicationPropertiesService properties = ApplicationPropertiesService.get();
 
-		ServerInfo infos = new ServerInfo();
-		infos.setAnnouncement(applicationSettingsService.get()
-				.getAnnouncement());
-		infos.getSupportedLanguages().putAll(
-				startupBean.getSupportedLanguages());
-		infos.setVersion(properties.getVersion());
-		infos.setGitCommit(properties.getGitCommit());
-		return Response.ok(infos).build();
-	}
+    final ServerInfo infos = new ServerInfo();
+    infos.setAnnouncement(applicationSettingsService.get().getAnnouncement());
+    infos.getSupportedLanguages().putAll(startupBean.getSupportedLanguages());
+    infos.setVersion(properties.getVersion());
+    infos.setGitCommit(properties.getGitCommit());
+    return Response.ok(infos).build();
+  }
 
-	@Path("/proxy")
-	@GET
-	@ApiOperation(value = "proxy image")
-	@Produces("image/png")
-	public Response get(@QueryParam("u") String url) {
-		if (!applicationSettingsService.get().isImageProxyEnabled()) {
-			return Response.status(Status.FORBIDDEN).build();
-		}
+  @Path("/proxy")
+  @GET
+  @ApiOperation(value = "proxy image")
+  @Produces("image/png")
+  public Response get(@QueryParam("u") String url) {
+    if (!applicationSettingsService.get().isImageProxyEnabled()) {
+      return Response.status(Status.FORBIDDEN).build();
+    }
 
-		url = FeedUtils.imageProxyDecoder(url);
-		try {
-			HttpResult result = httpGetter.getBinary(url, 20000);
-			return Response.ok(result.getContent()).build();
-		} catch (Exception e) {
-			return Response.status(Status.SERVICE_UNAVAILABLE)
-					.entity(e.getMessage()).build();
-		}
-	}
+    url = FeedUtils.imageProxyDecoder(url);
+    try {
+      final HttpResult result = httpGetter.getBinary(url, 20000);
+      return Response.ok(result.getContent()).build();
+    }
+    catch (final Exception e) {
+      return Response.status(Status.SERVICE_UNAVAILABLE).entity(e.getMessage()).build();
+    }
+  }
 }

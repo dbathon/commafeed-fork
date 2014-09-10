@@ -11,21 +11,19 @@ import com.commafeed.frontend.pages.components.RegisterPanel;
 @SuppressWarnings("serial")
 public class WelcomePage extends BasePage {
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	public WelcomePage() {
-		add(new BookmarkablePageLink<Void>("logo-link", getApplication()
-				.getHomePage()));
-		add(new BookmarkablePageLink<Void>("demo-login", DemoLoginPage.class));
-		add(new LoginPanel("login"));
-		add(new RegisterPanel("register") {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisibilityAllowed(applicationSettingsService.get()
-						.isAllowRegistrations());
-			}
-		});
-	}
+  public WelcomePage() {
+    add(new BookmarkablePageLink<Void>("logo-link", getApplication().getHomePage()));
+    add(new BookmarkablePageLink<Void>("demo-login", DemoLoginPage.class));
+    add(new LoginPanel("login"));
+    add(new RegisterPanel("register") {
+      @Override
+      protected void onConfigure() {
+        super.onConfigure();
+        setVisibilityAllowed(applicationSettingsService.get().isAllowRegistrations());
+      }
+    });
+  }
 }

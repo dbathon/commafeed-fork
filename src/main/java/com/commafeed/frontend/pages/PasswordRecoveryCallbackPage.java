@@ -23,60 +23,58 @@ import com.commafeed.frontend.utils.exception.DisplayException;
 @SuppressWarnings("serial")
 public class PasswordRecoveryCallbackPage extends BasePage {
 
-	public static final String PARAM_EMAIL = "email";
-	public static final String PARAM_TOKEN = "token";
+  public static final String PARAM_EMAIL = "email";
+  public static final String PARAM_TOKEN = "token";
 
-	@Inject
-	PasswordEncryptionService encryptionService;
+  @Inject
+  PasswordEncryptionService encryptionService;
 
-	@Inject
-	UserService userService;
+  @Inject
+  UserService userService;
 
-	public PasswordRecoveryCallbackPage(PageParameters params) {
-		String email = params.get(PARAM_EMAIL).toString();
-		String token = params.get(PARAM_TOKEN).toString();
+  public PasswordRecoveryCallbackPage(PageParameters params) {
+    final String email = params.get(PARAM_EMAIL).toString();
+    final String token = params.get(PARAM_TOKEN).toString();
 
-		final User user = userDAO.findByEmail(email);
-		if (user == null) {
-			throw new DisplayException("email not found");
-		}
-		if (user.getRecoverPasswordToken() == null
-				|| !user.getRecoverPasswordToken().equals(token)) {
-			throw new DisplayException("invalid token");
-		}
-		if (user.getRecoverPasswordTokenDate().before(
-				DateUtils.addDays(new Date(), -2))) {
-			throw new DisplayException("token expired");
-		}
+    final User user = userDAO.findByEmail(email);
+    if (user == null) {
+      throw new DisplayException("email not found");
+    }
+    if (user.getRecoverPasswordToken() == null || !user.getRecoverPasswordToken().equals(token)) {
+      throw new DisplayException("invalid token");
+    }
+    if (user.getRecoverPasswordTokenDate().before(DateUtils.addDays(new Date(), -2))) {
+      throw new DisplayException("token expired");
+    }
 
-		final IModel<String> password = new Model<String>();
-		final IModel<String> confirm = new Model<String>();
-		add(new BootstrapFeedbackPanel("feedback"));
-		Form<Void> form = new Form<Void>("form") {
-			@Override
-			protected void onSubmit() {
-				String passwd = password.getObject();
-				if (StringUtils.equals(passwd, confirm.getObject())) {
-					byte[] password = encryptionService.getEncryptedPassword(
-							passwd, user.getSalt());
-					user.setPassword(password);
-					user.setApiKey(userService.generateApiKey(user));
-					user.setRecoverPasswordToken(null);
-					user.setRecoverPasswordTokenDate(null);
-					userDAO.saveOrUpdate(user);
-					info("Password saved.");
-				} else {
-					error("Passwords do not match.");
-				}
-			}
-		};
-		add(form);
-		form.add(new PasswordTextField("password", password).setResetPassword(
-				true).add(StringValidator.minimumLength(6)));
-		form.add(new PasswordTextField("confirm", confirm).setResetPassword(
-				true).add(StringValidator.minimumLength(6)));
+    final IModel<String> password = new Model<String>();
+    final IModel<String> confirm = new Model<String>();
+    add(new BootstrapFeedbackPanel("feedback"));
+    final Form<Void> form = new Form<Void>("form") {
+      @Override
+      protected void onSubmit() {
+        final String passwd = password.getObject();
+        if (StringUtils.equals(passwd, confirm.getObject())) {
+          final byte[] password = encryptionService.getEncryptedPassword(passwd, user.getSalt());
+          user.setPassword(password);
+          user.setApiKey(userService.generateApiKey(user));
+          user.setRecoverPasswordToken(null);
+          user.setRecoverPasswordTokenDate(null);
+          userDAO.saveOrUpdate(user);
+          info("Password saved.");
+        }
+        else {
+          error("Passwords do not match.");
+        }
+      }
+    };
+    add(form);
+    form.add(new PasswordTextField("password", password).setResetPassword(true).add(
+        StringValidator.minimumLength(6)));
+    form.add(new PasswordTextField("confirm", confirm).setResetPassword(true).add(
+        StringValidator.minimumLength(6)));
 
-		form.add(new BookmarkablePageLink<Void>("cancel", HomePage.class));
+    form.add(new BookmarkablePageLink<Void>("cancel", HomePage.class));
 
-	}
+  }
 }

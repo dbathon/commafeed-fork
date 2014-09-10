@@ -10,14 +10,13 @@ import com.commafeed.frontend.CommaFeedSession;
 
 public class DemoLoginPage extends WebPage {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	@Inject
-	UserService userService;
+  @Inject
+  UserService userService;
 
-	public DemoLoginPage() {
-		CommaFeedSession.get().authenticate(StartupBean.USERNAME_DEMO,
-				StartupBean.USERNAME_DEMO);
-		setResponsePage(getApplication().getHomePage());
-	}
+  public DemoLoginPage() {
+    CommaFeedSession.get().authenticate(StartupBean.USERNAME_DEMO, StartupBean.USERNAME_DEMO);
+    setResponsePage(getApplication().getHomePage());
+  }
 }

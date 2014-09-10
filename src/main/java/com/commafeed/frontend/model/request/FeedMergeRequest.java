@@ -16,26 +16,26 @@ import com.wordnik.swagger.annotations.ApiProperty;
 @ApiClass("Feed merge Request")
 public class FeedMergeRequest implements Serializable {
 
-	@ApiProperty(value = "merge into this feed", required = true)
-	private Long intoFeedId;
+  @ApiProperty(value = "merge into this feed", required = true)
+  private Long intoFeedId;
 
-	@ApiProperty(value = "id of the feeds to merge", required = true)
-	private List<Long> feedIds;
+  @ApiProperty(value = "id of the feeds to merge", required = true)
+  private List<Long> feedIds;
 
-	public Long getIntoFeedId() {
-		return intoFeedId;
-	}
+  public Long getIntoFeedId() {
+    return intoFeedId;
+  }
 
-	public void setIntoFeedId(Long intoFeedId) {
-		this.intoFeedId = intoFeedId;
-	}
+  public void setIntoFeedId(Long intoFeedId) {
+    this.intoFeedId = intoFeedId;
+  }
 
-	public List<Long> getFeedIds() {
-		return feedIds;
-	}
+  public List<Long> getFeedIds() {
+    return feedIds;
+  }
 
-	public void setFeedIds(List<Long> feedIds) {
-		this.feedIds = feedIds;
-	}
+  public void setFeedIds(List<Long> feedIds) {
+    this.feedIds = feedIds;
+  }
 
 }

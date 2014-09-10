@@ -22,74 +22,74 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 public class FeedSubscription extends AbstractModel {
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(nullable = false)
-	@Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-	private User user;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(nullable = false)
+  @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
+  private User user;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(nullable = false)
-	@Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-	private Feed feed;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(nullable = false)
+  @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
+  private Feed feed;
 
-	@Column(length = 128, nullable = false)
-	private String title;
+  @Column(length = 128, nullable = false)
+  private String title;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-	private FeedCategory category;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
+  private FeedCategory category;
 
-	@OneToMany(mappedBy = "subscription", cascade = CascadeType.REMOVE)
-	private Set<FeedEntryStatus> statuses;
+  @OneToMany(mappedBy = "subscription", cascade = CascadeType.REMOVE)
+  private Set<FeedEntryStatus> statuses;
 
-	private Integer position;
+  private Integer position;
 
-	public Feed getFeed() {
-		return feed;
-	}
+  public Feed getFeed() {
+    return feed;
+  }
 
-	public void setFeed(Feed feed) {
-		this.feed = feed;
-	}
+  public void setFeed(Feed feed) {
+    this.feed = feed;
+  }
 
-	public User getUser() {
-		return user;
-	}
+  public User getUser() {
+    return user;
+  }
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+  public void setUser(User user) {
+    this.user = user;
+  }
 
-	public String getTitle() {
-		return title;
-	}
+  public String getTitle() {
+    return title;
+  }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-	public FeedCategory getCategory() {
-		return category;
-	}
+  public FeedCategory getCategory() {
+    return category;
+  }
 
-	public void setCategory(FeedCategory category) {
-		this.category = category;
-	}
+  public void setCategory(FeedCategory category) {
+    this.category = category;
+  }
 
-	public Set<FeedEntryStatus> getStatuses() {
-		return statuses;
-	}
+  public Set<FeedEntryStatus> getStatuses() {
+    return statuses;
+  }
 
-	public void setStatuses(Set<FeedEntryStatus> statuses) {
-		this.statuses = statuses;
-	}
+  public void setStatuses(Set<FeedEntryStatus> statuses) {
+    this.statuses = statuses;
+  }
 
-	public Integer getPosition() {
-		return position;
-	}
+  public Integer getPosition() {
+    return position;
+  }
 
-	public void setPosition(Integer position) {
-		this.position = position;
-	}
+  public void setPosition(Integer position) {
+    this.position = position;
+  }
 
 }

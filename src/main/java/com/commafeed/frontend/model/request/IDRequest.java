@@ -15,15 +15,15 @@ import com.wordnik.swagger.annotations.ApiProperty;
 @ApiClass
 public class IDRequest implements Serializable {
 
-	@ApiProperty
-	private Long id;
+  @ApiProperty
+  private Long id;
 
-	public Long getId() {
-		return id;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+  public void setId(Long id) {
+    this.id = id;
+  }
 
 }

@@ -19,25 +19,25 @@ import com.wordnik.swagger.jaxrs.JaxrsApiReader;
 @ApplicationPath("/rest")
 public class RESTApplication extends Application {
 
-	static {
-		JaxrsApiReader.setFormatString("");
-	}
+  static {
+    JaxrsApiReader.setFormatString("");
+  }
 
-	@Override
-	public Set<Class<?>> getClasses() {
-		Set<Class<?>> set = Sets.newHashSet();
-		set.add(JsonProvider.class);
+  @Override
+  public Set<Class<?>> getClasses() {
+    final Set<Class<?>> set = Sets.newHashSet();
+    set.add(JsonProvider.class);
 
-		set.add(EntryREST.class);
-		set.add(FeedREST.class);
-		set.add(CategoryREST.class);
-		set.add(UserREST.class);
-		set.add(ServerREST.class);
-		set.add(AdminREST.class);
+    set.add(EntryREST.class);
+    set.add(FeedREST.class);
+    set.add(CategoryREST.class);
+    set.add(UserREST.class);
+    set.add(ServerREST.class);
+    set.add(AdminREST.class);
 
-		set.add(ApiDocumentationREST.class);
-		set.add(PubSubHubbubCallbackREST.class);
+    set.add(ApiDocumentationREST.class);
+    set.add(PubSubHubbubCallbackREST.class);
 
-		return set;
-	}
+    return set;
+  }
 }

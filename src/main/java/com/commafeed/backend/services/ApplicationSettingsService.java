@@ -16,36 +16,35 @@ import com.google.common.collect.Iterables;
 @Singleton
 public class ApplicationSettingsService {
 
-	@Inject
-	ApplicationSettingsDAO applicationSettingsDAO;
+  @Inject
+  ApplicationSettingsDAO applicationSettingsDAO;
 
-	private ApplicationSettings settings;
+  private ApplicationSettings settings;
 
-	public void save(ApplicationSettings settings) {
-		this.settings = settings;
-		applicationSettingsDAO.saveOrUpdate(settings);
-		applyLogLevel();
-	}
+  public void save(ApplicationSettings settings) {
+    this.settings = settings;
+    applicationSettingsDAO.saveOrUpdate(settings);
+    applyLogLevel();
+  }
 
-	public ApplicationSettings get() {
-		if (settings == null) {
-			settings = Iterables.getFirst(applicationSettingsDAO.findAll(),
-					null);
-		}
-		return settings;
-	}
+  public ApplicationSettings get() {
+    if (settings == null) {
+      settings = Iterables.getFirst(applicationSettingsDAO.findAll(), null);
+    }
+    return settings;
+  }
 
-	@SuppressWarnings("unchecked")
-	public void applyLogLevel() {
-		String logLevel = get().getLogLevel();
-		Level level = Level.toLevel(logLevel);
+  @SuppressWarnings("unchecked")
+  public void applyLogLevel() {
+    final String logLevel = get().getLogLevel();
+    final Level level = Level.toLevel(logLevel);
 
-		Enumeration<Logger> loggers = LogManager.getCurrentLoggers();
-		while (loggers.hasMoreElements()) {
-			Logger logger = loggers.nextElement();
-			if (logger.getName().startsWith("com.commafeed")) {
-				logger.setLevel(level);
-			}
-		}
-	}
+    final Enumeration<Logger> loggers = LogManager.getCurrentLoggers();
+    while (loggers.hasMoreElements()) {
+      final Logger logger = loggers.nextElement();
+      if (logger.getName().startsWith("com.commafeed")) {
+        logger.setLevel(level);
+      }
+    }
+  }
 }

@@ -26,66 +26,65 @@ import com.google.common.collect.Lists;
 
 @Stateless
 public class FeedUpdateService {
-	
-	@PersistenceContext
-	protected EntityManager em;
 
-	@Inject
-	FeedSubscriptionDAO feedSubscriptionDAO;
+  @PersistenceContext
+  protected EntityManager em;
 
-	@Inject
-	FeedEntryDAO feedEntryDAO;
+  @Inject
+  FeedSubscriptionDAO feedSubscriptionDAO;
 
-	@Inject
-	FeedEntryStatusDAO feedEntryStatusDAO;
+  @Inject
+  FeedEntryDAO feedEntryDAO;
 
-	@Inject
-	MetricsBean metricsBean;
+  @Inject
+  FeedEntryStatusDAO feedEntryStatusDAO;
 
-	@Inject
-	CacheService cache;
+  @Inject
+  MetricsBean metricsBean;
 
-	public void updateEntry(Feed feed, FeedEntry entry,
-			List<FeedSubscription> subscriptions) {
+  @Inject
+  CacheService cache;
 
-		EntryWithFeed existing = feedEntryDAO.findExisting(entry.getGuid(),
-				entry.getUrl(), feed.getId());
+  public void updateEntry(Feed feed, FeedEntry entry, List<FeedSubscription> subscriptions) {
 
-		FeedEntry update = null;
-		FeedFeedEntry ffe = null;
-		if (existing == null) {
-			entry.setAuthor(FeedUtils.truncate(FeedUtils.handleContent(
-					entry.getAuthor(), feed.getLink(), true), 128));
-			FeedEntryContent content = entry.getContent();
-			content.setTitle(FeedUtils.truncate(FeedUtils.handleContent(
-					content.getTitle(), feed.getLink(), true), 2048));
-			content.setContent(FeedUtils.handleContent(content.getContent(),
-					feed.getLink(), false));
+    final EntryWithFeed existing =
+        feedEntryDAO.findExisting(entry.getGuid(), entry.getUrl(), feed.getId());
 
-			entry.setInserted(new Date());
-			ffe = new FeedFeedEntry(feed, entry);
+    FeedEntry update = null;
+    FeedFeedEntry ffe = null;
+    if (existing == null) {
+      entry.setAuthor(FeedUtils.truncate(
+          FeedUtils.handleContent(entry.getAuthor(), feed.getLink(), true), 128));
+      final FeedEntryContent content = entry.getContent();
+      content.setTitle(FeedUtils.truncate(
+          FeedUtils.handleContent(content.getTitle(), feed.getLink(), true), 2048));
+      content.setContent(FeedUtils.handleContent(content.getContent(), feed.getLink(), false));
 
-			update = entry;
-		} else if (existing.ffe == null) {
-			ffe = new FeedFeedEntry(feed, existing.entry);
-			update = existing.entry;
-		}
+      entry.setInserted(new Date());
+      ffe = new FeedFeedEntry(feed, entry);
 
-		if (update != null) {
-			List<FeedEntryStatus> statusUpdateList = Lists.newArrayList();
-			List<User> users = Lists.newArrayList();
-			for (FeedSubscription sub : subscriptions) {
-				User user = sub.getUser();
-				FeedEntryStatus status = new FeedEntryStatus(user, sub, update);
-				status.setSubscription(sub);
-				statusUpdateList.add(status);
-				users.add(user);
-			}
-			cache.invalidateUserData(users.toArray(new User[0]));
-			feedEntryDAO.saveOrUpdate(update);
-			feedEntryStatusDAO.saveOrUpdate(statusUpdateList);
-			em.persist(ffe);
-			metricsBean.entryUpdated(statusUpdateList.size());
-		}
-	}
+      update = entry;
+    }
+    else if (existing.ffe == null) {
+      ffe = new FeedFeedEntry(feed, existing.entry);
+      update = existing.entry;
+    }
+
+    if (update != null) {
+      final List<FeedEntryStatus> statusUpdateList = Lists.newArrayList();
+      final List<User> users = Lists.newArrayList();
+      for (final FeedSubscription sub : subscriptions) {
+        final User user = sub.getUser();
+        final FeedEntryStatus status = new FeedEntryStatus(user, sub, update);
+        status.setSubscription(sub);
+        statusUpdateList.add(status);
+        users.add(user);
+      }
+      cache.invalidateUserData(users.toArray(new User[0]));
+      feedEntryDAO.saveOrUpdate(update);
+      feedEntryStatusDAO.saveOrUpdate(statusUpdateList);
+      em.persist(ffe);
+      metricsBean.entryUpdated(statusUpdateList.size());
+    }
+  }
 }

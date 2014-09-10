@@ -10,30 +10,28 @@ import org.apache.wicket.request.resource.ResourceReference;
 @SuppressWarnings("serial")
 public abstract class UserCustomCssReference extends ResourceReference {
 
-	public UserCustomCssReference() {
-		super(UserCustomCssReference.class, "custom.css");
-	}
+  public UserCustomCssReference() {
+    super(UserCustomCssReference.class, "custom.css");
+  }
 
-	@Override
-	public IResource getResource() {
-		return new AbstractResource() {
-			@Override
-			protected ResourceResponse newResourceResponse(Attributes attributes) {
-				ResourceResponse resourceResponse = new ResourceResponse();
-				resourceResponse.setContentType("text/css");
-				resourceResponse.setTextEncoding("UTF-8");
-				resourceResponse.setWriteCallback(new WriteCallback() {
-					@Override
-					public void writeData(Attributes attributes)
-							throws IOException {
-						attributes.getResponse().write(
-								StringUtils.trimToEmpty(getCss()));
-					}
-				});
-				return resourceResponse;
-			}
-		};
-	}
+  @Override
+  public IResource getResource() {
+    return new AbstractResource() {
+      @Override
+      protected ResourceResponse newResourceResponse(Attributes attributes) {
+        final ResourceResponse resourceResponse = new ResourceResponse();
+        resourceResponse.setContentType("text/css");
+        resourceResponse.setTextEncoding("UTF-8");
+        resourceResponse.setWriteCallback(new WriteCallback() {
+          @Override
+          public void writeData(Attributes attributes) throws IOException {
+            attributes.getResponse().write(StringUtils.trimToEmpty(getCss()));
+          }
+        });
+        return resourceResponse;
+      }
+    };
+  }
 
-	protected abstract String getCss();
+  protected abstract String getCss();
 }

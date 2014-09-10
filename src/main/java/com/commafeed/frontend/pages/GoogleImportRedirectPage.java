@@ -15,36 +15,37 @@ import com.commafeed.backend.services.ApplicationSettingsService;
 @SuppressWarnings("serial")
 public class GoogleImportRedirectPage extends WebPage {
 
-	private static Logger log = Logger
-			.getLogger(GoogleImportRedirectPage.class);
+  private static Logger log = Logger.getLogger(GoogleImportRedirectPage.class);
 
-	private static final String SCOPE = "https://www.google.com/reader/subscriptions/export email profile";
-	private static final String AUTH_URL = "https://accounts.google.com/o/oauth2/auth";
+  private static final String SCOPE =
+      "https://www.google.com/reader/subscriptions/export email profile";
+  private static final String AUTH_URL = "https://accounts.google.com/o/oauth2/auth";
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	public GoogleImportRedirectPage() {
+  public GoogleImportRedirectPage() {
 
-		ApplicationSettings settings = applicationSettingsService.get();
+    final ApplicationSettings settings = applicationSettingsService.get();
 
-		String clientId = settings.getGoogleClientId();
+    final String clientId = settings.getGoogleClientId();
 
-		String redirectUri = GoogleImportCallbackPage.getCallbackUrl(settings.getPublicUrl());
-		try {
-			URIBuilder builder = new URIBuilder(AUTH_URL);
+    final String redirectUri = GoogleImportCallbackPage.getCallbackUrl(settings.getPublicUrl());
+    try {
+      final URIBuilder builder = new URIBuilder(AUTH_URL);
 
-			builder.addParameter("redirect_uri", redirectUri);
-			builder.addParameter("response_type", "code");
-			builder.addParameter("scope", SCOPE);
-			builder.addParameter("approval_prompt", "force");
-			builder.addParameter("client_id", clientId);
-			builder.addParameter("access_type", "offline");
+      builder.addParameter("redirect_uri", redirectUri);
+      builder.addParameter("response_type", "code");
+      builder.addParameter("scope", SCOPE);
+      builder.addParameter("approval_prompt", "force");
+      builder.addParameter("client_id", clientId);
+      builder.addParameter("access_type", "offline");
 
-			throw new RedirectToUrlException(builder.build().toString());
-		} catch (URISyntaxException e) {
-			log.error(e.getMessage(), e);
-		}
+      throw new RedirectToUrlException(builder.build().toString());
+    }
+    catch (final URISyntaxException e) {
+      log.error(e.getMessage(), e);
+    }
 
-	}
+  }
 }

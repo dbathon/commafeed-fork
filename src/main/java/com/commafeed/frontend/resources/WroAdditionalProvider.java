@@ -10,22 +10,21 @@ import com.google.api.client.util.Maps;
 
 /**
  * Build-time solution
- *
  */
 public class WroAdditionalProvider implements ProcessorProvider {
 
-	@Override
-	public Map<String, ResourcePreProcessor> providePreProcessors() {
-		Map<String, ResourcePreProcessor> map = Maps.newHashMap();
-		map.put("sassOnlyProcessor", new SassOnlyProcessor());
-		map.put("sassImport", new SassImportProcessor());
-		map.put("timestamp", new TimestampProcessor());
-		return map;
-	}
+  @Override
+  public Map<String, ResourcePreProcessor> providePreProcessors() {
+    final Map<String, ResourcePreProcessor> map = Maps.newHashMap();
+    map.put("sassOnlyProcessor", new SassOnlyProcessor());
+    map.put("sassImport", new SassImportProcessor());
+    map.put("timestamp", new TimestampProcessor());
+    return map;
+  }
 
-	@Override
-	public Map<String, ResourcePostProcessor> providePostProcessors() {
-		return Maps.newHashMap();
-	}
+  @Override
+  public Map<String, ResourcePostProcessor> providePostProcessors() {
+    return Maps.newHashMap();
+  }
 
 }

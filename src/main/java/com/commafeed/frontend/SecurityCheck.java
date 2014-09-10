@@ -17,12 +17,12 @@ import com.commafeed.backend.model.UserRole.Role;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SecurityCheck {
 
-	/**
-	 * Roles needed.
-	 */
-	@Nonbinding
-	Role value() default Role.USER;
+  /**
+   * Roles needed.
+   */
+  @Nonbinding
+  Role value() default Role.USER;
 
-	@Nonbinding
-	boolean apiKeyAllowed() default false;
+  @Nonbinding
+  boolean apiKeyAllowed() default false;
 }

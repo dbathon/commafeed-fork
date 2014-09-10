@@ -17,54 +17,55 @@ import com.google.common.collect.Sets;
 
 public class CommaFeedSession extends AuthenticatedWebSession {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	@Inject
-	UserService userService;
+  @Inject
+  UserService userService;
 
-	@Inject
-	UserRoleDAO userRoleDAO;
+  @Inject
+  UserRoleDAO userRoleDAO;
 
-	private User user;
-	private Roles roles = new Roles();
+  private User user;
+  private Roles roles = new Roles();
 
-	public CommaFeedSession(Request request) {
-		super(request);
-	}
+  public CommaFeedSession(Request request) {
+    super(request);
+  }
 
-	public User getUser() {
-		return user;
-	}
+  public User getUser() {
+    return user;
+  }
 
-	public static CommaFeedSession get() {
-		return (CommaFeedSession) Session.get();
-	}
+  public static CommaFeedSession get() {
+    return (CommaFeedSession) Session.get();
+  }
 
-	@Override
-	public Roles getRoles() {
-		return roles;
-	}
+  @Override
+  public Roles getRoles() {
+    return roles;
+  }
 
-	@Override
-	public boolean authenticate(String userName, String password) {
-		User user = userService.login(userName, password);
-		setUser(user);
-		return user != null;
-	}
+  @Override
+  public boolean authenticate(String userName, String password) {
+    final User user = userService.login(userName, password);
+    setUser(user);
+    return user != null;
+  }
 
-	public void setUser(User user) {
-		if (user == null) {
-			this.user = null;
-			this.roles = new Roles();
-		} else {
+  public void setUser(User user) {
+    if (user == null) {
+      this.user = null;
+      roles = new Roles();
+    }
+    else {
 
-			Set<String> roleSet = Sets.newHashSet();
-			for (Role role : userRoleDAO.findRoles(user)) {
-				roleSet.add(role.name());
-			}
-			this.user = user;
-			this.roles = new Roles(roleSet.toArray(new String[0]));
-		}
-	}
+      final Set<String> roleSet = Sets.newHashSet();
+      for (final Role role : userRoleDAO.findRoles(user)) {
+        roleSet.add(role.name());
+      }
+      this.user = user;
+      roles = new Roles(roleSet.toArray(new String[0]));
+    }
+  }
 
 }

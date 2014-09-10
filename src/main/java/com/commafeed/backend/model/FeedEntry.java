@@ -26,118 +26,118 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 public class FeedEntry extends AbstractModel {
 
-	@Column(length = 2048, nullable = false)
-	private String guid;
+  @Column(length = 2048, nullable = false)
+  private String guid;
 
-	@Column(length = 40, nullable = false)
-	private String guidHash;
+  @Column(length = 40, nullable = false)
+  private String guidHash;
 
-	@OneToMany(mappedBy = "entry", cascade = CascadeType.REMOVE)
-	private Set<FeedFeedEntry> feedRelationships;
+  @OneToMany(mappedBy = "entry", cascade = CascadeType.REMOVE)
+  private Set<FeedFeedEntry> feedRelationships;
 
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(nullable = false, updatable = false)
-	private FeedEntryContent content;
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(nullable = false, updatable = false)
+  private FeedEntryContent content;
 
-	@Column(length = 2048)
-	private String url;
+  @Column(length = 2048)
+  private String url;
 
-	@Column(name = "author", length = 128)
-	private String author;
+  @Column(name = "author", length = 128)
+  private String author;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date inserted;
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date inserted;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date updated;
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date updated;
 
-	@OneToMany(mappedBy = "entry", cascade = CascadeType.REMOVE)
-	private Set<FeedEntryStatus> statuses;
+  @OneToMany(mappedBy = "entry", cascade = CascadeType.REMOVE)
+  private Set<FeedEntryStatus> statuses;
 
-	/**
-	 * useful placeholder for the subscription, not persisted
-	 */
-	@Transient
-	private FeedSubscription subscription;
+  /**
+   * useful placeholder for the subscription, not persisted
+   */
+  @Transient
+  private FeedSubscription subscription;
 
-	public String getGuid() {
-		return guid;
-	}
+  public String getGuid() {
+    return guid;
+  }
 
-	public void setGuid(String guid) {
-		this.guid = guid;
-	}
+  public void setGuid(String guid) {
+    this.guid = guid;
+  }
 
-	public String getUrl() {
-		return url;
-	}
+  public String getUrl() {
+    return url;
+  }
 
-	public void setUrl(String url) {
-		this.url = url;
-	}
+  public void setUrl(String url) {
+    this.url = url;
+  }
 
-	public Date getUpdated() {
-		return updated;
-	}
+  public Date getUpdated() {
+    return updated;
+  }
 
-	public void setUpdated(Date updated) {
-		this.updated = updated;
-	}
+  public void setUpdated(Date updated) {
+    this.updated = updated;
+  }
 
-	public Set<FeedEntryStatus> getStatuses() {
-		return statuses;
-	}
+  public Set<FeedEntryStatus> getStatuses() {
+    return statuses;
+  }
 
-	public void setStatuses(Set<FeedEntryStatus> statuses) {
-		this.statuses = statuses;
-	}
+  public void setStatuses(Set<FeedEntryStatus> statuses) {
+    this.statuses = statuses;
+  }
 
-	public Date getInserted() {
-		return inserted;
-	}
+  public Date getInserted() {
+    return inserted;
+  }
 
-	public void setInserted(Date inserted) {
-		this.inserted = inserted;
-	}
+  public void setInserted(Date inserted) {
+    this.inserted = inserted;
+  }
 
-	public FeedEntryContent getContent() {
-		return content;
-	}
+  public FeedEntryContent getContent() {
+    return content;
+  }
 
-	public void setContent(FeedEntryContent content) {
-		this.content = content;
-	}
+  public void setContent(FeedEntryContent content) {
+    this.content = content;
+  }
 
-	public String getGuidHash() {
-		return guidHash;
-	}
+  public String getGuidHash() {
+    return guidHash;
+  }
 
-	public void setGuidHash(String guidHash) {
-		this.guidHash = guidHash;
-	}
+  public void setGuidHash(String guidHash) {
+    this.guidHash = guidHash;
+  }
 
-	public String getAuthor() {
-		return author;
-	}
+  public String getAuthor() {
+    return author;
+  }
 
-	public void setAuthor(String author) {
-		this.author = author;
-	}
+  public void setAuthor(String author) {
+    this.author = author;
+  }
 
-	public Set<FeedFeedEntry> getFeedRelationships() {
-		return feedRelationships;
-	}
+  public Set<FeedFeedEntry> getFeedRelationships() {
+    return feedRelationships;
+  }
 
-	public void setFeedRelationships(Set<FeedFeedEntry> feedRelationships) {
-		this.feedRelationships = feedRelationships;
-	}
+  public void setFeedRelationships(Set<FeedFeedEntry> feedRelationships) {
+    this.feedRelationships = feedRelationships;
+  }
 
-	public FeedSubscription getSubscription() {
-		return subscription;
-	}
+  public FeedSubscription getSubscription() {
+    return subscription;
+  }
 
-	public void setSubscription(FeedSubscription subscription) {
-		this.subscription = subscription;
-	}
+  public void setSubscription(FeedSubscription subscription) {
+    this.subscription = subscription;
+  }
 
 }

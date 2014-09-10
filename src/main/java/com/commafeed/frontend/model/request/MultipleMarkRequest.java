@@ -16,15 +16,15 @@ import com.wordnik.swagger.annotations.ApiProperty;
 @ApiClass("Multiple Mark Request")
 public class MultipleMarkRequest implements Serializable {
 
-	@ApiProperty(value = "list of mark requests", required = true)
-	private List<MarkRequest> requests;
+  @ApiProperty(value = "list of mark requests", required = true)
+  private List<MarkRequest> requests;
 
-	public List<MarkRequest> getRequests() {
-		return requests;
-	}
+  public List<MarkRequest> getRequests() {
+    return requests;
+  }
 
-	public void setRequests(List<MarkRequest> requests) {
-		this.requests = requests;
-	}
+  public void setRequests(List<MarkRequest> requests) {
+    this.requests = requests;
+  }
 
 }

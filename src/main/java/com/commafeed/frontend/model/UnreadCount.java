@@ -14,32 +14,32 @@ import com.wordnik.swagger.annotations.ApiClass;
 @ApiClass("Unread count")
 public class UnreadCount implements Serializable {
 
-	private long feedId;
-	private long unreadCount;
+  private long feedId;
+  private long unreadCount;
 
-	public UnreadCount() {
+  public UnreadCount() {
 
-	}
+  }
 
-	public UnreadCount(long feedId, long unreadCount) {
-		this.feedId = feedId;
-		this.unreadCount = unreadCount;
-	}
+  public UnreadCount(long feedId, long unreadCount) {
+    this.feedId = feedId;
+    this.unreadCount = unreadCount;
+  }
 
-	public long getFeedId() {
-		return feedId;
-	}
+  public long getFeedId() {
+    return feedId;
+  }
 
-	public void setFeedId(long feedId) {
-		this.feedId = feedId;
-	}
+  public void setFeedId(long feedId) {
+    this.feedId = feedId;
+  }
 
-	public long getUnreadCount() {
-		return unreadCount;
-	}
+  public long getUnreadCount() {
+    return unreadCount;
+  }
 
-	public void setUnreadCount(long unreadCount) {
-		this.unreadCount = unreadCount;
-	}
+  public void setUnreadCount(long unreadCount) {
+    this.unreadCount = unreadCount;
+  }
 
 }

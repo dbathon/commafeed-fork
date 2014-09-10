@@ -28,147 +28,148 @@ import com.google.common.collect.Queues;
 @ApplicationScoped
 public class FeedRefreshTaskGiver {
 
-	protected static final Logger log = LoggerFactory.getLogger(FeedRefreshTaskGiver.class);
+  protected static final Logger log = LoggerFactory.getLogger(FeedRefreshTaskGiver.class);
 
-	@Inject
-	FeedDAO feedDAO;
+  @Inject
+  FeedDAO feedDAO;
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	@Inject
-	MetricsBean metricsBean;
+  @Inject
+  MetricsBean metricsBean;
 
-	@Inject
-	FeedRefreshWorker worker;
+  @Inject
+  FeedRefreshWorker worker;
 
-	private int backgroundThreads;
+  private int backgroundThreads;
 
-	private Queue<Feed> addQueue = Queues.newConcurrentLinkedQueue();
-	private Queue<Feed> takeQueue = Queues.newConcurrentLinkedQueue();
-	private Queue<Feed> giveBackQueue = Queues.newConcurrentLinkedQueue();
+  private final Queue<Feed> addQueue = Queues.newConcurrentLinkedQueue();
+  private final Queue<Feed> takeQueue = Queues.newConcurrentLinkedQueue();
+  private final Queue<Feed> giveBackQueue = Queues.newConcurrentLinkedQueue();
 
-	private ExecutorService executor;
+  private ExecutorService executor;
 
-	@PostConstruct
-	public void init() {
-		backgroundThreads = applicationSettingsService.get()
-				.getBackgroundThreads();
-		executor = Executors.newFixedThreadPool(1);
-	}
+  @PostConstruct
+  public void init() {
+    backgroundThreads = applicationSettingsService.get().getBackgroundThreads();
+    executor = Executors.newFixedThreadPool(1);
+  }
 
-	@PreDestroy
-	public void shutdown() {
-		executor.shutdownNow();
-		while (!executor.isTerminated()) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				log.error("interrupted while waiting for threads to finish.");
-			}
-		}
-	}
+  @PreDestroy
+  public void shutdown() {
+    executor.shutdownNow();
+    while (!executor.isTerminated()) {
+      try {
+        Thread.sleep(100);
+      }
+      catch (final InterruptedException e) {
+        log.error("interrupted while waiting for threads to finish.");
+      }
+    }
+  }
 
-	public void start() {
-		try {
-			// sleeping for a little while, let everything settle
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			log.error("interrupted while sleeping");
-		}
-		log.info("starting feed refresh task giver");
+  public void start() {
+    try {
+      // sleeping for a little while, let everything settle
+      Thread.sleep(5000);
+    }
+    catch (final InterruptedException e) {
+      log.error("interrupted while sleeping");
+    }
+    log.info("starting feed refresh task giver");
 
-		executor.execute(new Runnable() {
-			@Override
-			public void run() {
-				while (!executor.isShutdown()) {
-					try {
-						Feed feed = take();
-						if (feed != null) {
-							metricsBean.feedRefreshed();
-							worker.updateFeed(feed);
-						} else {
-							log.debug("nothing to do, sleeping for 15s");
-							try {
-								Thread.sleep(15000);
-							} catch (InterruptedException e) {
-								log.error("interrupted while sleeping");
-							}
-						}
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
-					}
-				}
-			}
-		});
-	}
+    executor.execute(() -> {
+      while (!executor.isShutdown()) {
+        try {
+          final Feed feed = take();
+          if (feed != null) {
+            metricsBean.feedRefreshed();
+            worker.updateFeed(feed);
+          }
+          else {
+            log.debug("nothing to do, sleeping for 15s");
+            try {
+              Thread.sleep(15000);
+            }
+            catch (final InterruptedException e1) {
+              log.error("interrupted while sleeping");
+            }
+          }
+        }
+        catch (final Exception e2) {
+          log.error(e2.getMessage(), e2);
+        }
+      }
+    });
+  }
 
-	private Feed take() {
-		Feed feed = takeQueue.poll();
+  private Feed take() {
+    Feed feed = takeQueue.poll();
 
-		if (feed == null) {
-			refill();
-			feed = takeQueue.poll();
-		}
-		return feed;
-	}
+    if (feed == null) {
+      refill();
+      feed = takeQueue.poll();
+    }
+    return feed;
+  }
 
-	public Long getUpdatableCount() {
-		return feedDAO.getUpdatableCount(getThreshold());
-	}
+  public Long getUpdatableCount() {
+    return feedDAO.getUpdatableCount(getThreshold());
+  }
 
-	private Date getThreshold() {
-		boolean heavyLoad = applicationSettingsService.get().isHeavyLoad();
-		Date threshold = DateUtils.addMinutes(new Date(), heavyLoad ? -15 : -5);
-		return threshold;
-	}
+  private Date getThreshold() {
+    final boolean heavyLoad = applicationSettingsService.get().isHeavyLoad();
+    final Date threshold = DateUtils.addMinutes(new Date(), heavyLoad ? -15 : -5);
+    return threshold;
+  }
 
-	public void add(Feed feed) {
-		Date threshold = getThreshold();
-		if (feed.getLastUpdated() == null
-				|| feed.getLastUpdated().before(threshold)) {
-			addQueue.add(feed);
-		}
-	}
+  public void add(Feed feed) {
+    final Date threshold = getThreshold();
+    if (feed.getLastUpdated() == null || feed.getLastUpdated().before(threshold)) {
+      addQueue.add(feed);
+    }
+  }
 
-	private void refill() {
-		Date now = new Date();
+  private void refill() {
+    final Date now = new Date();
 
-		int count = Math.min(100, 3 * backgroundThreads);
-		List<Feed> feeds = null;
-		if (applicationSettingsService.get().isCrawlingPaused()) {
-			feeds = Lists.newArrayList();
-		} else {
-			feeds = feedDAO.findNextUpdatable(count, getThreshold());
-		}
+    final int count = Math.min(100, 3 * backgroundThreads);
+    List<Feed> feeds = null;
+    if (applicationSettingsService.get().isCrawlingPaused()) {
+      feeds = Lists.newArrayList();
+    }
+    else {
+      feeds = feedDAO.findNextUpdatable(count, getThreshold());
+    }
 
-		int size = addQueue.size();
-		for (int i = 0; i < size; i++) {
-			feeds.add(0, addQueue.poll());
-		}
+    int size = addQueue.size();
+    for (int i = 0; i < size; i++) {
+      feeds.add(0, addQueue.poll());
+    }
 
-		Map<Long, Feed> map = Maps.newLinkedHashMap();
-		for (Feed f : feeds) {
-			f.setLastUpdated(now);
-			map.put(f.getId(), f);
-		}
-		takeQueue.addAll(map.values());
+    final Map<Long, Feed> map = Maps.newLinkedHashMap();
+    for (final Feed f : feeds) {
+      f.setLastUpdated(now);
+      map.put(f.getId(), f);
+    }
+    takeQueue.addAll(map.values());
 
-		size = giveBackQueue.size();
-		for (int i = 0; i < size; i++) {
-			Feed f = giveBackQueue.poll();
-			f.setLastUpdated(now);
-			map.put(f.getId(), f);
-		}
+    size = giveBackQueue.size();
+    for (int i = 0; i < size; i++) {
+      final Feed f = giveBackQueue.poll();
+      f.setLastUpdated(now);
+      map.put(f.getId(), f);
+    }
 
-		feedDAO.saveOrUpdate(map.values());
-	}
+    feedDAO.saveOrUpdate(map.values());
+  }
 
-	public void giveBack(Feed feed) {
-		String normalized = FeedUtils.normalizeURL(feed.getUrl());
-		feed.setNormalizedUrl(normalized);
-		feed.setNormalizedUrlHash(DigestUtils.sha1Hex(normalized));
-		giveBackQueue.add(feed);
-	}
+  public void giveBack(Feed feed) {
+    final String normalized = FeedUtils.normalizeURL(feed.getUrl());
+    feed.setNormalizedUrl(normalized);
+    feed.setNormalizedUrlHash(DigestUtils.sha1Hex(normalized));
+    giveBackQueue.add(feed);
+  }
 
 }

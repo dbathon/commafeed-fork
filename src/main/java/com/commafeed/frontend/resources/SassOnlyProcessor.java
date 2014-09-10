@@ -14,15 +14,14 @@ import ro.isdc.wro.model.resource.SupportedResourceType;
 @SupportedResourceType(ResourceType.CSS)
 public class SassOnlyProcessor extends RubySassCssProcessor {
 
-	@Override
-	public void process(Resource resource, Reader reader, Writer writer)
-			throws IOException {
-		if (resource.getUri().endsWith(".sass")
-				|| resource.getUri().endsWith(".scss")) {
-			super.process(resource, reader, writer);
-		} else {
-			writer.write(IOUtils.toString(reader));
-		}
-	}
+  @Override
+  public void process(Resource resource, Reader reader, Writer writer) throws IOException {
+    if (resource.getUri().endsWith(".sass") || resource.getUri().endsWith(".scss")) {
+      super.process(resource, reader, writer);
+    }
+    else {
+      writer.write(IOUtils.toString(reader));
+    }
+  }
 
 }

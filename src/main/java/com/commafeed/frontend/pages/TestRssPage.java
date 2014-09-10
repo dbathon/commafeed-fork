@@ -19,42 +19,44 @@ import com.sun.syndication.io.SyndFeedOutput;
 @SuppressWarnings("serial")
 public class TestRssPage extends WebPage {
 
-	public TestRssPage() {
-		SyndFeed feed = new SyndFeedImpl();
-		feed.setFeedType("rss_2.0");
-		feed.setTitle("Test RSS");
+  public TestRssPage() {
+    final SyndFeed feed = new SyndFeedImpl();
+    feed.setFeedType("rss_2.0");
+    feed.setTitle("Test RSS");
 
-		feed.setLink("");
-		feed.setDescription("New entries everytime it is accessed");
+    feed.setLink("");
+    feed.setDescription("New entries everytime it is accessed");
 
-		List<SyndEntry> entries = Lists.newArrayList();
-		for (int i = 0; i < 5; i++) {
-			SyndEntry entry = new SyndEntryImpl();
-			String uuid = UUID.randomUUID().toString();
-			entry.setUri(uuid);
-			entry.setTitle(uuid);
-			entry.setLink("http://www.example.com/" + uuid);
-			entry.setPublishedDate(new Date());
-			entries.add(entry);
-		}
-		feed.setEntries(entries);
-		SyndFeedOutput output = new SyndFeedOutput();
+    final List<SyndEntry> entries = Lists.newArrayList();
+    for (int i = 0; i < 5; i++) {
+      final SyndEntry entry = new SyndEntryImpl();
+      final String uuid = UUID.randomUUID().toString();
+      entry.setUri(uuid);
+      entry.setTitle(uuid);
+      entry.setLink("http://www.example.com/" + uuid);
+      entry.setPublishedDate(new Date());
+      entries.add(entry);
+    }
+    feed.setEntries(entries);
+    final SyndFeedOutput output = new SyndFeedOutput();
 
-		StringWriter writer = new StringWriter();
-		try {
-			output.output(feed, writer);
-		} catch (Exception e) {
-			writer.write("Could not get feed information");
-		}
+    final StringWriter writer = new StringWriter();
+    try {
+      output.output(feed, writer);
+    }
+    catch (final Exception e) {
+      writer.write("Could not get feed information");
+    }
 
-		try {
-			// simulate internet lag
-			Thread.sleep(Math.abs(new Random().nextLong() % 5000));
-		} catch (InterruptedException e) {
-			// do nothing
-		}
-		getRequestCycle().scheduleRequestHandlerAfterCurrent(
-				new TextRequestHandler("text/xml", "UTF-8", writer.toString()));
-	}
+    try {
+      // simulate internet lag
+      Thread.sleep(Math.abs(new Random().nextLong() % 5000));
+    }
+    catch (final InterruptedException e) {
+      // do nothing
+    }
+    getRequestCycle().scheduleRequestHandlerAfterCurrent(
+        new TextRequestHandler("text/xml", "UTF-8", writer.toString()));
+  }
 
 }

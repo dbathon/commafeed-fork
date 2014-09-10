@@ -12,23 +12,22 @@ import com.commafeed.frontend.model.Category;
 
 public abstract class CacheService {
 
-	public abstract List<String> getLastEntries(Feed feed);
+  public abstract List<String> getLastEntries(Feed feed);
 
-	public abstract void setLastEntries(Feed feed, List<String> entries);
+  public abstract void setLastEntries(Feed feed, List<String> entries);
 
-	public String buildUniqueEntryKey(Feed feed, FeedEntry entry) {
-		return DigestUtils.sha1Hex(entry.getGuid() +
-				entry.getUrl());
-	}
+  public String buildUniqueEntryKey(Feed feed, FeedEntry entry) {
+    return DigestUtils.sha1Hex(entry.getGuid() + entry.getUrl());
+  }
 
-	public abstract Category getRootCategory(User user);
+  public abstract Category getRootCategory(User user);
 
-	public abstract void setRootCategory(User user, Category category);
-	
-	public abstract Map<Long, Long> getUnreadCounts(User user);
+  public abstract void setRootCategory(User user, Category category);
 
-	public abstract void setUnreadCounts(User user, Map<Long, Long> map);
+  public abstract Map<Long, Long> getUnreadCounts(User user);
 
-	public abstract void invalidateUserData(User... users);
+  public abstract void setUnreadCounts(User user, Map<Long, Long> map);
+
+  public abstract void invalidateUserData(User... users);
 
 }

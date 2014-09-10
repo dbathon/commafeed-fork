@@ -14,7 +14,6 @@ import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
 import org.apache.wicket.validation.validator.StringValidator;
@@ -31,76 +30,62 @@ import com.commafeed.frontend.utils.ModelFactory.MF;
 @SuppressWarnings("serial")
 public class RegisterPanel extends Panel {
 
-	@Inject
-	UserDAO userDAO;
+  @Inject
+  UserDAO userDAO;
 
-	@Inject
-	UserService userService;
+  @Inject
+  UserService userService;
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	public RegisterPanel(String markupId) {
-		super(markupId);
+  public RegisterPanel(String markupId) {
+    super(markupId);
 
-		IModel<RegistrationRequest> model = Model.of(new RegistrationRequest());
+    final IModel<RegistrationRequest> model = Model.of(new RegistrationRequest());
 
-		Form<RegistrationRequest> form = new StatelessForm<RegistrationRequest>(
-				"form", model) {
-			@Override
-			protected void onSubmit() {
-				if (applicationSettingsService.get().isAllowRegistrations()) {
-					RegistrationRequest req = getModelObject();
-					userService.register(req.getName(), req.getPassword(),
-							req.getEmail(), Arrays.asList(Role.USER));
+    final Form<RegistrationRequest> form = new StatelessForm<RegistrationRequest>("form", model) {
+      @Override
+      protected void onSubmit() {
+        if (applicationSettingsService.get().isAllowRegistrations()) {
+          final RegistrationRequest req = getModelObject();
+          userService.register(req.getName(), req.getPassword(), req.getEmail(),
+              Arrays.asList(Role.USER));
 
-					IAuthenticationStrategy strategy = getApplication()
-							.getSecuritySettings().getAuthenticationStrategy();
-					strategy.save(req.getName(), req.getPassword());
-					CommaFeedSession.get().signIn(req.getName(),
-							req.getPassword());
-				}
-				setResponsePage(getApplication().getHomePage());
-			}
-		};
-		add(form);
-		add(new BootstrapFeedbackPanel("feedback",
-				new ContainerFeedbackMessageFilter(form)));
+          final IAuthenticationStrategy strategy =
+              getApplication().getSecuritySettings().getAuthenticationStrategy();
+          strategy.save(req.getName(), req.getPassword());
+          CommaFeedSession.get().signIn(req.getName(), req.getPassword());
+        }
+        setResponsePage(getApplication().getHomePage());
+      }
+    };
+    add(form);
+    add(new BootstrapFeedbackPanel("feedback", new ContainerFeedbackMessageFilter(form)));
 
-		RegistrationRequest p = MF.p(RegistrationRequest.class);
-		form.add(new RequiredTextField<String>("name", MF.m(model, p.getName()))
-				.add(StringValidator.lengthBetween(3, 32)).add(
-						new IValidator<String>() {
-							@Override
-							public void validate(
-									IValidatable<String> validatable) {
-								String name = validatable.getValue();
-								User user = userDAO.findByName(name);
-								if (user != null) {
-									validatable.error(new ValidationError(
-											"Name is already taken."));
-								}
-							}
-						}));
-		form.add(new PasswordTextField("password", MF.m(model, p.getPassword()))
-				.setResetPassword(false).add(StringValidator.minimumLength(6)));
-		form.add(new RequiredTextField<String>("email", MF.m(model,
-				p.getEmail())) {
-			@Override
-			protected String getInputType() {
-				return "email";
-			}
-		}.add(RfcCompliantEmailAddressValidator.getInstance()).add(
-				new IValidator<String>() {
-					@Override
-					public void validate(IValidatable<String> validatable) {
-						String email = validatable.getValue();
-						User user = userDAO.findByEmail(email);
-						if (user != null) {
-							validatable.error(new ValidationError(
-									"Email is already taken."));
-						}
-					}
-				}));
-	}
+    final RegistrationRequest p = MF.p(RegistrationRequest.class);
+    form.add(new RequiredTextField<String>("name", MF.m(model, p.getName())).add(
+        StringValidator.lengthBetween(3, 32)).add((IValidator<String>) validatable -> {
+      final String name = validatable.getValue();
+      final User user = userDAO.findByName(name);
+      if (user != null) {
+        validatable.error(new ValidationError("Name is already taken."));
+      }
+    }));
+    form.add(new PasswordTextField("password", MF.m(model, p.getPassword()))
+        .setResetPassword(false).add(StringValidator.minimumLength(6)));
+    form.add(new RequiredTextField<String>("email", MF.m(model, p.getEmail())) {
+      @Override
+      protected String getInputType() {
+        return "email";
+      }
+    }.add(RfcCompliantEmailAddressValidator.getInstance()).add(
+        (IValidator<String>) validatable -> {
+          final String email = validatable.getValue();
+          final User user = userDAO.findByEmail(email);
+          if (user != null) {
+            validatable.error(new ValidationError("Email is already taken."));
+          }
+        }));
+  }
 }

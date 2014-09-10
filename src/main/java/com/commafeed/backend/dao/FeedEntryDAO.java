@@ -26,84 +26,83 @@ import com.google.common.collect.Iterables;
 @Stateless
 public class FeedEntryDAO extends GenericDAO<FeedEntry> {
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	protected static final Logger log = LoggerFactory
-			.getLogger(FeedEntryDAO.class);
+  protected static final Logger log = LoggerFactory.getLogger(FeedEntryDAO.class);
 
-	public static class EntryWithFeed {
-		public FeedEntry entry;
-		public FeedFeedEntry ffe;
+  public static class EntryWithFeed {
+    public FeedEntry entry;
+    public FeedFeedEntry ffe;
 
-		public EntryWithFeed(FeedEntry entry, FeedFeedEntry ffe) {
-			this.entry = entry;
-			this.ffe = ffe;
-		}
-	}
+    public EntryWithFeed(FeedEntry entry, FeedFeedEntry ffe) {
+      this.entry = entry;
+      this.ffe = ffe;
+    }
+  }
 
-	public EntryWithFeed findExisting(String guid, String url, Long feedId) {
+  public EntryWithFeed findExisting(String guid, String url, Long feedId) {
 
-		TypedQuery<EntryWithFeed> q = em.createNamedQuery(
-				"EntryStatus.existing", EntryWithFeed.class);
-		q.setParameter("guidHash", DigestUtils.sha1Hex(guid));
-		q.setParameter("url", url);
-		q.setParameter("feedId", feedId);
+    final TypedQuery<EntryWithFeed> q =
+        em.createNamedQuery("EntryStatus.existing", EntryWithFeed.class);
+    q.setParameter("guidHash", DigestUtils.sha1Hex(guid));
+    q.setParameter("url", url);
+    q.setParameter("feedId", feedId);
 
-		EntryWithFeed result = null;
-		List<EntryWithFeed> list = q.getResultList();
-		for (EntryWithFeed ewf : list) {
-			if (ewf.entry != null && ewf.ffe != null) {
-				result = ewf;
-				break;
-			}
-		}
-		if (result == null) {
-			result = Iterables.getFirst(list, null);
-		}
-		return result;
-	}
+    EntryWithFeed result = null;
+    final List<EntryWithFeed> list = q.getResultList();
+    for (final EntryWithFeed ewf : list) {
+      if (ewf.entry != null && ewf.ffe != null) {
+        result = ewf;
+        break;
+      }
+    }
+    if (result == null) {
+      result = Iterables.getFirst(list, null);
+    }
+    return result;
+  }
 
-	public List<FeedEntry> findByFeed(Feed feed, int offset, int limit) {
-		CriteriaQuery<FeedEntry> query = builder.createQuery(getType());
-		Root<FeedEntry> root = query.from(getType());
-		SetJoin<FeedEntry, FeedFeedEntry> feedsJoin = root.join(FeedEntry_.feedRelationships);
+  public List<FeedEntry> findByFeed(Feed feed, int offset, int limit) {
+    final CriteriaQuery<FeedEntry> query = builder.createQuery(getType());
+    final Root<FeedEntry> root = query.from(getType());
+    final SetJoin<FeedEntry, FeedFeedEntry> feedsJoin = root.join(FeedEntry_.feedRelationships);
 
-		query.where(builder.equal(feedsJoin.get(FeedFeedEntry_.feed), feed));
-		query.orderBy(builder.desc(feedsJoin.get(FeedFeedEntry_.entryUpdated)));
-		TypedQuery<FeedEntry> q = em.createQuery(query);
-		limit(q, offset, limit);
-		setTimeout(q, applicationSettingsService.get().getQueryTimeout());
-		return q.getResultList();
-	}
+    query.where(builder.equal(feedsJoin.get(FeedFeedEntry_.feed), feed));
+    query.orderBy(builder.desc(feedsJoin.get(FeedFeedEntry_.entryUpdated)));
+    final TypedQuery<FeedEntry> q = em.createQuery(query);
+    limit(q, offset, limit);
+    setTimeout(q, applicationSettingsService.get().getQueryTimeout());
+    return q.getResultList();
+  }
 
-	public int delete(Date olderThan, int max) {
-		CriteriaQuery<FeedEntry> query = builder.createQuery(getType());
-		Root<FeedEntry> root = query.from(getType());
-		query.where(builder.lessThan(root.get(FeedEntry_.inserted), olderThan));
+  public int delete(Date olderThan, int max) {
+    final CriteriaQuery<FeedEntry> query = builder.createQuery(getType());
+    final Root<FeedEntry> root = query.from(getType());
+    query.where(builder.lessThan(root.get(FeedEntry_.inserted), olderThan));
 
-		TypedQuery<FeedEntry> q = em.createQuery(query);
-		q.setMaxResults(max);
-		List<FeedEntry> list = q.getResultList();
+    final TypedQuery<FeedEntry> q = em.createQuery(query);
+    q.setMaxResults(max);
+    final List<FeedEntry> list = q.getResultList();
 
-		int deleted = list.size();
-		delete(list);
-		return deleted;
-	}
+    final int deleted = list.size();
+    delete(list);
+    return deleted;
+  }
 
-	public int deleteWithoutFeeds(int max) {
-		CriteriaQuery<FeedEntry> query = builder.createQuery(getType());
-		Root<FeedEntry> root = query.from(getType());
+  public int deleteWithoutFeeds(int max) {
+    final CriteriaQuery<FeedEntry> query = builder.createQuery(getType());
+    final Root<FeedEntry> root = query.from(getType());
 
-		SetJoin<FeedEntry, FeedFeedEntry> join = root.join(FeedEntry_.feedRelationships,
-				JoinType.LEFT);
-		query.where(builder.isNull(join.get(FeedFeedEntry_.feed)));
-		TypedQuery<FeedEntry> q = em.createQuery(query);
-		q.setMaxResults(max);
+    final SetJoin<FeedEntry, FeedFeedEntry> join =
+        root.join(FeedEntry_.feedRelationships, JoinType.LEFT);
+    query.where(builder.isNull(join.get(FeedFeedEntry_.feed)));
+    final TypedQuery<FeedEntry> q = em.createQuery(query);
+    q.setMaxResults(max);
 
-		List<FeedEntry> list = q.getResultList();
-		int deleted = list.size();
-		delete(list);
-		return deleted;
-	}
+    final List<FeedEntry> list = q.getResultList();
+    final int deleted = list.size();
+    delete(list);
+    return deleted;
+  }
 }

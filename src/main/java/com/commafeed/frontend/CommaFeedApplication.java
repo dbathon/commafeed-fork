@@ -24,9 +24,7 @@ import org.apache.wicket.cdi.ConversationPropagation;
 import org.apache.wicket.core.request.handler.PageProvider;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler.RedirectPolicy;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.filter.JavaScriptFilteredIntoFooterHeaderResponse;
-import org.apache.wicket.markup.html.IHeaderResponseDecorator;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Request;
@@ -49,147 +47,134 @@ import com.commafeed.frontend.utils.exception.DisplayExceptionPage;
 
 public class CommaFeedApplication extends AuthenticatedWebApplication {
 
-	private static Logger log = LoggerFactory
-			.getLogger(CommaFeedApplication.class);
+  private static Logger log = LoggerFactory.getLogger(CommaFeedApplication.class);
 
-	public CommaFeedApplication() {
-		super();
-		String prod = ResourceBundle.getBundle("application").getString(
-				"production");
-		setConfigurationType(Boolean.valueOf(prod) ? RuntimeConfigurationType.DEPLOYMENT
-				: RuntimeConfigurationType.DEVELOPMENT);
-	}
+  public CommaFeedApplication() {
+    super();
+    final String prod = ResourceBundle.getBundle("application").getString("production");
+    setConfigurationType(Boolean.valueOf(prod) ? RuntimeConfigurationType.DEPLOYMENT
+        : RuntimeConfigurationType.DEVELOPMENT);
+  }
 
-	@Override
-	protected void init() {
-		super.init();
+  @Override
+  protected void init() {
+    super.init();
 
-		mountPage("welcome", WelcomePage.class);
-		mountPage("demo", DemoLoginPage.class);
-		
-		mountPage("recover", PasswordRecoveryPage.class);
-		mountPage("recover2", PasswordRecoveryCallbackPage.class);
-		
-		mountPage("logout", LogoutPage.class);
-		mountPage("error", DisplayExceptionPage.class);
-		
-//		mountPage("google/import/redirect", GoogleImportRedirectPage.class);
-//		mountPage(GoogleImportCallbackPage.PAGE_PATH,
-//				GoogleImportCallbackPage.class);
+    mountPage("welcome", WelcomePage.class);
+    mountPage("demo", DemoLoginPage.class);
 
-		mountPage("next", NextUnreadRedirectPage.class);
+    mountPage("recover", PasswordRecoveryPage.class);
+    mountPage("recover2", PasswordRecoveryCallbackPage.class);
 
-		setupInjection();
-		setupSecurity();
+    mountPage("logout", LogoutPage.class);
+    mountPage("error", DisplayExceptionPage.class);
 
-		getMarkupSettings().setStripWicketTags(true);
-		getMarkupSettings().setCompressWhitespace(true);
-		getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
+    // mountPage("google/import/redirect", GoogleImportRedirectPage.class);
+    // mountPage(GoogleImportCallbackPage.PAGE_PATH,
+    // GoogleImportCallbackPage.class);
 
-		setHeaderResponseDecorator(new IHeaderResponseDecorator() {
-			@Override
-			public IHeaderResponse decorate(IHeaderResponse response) {
-				return new JavaScriptFilteredIntoFooterHeaderResponse(response,
-						"footer-container");
-			}
-		});
+    mountPage("next", NextUnreadRedirectPage.class);
 
-		getRequestCycleListeners().add(new AbstractRequestCycleListener() {
-			@Override
-			public IRequestHandler onException(RequestCycle cycle, Exception ex) {
-				AjaxRequestTarget target = cycle.find(AjaxRequestTarget.class);
-				// redirect to the error page if ajax request, render error on
-				// current page otherwise
-				RedirectPolicy policy = target == null ? RedirectPolicy.NEVER_REDIRECT
-						: RedirectPolicy.AUTO_REDIRECT;
-				return new RenderPageRequestHandler(new PageProvider(
-						new DisplayExceptionPage(ex)), policy);
-			}
-		});
-	}
+    setupInjection();
+    setupSecurity();
 
-	private void setupSecurity() {
-		getSecuritySettings().setAuthenticationStrategy(
-				new DefaultAuthenticationStrategy("LoggedIn") {
+    getMarkupSettings().setStripWicketTags(true);
+    getMarkupSettings().setCompressWhitespace(true);
+    getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
 
-					private CookieUtils cookieUtils = null;
+    setHeaderResponseDecorator(response -> new JavaScriptFilteredIntoFooterHeaderResponse(response,
+        "footer-container"));
 
-					@Override
-					protected CookieUtils getCookieUtils() {
+    getRequestCycleListeners().add(new AbstractRequestCycleListener() {
+      @Override
+      public IRequestHandler onException(RequestCycle cycle, Exception ex) {
+        final AjaxRequestTarget target = cycle.find(AjaxRequestTarget.class);
+        // redirect to the error page if ajax request, render error on
+        // current page otherwise
+        final RedirectPolicy policy =
+            target == null ? RedirectPolicy.NEVER_REDIRECT : RedirectPolicy.AUTO_REDIRECT;
+        return new RenderPageRequestHandler(new PageProvider(new DisplayExceptionPage(ex)), policy);
+      }
+    });
+  }
 
-						if (cookieUtils == null) {
-							cookieUtils = new CookieUtils() {
-								@Override
-								protected void initializeCookie(Cookie cookie) {
-									super.initializeCookie(cookie);
-									cookie.setHttpOnly(true);
-								}
-							};
-						}
-						return cookieUtils;
-					}
-				});
-		getSecuritySettings().setAuthorizationStrategy(
-				new IAuthorizationStrategy() {
+  private void setupSecurity() {
+    getSecuritySettings().setAuthenticationStrategy(new DefaultAuthenticationStrategy("LoggedIn") {
 
-					@Override
-					public <T extends IRequestableComponent> boolean isInstantiationAuthorized(
-							Class<T> componentClass) {
-						boolean authorized = true;
+      private CookieUtils cookieUtils = null;
 
-						boolean restricted = componentClass
-								.isAnnotationPresent(SecurityCheck.class);
-						if (restricted) {
-							SecurityCheck annotation = componentClass
-									.getAnnotation(SecurityCheck.class);
-							Roles roles = CommaFeedSession.get().getRoles();
-							authorized = roles.hasAnyRole(new Roles(annotation
-									.value().name()));
-						}
-						return authorized;
-					}
+      @Override
+      protected CookieUtils getCookieUtils() {
 
-					@Override
-					public boolean isActionAuthorized(Component component,
-							Action action) {
-						return true;
-					}
-				});
-	}
+        if (cookieUtils == null) {
+          cookieUtils = new CookieUtils() {
+            @Override
+            protected void initializeCookie(Cookie cookie) {
+              super.initializeCookie(cookie);
+              cookie.setHttpOnly(true);
+            }
+          };
+        }
+        return cookieUtils;
+      }
+    });
+    getSecuritySettings().setAuthorizationStrategy(new IAuthorizationStrategy() {
 
-	@Override
-	public Class<? extends Page> getHomePage() {
-		return HomePage.class;
-	}
+      @Override
+      public <T extends IRequestableComponent> boolean isInstantiationAuthorized(
+          Class<T> componentClass) {
+        boolean authorized = true;
 
-	protected void setupInjection() {
-		try {
-			BeanManager beanManager = (BeanManager) new InitialContext()
-					.lookup("java:comp/BeanManager");
-			new CdiConfiguration(beanManager).setPropagation(
-					ConversationPropagation.NONE).configure(this);
-		} catch (NamingException e) {
-			log.warn("Could not locate bean manager. CDI is disabled.");
-		}
-	}
+        final boolean restricted = componentClass.isAnnotationPresent(SecurityCheck.class);
+        if (restricted) {
+          final SecurityCheck annotation = componentClass.getAnnotation(SecurityCheck.class);
+          final Roles roles = CommaFeedSession.get().getRoles();
+          authorized = roles.hasAnyRole(new Roles(annotation.value().name()));
+        }
+        return authorized;
+      }
 
-	@Override
-	public Session newSession(Request request, Response response) {
-		return new CommaFeedSession(request);
-	}
+      @Override
+      public boolean isActionAuthorized(Component component, Action action) {
+        return true;
+      }
+    });
+  }
 
-	@Override
-	protected Class<? extends WebPage> getSignInPageClass() {
-		return WelcomePage.class;
-	}
+  @Override
+  public Class<? extends Page> getHomePage() {
+    return HomePage.class;
+  }
 
-	@Override
-	protected Class<? extends AbstractAuthenticatedWebSession> getWebSessionClass() {
-		return CommaFeedSession.class;
-	}
+  protected void setupInjection() {
+    try {
+      final BeanManager beanManager =
+          (BeanManager) new InitialContext().lookup("java:comp/BeanManager");
+      new CdiConfiguration(beanManager).setPropagation(ConversationPropagation.NONE)
+          .configure(this);
+    }
+    catch (final NamingException e) {
+      log.warn("Could not locate bean manager. CDI is disabled.");
+    }
+  }
 
-	public static CommaFeedApplication get() {
+  @Override
+  public Session newSession(Request request, Response response) {
+    return new CommaFeedSession(request);
+  }
 
-		return (CommaFeedApplication) Application.get();
-	}
+  @Override
+  protected Class<? extends WebPage> getSignInPageClass() {
+    return WelcomePage.class;
+  }
+
+  @Override
+  protected Class<? extends AbstractAuthenticatedWebSession> getWebSessionClass() {
+    return CommaFeedSession.class;
+  }
+
+  public static CommaFeedApplication get() {
+
+    return (CommaFeedApplication) Application.get();
+  }
 }

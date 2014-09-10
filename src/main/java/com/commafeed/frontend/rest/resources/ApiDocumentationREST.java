@@ -21,45 +21,44 @@ import com.wordnik.swagger.core.util.TypeUtil;
 @Api("/resources")
 public class ApiDocumentationREST extends AbstractREST {
 
-	public static final String API_VERSION = "1.0";
+  public static final String API_VERSION = "1.0";
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	@GET
-	@ApiOperation(value = "Returns list of all available api endpoints", responseClass = "List[DocumentationEndPoint]")
-	public Response getAllApis(@Context Application app) {
+  @GET
+  @ApiOperation(value = "Returns list of all available api endpoints",
+      responseClass = "List[DocumentationEndPoint]")
+  public Response getAllApis(@Context Application app) {
 
-		TypeUtil.addAllowablePackage(Entries.class.getPackage().getName());
-		TypeUtil.addAllowablePackage(MarkRequest.class.getPackage().getName());
+    TypeUtil.addAllowablePackage(Entries.class.getPackage().getName());
+    TypeUtil.addAllowablePackage(MarkRequest.class.getPackage().getName());
 
-		Documentation doc = new Documentation();
-		for (Class<?> resource : app.getClasses()) {
-			if (ApiDocumentationREST.class.equals(resource)) {
-				continue;
-			}
-			Api api = resource.getAnnotation(Api.class);
-			if (api != null) {
-				doc.addApi(new DocumentationEndPoint(api.value(), api
-						.description()));
-			}
-		}
+    final Documentation doc = new Documentation();
+    for (final Class<?> resource : app.getClasses()) {
+      if (ApiDocumentationREST.class.equals(resource)) {
+        continue;
+      }
+      final Api api = resource.getAnnotation(Api.class);
+      if (api != null) {
+        doc.addApi(new DocumentationEndPoint(api.value(), api.description()));
+      }
+    }
 
-		doc.setSwaggerVersion(SwaggerSpec.version());
-		doc.setBasePath(getBasePath(applicationSettingsService.get()
-				.getPublicUrl()));
-		doc.setApiVersion(API_VERSION);
+    doc.setSwaggerVersion(SwaggerSpec.version());
+    doc.setBasePath(getBasePath(applicationSettingsService.get().getPublicUrl()));
+    doc.setApiVersion(API_VERSION);
 
-		return Response.ok().entity(doc).build();
-	}
+    return Response.ok().entity(doc).build();
+  }
 
-	public static String getBasePath(String publicUrl) {
-		if (!publicUrl.endsWith("/")) {
-			publicUrl = publicUrl + "/";
-		}
-		publicUrl += "rest";
+  public static String getBasePath(String publicUrl) {
+    if (!publicUrl.endsWith("/")) {
+      publicUrl = publicUrl + "/";
+    }
+    publicUrl += "rest";
 
-		return publicUrl;
-	}
+    return publicUrl;
+  }
 
 }

@@ -16,19 +16,16 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 @Provider
 public class JsonProvider extends JacksonJsonProvider {
 
-	@Override
-	public void writeTo(Object value, Class<?> type, Type genericType,
-			Annotation[] annotations, MediaType mediaType,
-			MultivaluedMap<String, Object> httpHeaders,
-			OutputStream entityStream) throws IOException {
+  @Override
+  public void writeTo(Object value, Class<?> type, Type genericType, Annotation[] annotations,
+      MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
+      throws IOException {
 
-		httpHeaders.putSingle(HttpHeaders.CONTENT_TYPE, mediaType.toString()
-				+ ";charset=UTF-8");
-		httpHeaders.putSingle(HttpHeaders.CACHE_CONTROL, "no-cache");
-		httpHeaders.putSingle(HttpHeaders.PRAGMA, "no-cache");
+    httpHeaders.putSingle(HttpHeaders.CONTENT_TYPE, mediaType.toString() + ";charset=UTF-8");
+    httpHeaders.putSingle(HttpHeaders.CACHE_CONTROL, "no-cache");
+    httpHeaders.putSingle(HttpHeaders.PRAGMA, "no-cache");
 
-		super.writeTo(value, type, genericType, annotations, mediaType,
-				httpHeaders, entityStream);
-	}
+    super.writeTo(value, type, genericType, annotations, mediaType, httpHeaders, entityStream);
+  }
 
 }

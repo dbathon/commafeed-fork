@@ -35,103 +35,103 @@ import com.commafeed.frontend.SecurityCheck;
 @Consumes(MediaType.APPLICATION_JSON)
 public abstract class AbstractREST {
 
-	@Context
-	private HttpServletRequest request;
+  @Context
+  private HttpServletRequest request;
 
-	@Context
-	private HttpServletResponse response;
+  @Context
+  private HttpServletResponse response;
 
-	@Inject
-	private UserDAO userDAO;
+  @Inject
+  private UserDAO userDAO;
 
-	@PostConstruct
-	public void init() {
-		CommaFeedApplication app = CommaFeedApplication.get();
-		ServletWebRequest swreq = new ServletWebRequest(request, "");
-		ServletWebResponse swresp = new ServletWebResponse(swreq, response);
-		RequestCycle cycle = app.createRequestCycle(swreq, swresp);
-		ThreadContext.setRequestCycle(cycle);
-		CommaFeedSession session = (CommaFeedSession) app
-				.fetchCreateAndSetSession(cycle);
+  @PostConstruct
+  public void init() {
+    final CommaFeedApplication app = CommaFeedApplication.get();
+    final ServletWebRequest swreq = new ServletWebRequest(request, "");
+    final ServletWebResponse swresp = new ServletWebResponse(swreq, response);
+    final RequestCycle cycle = app.createRequestCycle(swreq, swresp);
+    ThreadContext.setRequestCycle(cycle);
+    final CommaFeedSession session = (CommaFeedSession) app.fetchCreateAndSetSession(cycle);
 
-		if (session.getUser() == null) {
-			cookieLogin(app, session);
-		}
-		if (session.getUser() == null) {
-			basicHttpLogin(swreq, session);
-		}
-	}
+    if (session.getUser() == null) {
+      cookieLogin(app, session);
+    }
+    if (session.getUser() == null) {
+      basicHttpLogin(swreq, session);
+    }
+  }
 
-	private void cookieLogin(CommaFeedApplication app, CommaFeedSession session) {
-		IAuthenticationStrategy authenticationStrategy = app
-				.getSecuritySettings().getAuthenticationStrategy();
-		String[] data = authenticationStrategy.load();
-		if (data != null && data.length > 1) {
-			session.signIn(data[0], data[1]);
-		}
-	}
+  private void cookieLogin(CommaFeedApplication app, CommaFeedSession session) {
+    final IAuthenticationStrategy authenticationStrategy =
+        app.getSecuritySettings().getAuthenticationStrategy();
+    final String[] data = authenticationStrategy.load();
+    if (data != null && data.length > 1) {
+      session.signIn(data[0], data[1]);
+    }
+  }
 
-	private void basicHttpLogin(ServletWebRequest req, CommaFeedSession session) {
-		String value = req.getHeader(HttpHeaders.AUTHORIZATION);
-		if (value != null && value.startsWith("Basic ")) {
-			value = value.substring(6);
-			String decoded = new String(Base64.decodeBase64(value));
-			String[] data = decoded.split(":");
-			if (data != null && data.length > 1) {
-				session.signIn(data[0], data[1]);
-			}
-		}
-	}
+  private void basicHttpLogin(ServletWebRequest req, CommaFeedSession session) {
+    String value = req.getHeader(HttpHeaders.AUTHORIZATION);
+    if (value != null && value.startsWith("Basic ")) {
+      value = value.substring(6);
+      final String decoded = new String(Base64.decodeBase64(value));
+      final String[] data = decoded.split(":");
+      if (data != null && data.length > 1) {
+        session.signIn(data[0], data[1]);
+      }
+    }
+  }
 
-	private void apiKeyLogin() {
-		String apiKey = request.getParameter("apiKey");
-		User user = userDAO.findByApiKey(apiKey);
-		CommaFeedSession.get().setUser(user);
-	}
+  private void apiKeyLogin() {
+    final String apiKey = request.getParameter("apiKey");
+    final User user = userDAO.findByApiKey(apiKey);
+    CommaFeedSession.get().setUser(user);
+  }
 
-	protected User getUser() {
-		return CommaFeedSession.get().getUser();
-	}
+  protected User getUser() {
+    return CommaFeedSession.get().getUser();
+  }
 
-	@AroundInvoke
-	public Object checkSecurity(InvocationContext context) throws Exception {
-		boolean allowed = true;
-		User user = null;
-		Method method = context.getMethod();
-		SecurityCheck check = method.isAnnotationPresent(SecurityCheck.class) ? method
-				.getAnnotation(SecurityCheck.class) : method
-				.getDeclaringClass().getAnnotation(SecurityCheck.class);
+  @AroundInvoke
+  public Object checkSecurity(InvocationContext context) throws Exception {
+    boolean allowed = true;
+    User user = null;
+    final Method method = context.getMethod();
+    final SecurityCheck check =
+        method.isAnnotationPresent(SecurityCheck.class) ? method.getAnnotation(SecurityCheck.class)
+            : method.getDeclaringClass().getAnnotation(SecurityCheck.class);
 
-		if (check != null) {
-			user = getUser();
-			if (user == null && check.apiKeyAllowed()) {
-				apiKeyLogin();
-				user = getUser();
-			}
+    if (check != null) {
+      user = getUser();
+      if (user == null && check.apiKeyAllowed()) {
+        apiKeyLogin();
+        user = getUser();
+      }
 
-			allowed = checkRole(check.value());
-		}
-		if (!allowed) {
-			if (user == null) {
-				return Response.status(Status.UNAUTHORIZED)
-						.entity("You are not authorized to do this.").build();
-			} else {
-				return Response.status(Status.FORBIDDEN)
-						.entity("You are not authorized to do this.").build();
-			}
+      allowed = checkRole(check.value());
+    }
+    if (!allowed) {
+      if (user == null) {
+        return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to do this.")
+            .build();
+      }
+      else {
+        return Response.status(Status.FORBIDDEN).entity("You are not authorized to do this.")
+            .build();
+      }
 
-		}
+    }
 
-		return context.proceed();
-	}
+    return context.proceed();
+  }
 
-	private boolean checkRole(Role requiredRole) {
-		if (requiredRole == Role.NONE) {
-			return true;
-		}
+  private boolean checkRole(Role requiredRole) {
+    if (requiredRole == Role.NONE) {
+      return true;
+    }
 
-		Roles roles = CommaFeedSession.get().getRoles();
-		boolean authorized = roles.hasAnyRole(new Roles(requiredRole.name()));
-		return authorized;
-	}
+    final Roles roles = CommaFeedSession.get().getRoles();
+    final boolean authorized = roles.hasAnyRole(new Roles(requiredRole.name()));
+    return authorized;
+  }
 }

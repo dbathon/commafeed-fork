@@ -18,29 +18,26 @@ import liquibase.resource.ResourceAccessor;
  */
 public class CDIBootstrap implements Extension {
 
-	void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
-	}
+  void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {}
 
-	void afterDeploymentValidation(@Observes AfterDeploymentValidation event,
-			BeanManager manager) {
-	}
+  void afterDeploymentValidation(@Observes AfterDeploymentValidation event, BeanManager manager) {}
 
-	@Produces
-	@LiquibaseType
-	public CDILiquibaseConfig createConfig() {
-		return null;
-	}
+  @Produces
+  @LiquibaseType
+  public CDILiquibaseConfig createConfig() {
+    return null;
+  }
 
-	@Produces
-	@LiquibaseType
-	public DataSource createDataSource() throws SQLException {
-		return null;
-	}
+  @Produces
+  @LiquibaseType
+  public DataSource createDataSource() throws SQLException {
+    return null;
+  }
 
-	@Produces
-	@LiquibaseType
-	public ResourceAccessor create() {
-		return null;
-	}
+  @Produces
+  @LiquibaseType
+  public ResourceAccessor create() {
+    return null;
+  }
 
 }

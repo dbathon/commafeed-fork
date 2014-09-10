@@ -28,56 +28,55 @@ import com.google.common.collect.Iterables;
 @SecurityCheck(Role.USER)
 public class NextUnreadRedirectPage extends WebPage {
 
-	public static final String PARAM_CATEGORYID = "category";
-	public static final String PARAM_READINGORDER = "order";
+  public static final String PARAM_CATEGORYID = "category";
+  public static final String PARAM_READINGORDER = "order";
 
-	@Inject
-	FeedCategoryDAO feedCategoryDAO;
+  @Inject
+  FeedCategoryDAO feedCategoryDAO;
 
-	@Inject
-	FeedEntryStatusDAO feedEntryStatusDAO;
+  @Inject
+  FeedEntryStatusDAO feedEntryStatusDAO;
 
-	@Inject
-	FeedSubscriptionDAO feedSubscriptionDAO;
+  @Inject
+  FeedSubscriptionDAO feedSubscriptionDAO;
 
-	public NextUnreadRedirectPage(PageParameters params) {
-		String categoryId = params.get(PARAM_CATEGORYID).toString();
-		String orderParam = params.get(PARAM_READINGORDER).toString();
+  public NextUnreadRedirectPage(PageParameters params) {
+    final String categoryId = params.get(PARAM_CATEGORYID).toString();
+    final String orderParam = params.get(PARAM_READINGORDER).toString();
 
-		User user = CommaFeedSession.get().getUser();
-		ReadingOrder order = ReadingOrder.desc;
+    final User user = CommaFeedSession.get().getUser();
+    ReadingOrder order = ReadingOrder.desc;
 
-		if (StringUtils.equals(orderParam, "asc")) {
-			order = ReadingOrder.asc;
-		}
+    if (StringUtils.equals(orderParam, "asc")) {
+      order = ReadingOrder.asc;
+    }
 
-		List<FeedEntryStatus> statuses = null;
-		if (StringUtils.isBlank(categoryId)
-				|| CategoryREST.ALL.equals(categoryId)) {
-			statuses = feedEntryStatusDAO.findAllUnread(user, null, 0, 1,
-					order, true);
-		} else {
-			FeedCategory category = feedCategoryDAO.findById(user,
-					Long.valueOf(categoryId));
-			if (category != null) {
-				List<FeedCategory> children = feedCategoryDAO
-						.findAllChildrenCategories(user, category);
-				List<FeedSubscription> subscriptions = feedSubscriptionDAO
-						.findByCategories(user, children);
-				statuses = feedEntryStatusDAO.findUnreadBySubscriptions(
-						subscriptions, null, 0, 1, order, true);
-			}
-		}
+    List<FeedEntryStatus> statuses = null;
+    if (StringUtils.isBlank(categoryId) || CategoryREST.ALL.equals(categoryId)) {
+      statuses = feedEntryStatusDAO.findAllUnread(user, null, 0, 1, order, true);
+    }
+    else {
+      final FeedCategory category = feedCategoryDAO.findById(user, Long.valueOf(categoryId));
+      if (category != null) {
+        final List<FeedCategory> children =
+            feedCategoryDAO.findAllChildrenCategories(user, category);
+        final List<FeedSubscription> subscriptions =
+            feedSubscriptionDAO.findByCategories(user, children);
+        statuses =
+            feedEntryStatusDAO.findUnreadBySubscriptions(subscriptions, null, 0, 1, order, true);
+      }
+    }
 
-		if (CollectionUtils.isEmpty(statuses)) {
-			setResponsePage(HomePage.class);
-		} else {
-			FeedEntryStatus status = Iterables.getFirst(statuses, null);
-			String url = status.getEntry().getUrl();
-			status.setRead(true);
-			feedEntryStatusDAO.saveOrUpdate(status);
-			throw new RedirectToUrlException(url);
-		}
-	}
+    if (CollectionUtils.isEmpty(statuses)) {
+      setResponsePage(HomePage.class);
+    }
+    else {
+      final FeedEntryStatus status = Iterables.getFirst(statuses, null);
+      final String url = status.getEntry().getUrl();
+      status.setRead(true);
+      feedEntryStatusDAO.saveOrUpdate(status);
+      throw new RedirectToUrlException(url);
+    }
+  }
 
 }

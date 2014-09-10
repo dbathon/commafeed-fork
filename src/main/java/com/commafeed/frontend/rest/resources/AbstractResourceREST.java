@@ -27,58 +27,57 @@ import com.wordnik.swagger.jaxrs.JaxrsApiReader;
 @SecurityCheck(Role.USER)
 public abstract class AbstractResourceREST extends AbstractREST {
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	@GET
-	@SecurityCheck(value = Role.NONE)
-	@ApiOperation(value = "Returns information about API parameters", responseClass = "com.wordnik.swagger.core.Documentation")
-	public Response getHelp(@Context Application app,
-			@Context HttpHeaders headers, @Context UriInfo uriInfo) {
+  @GET
+  @SecurityCheck(value = Role.NONE)
+  @ApiOperation(value = "Returns information about API parameters",
+      responseClass = "com.wordnik.swagger.core.Documentation")
+  public Response getHelp(@Context Application app, @Context HttpHeaders headers,
+      @Context UriInfo uriInfo) {
 
-		TypeUtil.addAllowablePackage(Entries.class.getPackage().getName());
-		TypeUtil.addAllowablePackage(MarkRequest.class.getPackage().getName());
+    TypeUtil.addAllowablePackage(Entries.class.getPackage().getName());
+    TypeUtil.addAllowablePackage(MarkRequest.class.getPackage().getName());
 
-		String apiVersion = ApiDocumentationREST.API_VERSION;
-		String swaggerVersion = SwaggerSpec.version();
-		String basePath = ApiDocumentationREST
-				.getBasePath(applicationSettingsService.get().getPublicUrl());
+    final String apiVersion = ApiDocumentationREST.API_VERSION;
+    final String swaggerVersion = SwaggerSpec.version();
+    final String basePath =
+        ApiDocumentationREST.getBasePath(applicationSettingsService.get().getPublicUrl());
 
-		Class<?> resource = null;
-		String path = prependSlash(uriInfo.getPath());
-		for (Class<?> klass : app.getClasses()) {
-			Api api = klass.getAnnotation(Api.class);
-			if (api != null && api.value() != null
-					&& StringUtils.equals(prependSlash(api.value()), path)) {
-				resource = klass;
-				break;
-			}
-		}
+    Class<?> resource = null;
+    final String path = prependSlash(uriInfo.getPath());
+    for (final Class<?> klass : app.getClasses()) {
+      final Api api = klass.getAnnotation(Api.class);
+      if (api != null && api.value() != null && StringUtils.equals(prependSlash(api.value()), path)) {
+        resource = klass;
+        break;
+      }
+    }
 
-		if (resource == null) {
-			return Response
-					.status(Status.NOT_FOUND)
-					.entity("Api annotation not found on class "
-							+ getClass().getName()).build();
-		}
-		Api api = resource.getAnnotation(Api.class);
-		String apiPath = api.value();
-		String apiListingPath = api.value();
+    if (resource == null) {
+      return Response.status(Status.NOT_FOUND)
+          .entity("Api annotation not found on class " + getClass().getName()).build();
+    }
+    final Api api = resource.getAnnotation(Api.class);
+    final String apiPath = api.value();
+    final String apiListingPath = api.value();
 
-		Documentation doc = new HelpApi(null).filterDocs(JaxrsApiReader.read(
-				resource, apiVersion, swaggerVersion, basePath, apiPath),
-				headers, uriInfo, apiListingPath, apiPath);
+    final Documentation doc =
+        new HelpApi(null).filterDocs(
+            JaxrsApiReader.read(resource, apiVersion, swaggerVersion, basePath, apiPath), headers,
+            uriInfo, apiListingPath, apiPath);
 
-		doc.setSwaggerVersion(swaggerVersion);
-		doc.setBasePath(basePath);
-		doc.setApiVersion(apiVersion);
-		return Response.ok().entity(doc).build();
-	}
+    doc.setSwaggerVersion(swaggerVersion);
+    doc.setBasePath(basePath);
+    doc.setApiVersion(apiVersion);
+    return Response.ok().entity(doc).build();
+  }
 
-	private String prependSlash(String path) {
-		if (!path.startsWith("/")) {
-			path = "/" + path;
-		}
-		return path;
-	}
+  private String prependSlash(String path) {
+    if (!path.startsWith("/")) {
+      path = "/" + path;
+    }
+    return path;
+  }
 }

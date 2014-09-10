@@ -15,48 +15,48 @@ import com.wordnik.swagger.annotations.ApiProperty;
 @ApiClass("Feed modification request")
 public class FeedModificationRequest implements Serializable {
 
-	@ApiProperty(value = "id", required = true)
-	private Long id;
+  @ApiProperty(value = "id", required = true)
+  private Long id;
 
-	@ApiProperty(value = "new name, null if not changed")
-	private String name;
+  @ApiProperty(value = "new name, null if not changed")
+  private String name;
 
-	@ApiProperty(value = "new parent category id")
-	private String categoryId;
+  @ApiProperty(value = "new parent category id")
+  private String categoryId;
 
-	@ApiProperty(value = "new display position, null if not changed")
-	private Integer position;
+  @ApiProperty(value = "new display position, null if not changed")
+  private Integer position;
 
-	public Long getId() {
-		return id;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public String getCategoryId() {
-		return categoryId;
-	}
+  public String getCategoryId() {
+    return categoryId;
+  }
 
-	public void setCategoryId(String categoryId) {
-		this.categoryId = categoryId;
-	}
+  public void setCategoryId(String categoryId) {
+    this.categoryId = categoryId;
+  }
 
-	public Integer getPosition() {
-		return position;
-	}
+  public Integer getPosition() {
+    return position;
+  }
 
-	public void setPosition(Integer position) {
-		this.position = position;
-	}
+  public void setPosition(Integer position) {
+    this.position = position;
+  }
 
 }

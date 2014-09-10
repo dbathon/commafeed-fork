@@ -36,99 +36,97 @@ import com.google.api.client.util.Maps;
 @SuppressWarnings("serial")
 public abstract class BasePage extends WebPage {
 
-	@Inject
-	protected FeedDAO feedDAO;
+  @Inject
+  protected FeedDAO feedDAO;
 
-	@Inject
-	StartupBean startupBean;
+  @Inject
+  StartupBean startupBean;
 
-	@Inject
-	protected FeedSubscriptionDAO feedSubscriptionDAO;
+  @Inject
+  protected FeedSubscriptionDAO feedSubscriptionDAO;
 
-	@Inject
-	protected FeedCategoryDAO feedCategoryDAO;
+  @Inject
+  protected FeedCategoryDAO feedCategoryDAO;
 
-	@Inject
-	protected FeedEntryDAO feedEntryDAO;
+  @Inject
+  protected FeedEntryDAO feedEntryDAO;
 
-	@Inject
-	protected FeedEntryStatusDAO feedEntryStatusDAO;
+  @Inject
+  protected FeedEntryStatusDAO feedEntryStatusDAO;
 
-	@Inject
-	protected UserDAO userDAO;
+  @Inject
+  protected UserDAO userDAO;
 
-	@Inject
-	protected UserSettingsDAO userSettingsDAO;
+  @Inject
+  protected UserSettingsDAO userSettingsDAO;
 
-	@Inject
-	protected UserRoleDAO userRoleDAO;
+  @Inject
+  protected UserRoleDAO userRoleDAO;
 
-	@Inject
-	MailService mailService;
+  @Inject
+  MailService mailService;
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	private ApplicationSettings settings;
+  private final ApplicationSettings settings;
 
-	public BasePage() {
+  public BasePage() {
 
-		String lang = "en";
-		String theme = "default";
-		User user = CommaFeedSession.get().getUser();
-		if (user != null) {
-			UserSettings settings = userSettingsDAO.findByUser(user);
-			if (settings != null) {
-				lang = settings.getLanguage() == null ? "en" : settings
-						.getLanguage();
-				theme = settings.getTheme() == null ? "default" : settings
-						.getTheme();
-			}
-		}
+    String lang = "en";
+    String theme = "default";
+    final User user = CommaFeedSession.get().getUser();
+    if (user != null) {
+      final UserSettings settings = userSettingsDAO.findByUser(user);
+      if (settings != null) {
+        lang = settings.getLanguage() == null ? "en" : settings.getLanguage();
+        theme = settings.getTheme() == null ? "default" : settings.getTheme();
+      }
+    }
 
-		add(new TransparentWebMarkupContainer("html").setMarkupId(
-				"theme-" + theme).add(new AttributeModifier("lang", lang)));
+    add(new TransparentWebMarkupContainer("html").setMarkupId("theme-" + theme).add(
+        new AttributeModifier("lang", lang)));
 
-		settings = applicationSettingsService.get();
-		add(new HeaderResponseContainer("footer-container", "footer-container"));
-		add(new WebMarkupContainer("uservoice") {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisibilityAllowed(settings.isFeedbackButton());
-			}
-		});
-	}
+    settings = applicationSettingsService.get();
+    add(new HeaderResponseContainer("footer-container", "footer-container"));
+    add(new WebMarkupContainer("uservoice") {
+      @Override
+      protected void onConfigure() {
+        super.onConfigure();
+        setVisibilityAllowed(settings.isFeedbackButton());
+      }
+    });
+  }
 
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
+  @Override
+  public void renderHead(IHeaderResponse response) {
+    super.renderHead(response);
 
-		if (getApplication().getConfigurationType() == RuntimeConfigurationType.DEPLOYMENT) {
-			long startupTime = startupBean.getStartupTime();
-			String suffix = "?" + startupTime;
-			response.render(JavaScriptHeaderItem.forUrl("static/all.js"
-					+ suffix));
-			response.render(CssHeaderItem.forUrl("static/all.css" + suffix));
-		} else {
-			response.render(JavaScriptHeaderItem.forUrl("wro/lib.js"));
-			response.render(CssHeaderItem.forUrl("wro/lib.css"));
-			response.render(CssHeaderItem.forUrl("wro/app.css"));
+    if (getApplication().getConfigurationType() == RuntimeConfigurationType.DEPLOYMENT) {
+      final long startupTime = startupBean.getStartupTime();
+      final String suffix = "?" + startupTime;
+      response.render(JavaScriptHeaderItem.forUrl("static/all.js" + suffix));
+      response.render(CssHeaderItem.forUrl("static/all.css" + suffix));
+    }
+    else {
+      response.render(JavaScriptHeaderItem.forUrl("wro/lib.js"));
+      response.render(CssHeaderItem.forUrl("wro/lib.css"));
+      response.render(CssHeaderItem.forUrl("wro/app.css"));
 
-			response.render(JavaScriptHeaderItem.forUrl("js/welcome.js"));
-			response.render(JavaScriptHeaderItem.forUrl("js/main.js"));
-			response.render(JavaScriptHeaderItem.forUrl("js/controllers.js"));
-			response.render(JavaScriptHeaderItem.forUrl("js/directives.js"));
-			response.render(JavaScriptHeaderItem.forUrl("js/filters.js"));
-			response.render(JavaScriptHeaderItem.forUrl("js/services.js"));
+      response.render(JavaScriptHeaderItem.forUrl("js/welcome.js"));
+      response.render(JavaScriptHeaderItem.forUrl("js/main.js"));
+      response.render(JavaScriptHeaderItem.forUrl("js/controllers.js"));
+      response.render(JavaScriptHeaderItem.forUrl("js/directives.js"));
+      response.render(JavaScriptHeaderItem.forUrl("js/filters.js"));
+      response.render(JavaScriptHeaderItem.forUrl("js/services.js"));
 
-		}
+    }
 
-		if (StringUtils.isNotBlank(settings.getGoogleAnalyticsTrackingCode())) {
-			Map<String, Object> vars = Maps.newHashMap();
-			vars.put("trackingCode", settings.getGoogleAnalyticsTrackingCode());
-			WicketUtils.loadJS(response, BasePage.class, "analytics", vars);
-		}
+    if (StringUtils.isNotBlank(settings.getGoogleAnalyticsTrackingCode())) {
+      final Map<String, Object> vars = Maps.newHashMap();
+      vars.put("trackingCode", settings.getGoogleAnalyticsTrackingCode());
+      WicketUtils.loadJS(response, BasePage.class, "analytics", vars);
+    }
 
-	}
+  }
 }

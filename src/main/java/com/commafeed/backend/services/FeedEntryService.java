@@ -14,83 +14,83 @@ import com.commafeed.backend.model.User;
 @Stateless
 public class FeedEntryService {
 
-	@Inject
-	FeedEntryStatusDAO feedEntryStatusDAO;
+  @Inject
+  FeedEntryStatusDAO feedEntryStatusDAO;
 
-	@Inject
-	FeedSubscriptionDAO feedSubscriptionDAO;
-	
-	@Inject 
-	FeedEntryDAO feedEntryDAO;
+  @Inject
+  FeedSubscriptionDAO feedSubscriptionDAO;
 
-	public void markEntry(User user, Long entryId, Long subscriptionId,
-			boolean read) {
-		FeedSubscription sub = feedSubscriptionDAO.findById(user,
-				subscriptionId);
-		if (sub == null) {
-			return;
-		}
+  @Inject
+  FeedEntryDAO feedEntryDAO;
 
-		FeedEntry entry = feedEntryDAO.findById(entryId);
-		if (entry == null) {
-			return;
-		}
+  public void markEntry(User user, Long entryId, Long subscriptionId, boolean read) {
+    final FeedSubscription sub = feedSubscriptionDAO.findById(user, subscriptionId);
+    if (sub == null) {
+      return;
+    }
 
-		FeedEntryStatus status = feedEntryStatusDAO.getStatus(sub, entry);
+    final FeedEntry entry = feedEntryDAO.findById(entryId);
+    if (entry == null) {
+      return;
+    }
 
-		if (read) {
-			if (status.getId() != null) {
-				if (status.isStarred()) {
-					status.setRead(true);
-					feedEntryStatusDAO.saveOrUpdate(status);
-				} else {
-					feedEntryStatusDAO.delete(status);
-				}
-			}
-		} else {
-			if (status.getId() == null) {
-				status = new FeedEntryStatus(user, sub, entry);
-				status.setSubscription(sub);
-			}
-			status.setRead(false);
-			feedEntryStatusDAO.saveOrUpdate(status);
-		}
+    FeedEntryStatus status = feedEntryStatusDAO.getStatus(sub, entry);
 
-	}
+    if (read) {
+      if (status.getId() != null) {
+        if (status.isStarred()) {
+          status.setRead(true);
+          feedEntryStatusDAO.saveOrUpdate(status);
+        }
+        else {
+          feedEntryStatusDAO.delete(status);
+        }
+      }
+    }
+    else {
+      if (status.getId() == null) {
+        status = new FeedEntryStatus(user, sub, entry);
+        status.setSubscription(sub);
+      }
+      status.setRead(false);
+      feedEntryStatusDAO.saveOrUpdate(status);
+    }
 
-	public void starEntry(User user, Long entryId, Long subscriptionId,
-			boolean starred) {
+  }
 
-		FeedSubscription sub = feedSubscriptionDAO.findById(user,
-				subscriptionId);
-		if (sub == null) {
-			return;
-		}
+  public void starEntry(User user, Long entryId, Long subscriptionId, boolean starred) {
 
-		FeedEntry entry = feedEntryDAO.findById(entryId);
-		if (entry == null) {
-			return;
-		}
+    final FeedSubscription sub = feedSubscriptionDAO.findById(user, subscriptionId);
+    if (sub == null) {
+      return;
+    }
 
-		FeedEntryStatus status = feedEntryStatusDAO.getStatus(sub, entry);
+    final FeedEntry entry = feedEntryDAO.findById(entryId);
+    if (entry == null) {
+      return;
+    }
 
-		if (!starred) {
-			if (status.getId() != null) {
-				if (!status.isRead()) {
-					status.setStarred(false);
-					feedEntryStatusDAO.saveOrUpdate(status);
-				} else {
-					feedEntryStatusDAO.delete(status);
-				}
-			}
-		} else {
-			if (status.getId() == null) {
-				status = new FeedEntryStatus(user, sub, entry);
-				status.setSubscription(sub);
-				status.setRead(true);
-			}
-			status.setStarred(true);
-			feedEntryStatusDAO.saveOrUpdate(status);
-		}
-	}
+    FeedEntryStatus status = feedEntryStatusDAO.getStatus(sub, entry);
+
+    if (!starred) {
+      if (status.getId() != null) {
+        if (!status.isRead()) {
+          status.setStarred(false);
+          feedEntryStatusDAO.saveOrUpdate(status);
+        }
+        else {
+          feedEntryStatusDAO.delete(status);
+        }
+      }
+    }
+    else {
+      if (status.getId() == null) {
+        status = new FeedEntryStatus(user, sub, entry);
+        status.setSubscription(sub);
+        status.setRead(true);
+      }
+      status.setStarred(true);
+      feedEntryStatusDAO.saveOrUpdate(status);
+    }
+  }
 }

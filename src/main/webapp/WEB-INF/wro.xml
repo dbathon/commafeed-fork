@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <groups xmlns="http://www.isdc.ro/wro">
 
-	<group name="lib">
-		<js minimize="false">/vendor/jquery/*.js</js>
-		<js minimize="false">/vendor/lodash/*.js</js>
-		<js minimize="false">/vendor/jqueryui/*.js</js>
-		<js minimize="false">/vendor/jquery-mousewheel/*.js</js>
-		<js minimize="false">/vendor/bootstrap/*.js</js>
-		<js minimize="false">/vendor/angularjs/*.js</js>
-		<js minimize="false">/vendor/angularui/*.js</js>
-		<js minimize="false">/vendor/angularui-bootstrap/*.js</js>
-		<js minimize="false">/vendor/angularui-state/*.js</js>
-		<js minimize="false">/vendor/mousetrap/*.js</js>
-		<js minimize="false">/vendor/nggrid/*.js</js>
-		<js minimize="false">/vendor/nginfinitescroll/*.js</js>
-		<js minimize="false">/vendor/spinjs/*.js</js>
-		<js minimize="false">/vendor/momentjs/*.js</js>
-		
-		<css minimize="false">/vendor/bootstrap/*.css</css>
-		<css minimize="false">/vendor/angularui/*.css</css>
-		<css minimize="false">/vendor/fontawesome/css/*.css</css>
-		<css minimize="false">/vendor/zocial/*.css</css>
-		<css minimize="false">/vendor/nggrid/*.css</css>
-	</group>
+  <group name="lib">
+    <js minimize="false">/vendor/jquery/*.js</js>
+    <js minimize="false">/vendor/lodash/*.js</js>
+    <js minimize="false">/vendor/jqueryui/*.js</js>
+    <js minimize="false">/vendor/jquery-mousewheel/*.js</js>
+    <js minimize="false">/vendor/bootstrap/*.js</js>
+    <js minimize="false">/vendor/angularjs/*.js</js>
+    <js minimize="false">/vendor/angularui/*.js</js>
+    <js minimize="false">/vendor/angularui-bootstrap/*.js</js>
+    <js minimize="false">/vendor/angularui-state/*.js</js>
+    <js minimize="false">/vendor/mousetrap/*.js</js>
+    <js minimize="false">/vendor/nggrid/*.js</js>
+    <js minimize="false">/vendor/nginfinitescroll/*.js</js>
+    <js minimize="false">/vendor/spinjs/*.js</js>
+    <js minimize="false">/vendor/momentjs/*.js</js>
 
-	<group name="app">
-		<css>/sass/app.scss</css>
-		<js>/js/*.js</js>
-	</group>
+    <css minimize="false">/vendor/bootstrap/*.css</css>
+    <css minimize="false">/vendor/angularui/*.css</css>
+    <css minimize="false">/vendor/fontawesome/css/*.css</css>
+    <css minimize="false">/vendor/zocial/*.css</css>
+    <css minimize="false">/vendor/nggrid/*.css</css>
+  </group>
 
-	<group name="all">
-		<group-ref>lib</group-ref>
-		<group-ref>app</group-ref>
-	</group>
+  <group name="app">
+    <css>/sass/app.scss</css>
+    <js>/js/*.js</js>
+  </group>
+
+  <group name="all">
+    <group-ref>lib</group-ref>
+    <group-ref>app</group-ref>
+  </group>
 </groups>

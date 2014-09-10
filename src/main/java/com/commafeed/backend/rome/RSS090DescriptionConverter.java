@@ -8,16 +8,16 @@ import com.sun.syndication.feed.synd.impl.ConverterForRSS090;
 
 public class RSS090DescriptionConverter extends ConverterForRSS090 {
 
-	@Override
-	protected SyndEntry createSyndEntry(Item item, boolean preserveWireItem) {
-		SyndEntry entry = super.createSyndEntry(item, preserveWireItem);
-		Description desc = item.getDescription();
-		if (desc != null) {
-			SyndContentImpl syndDesc = new SyndContentImpl();
-			syndDesc.setValue(desc.getValue());
-			entry.setDescription(syndDesc);
-		}
-		return entry;
-	}
+  @Override
+  protected SyndEntry createSyndEntry(Item item, boolean preserveWireItem) {
+    final SyndEntry entry = super.createSyndEntry(item, preserveWireItem);
+    final Description desc = item.getDescription();
+    if (desc != null) {
+      final SyndContentImpl syndDesc = new SyndContentImpl();
+      syndDesc.setValue(desc.getValue());
+      entry.setDescription(syndDesc);
+    }
+    return entry;
+  }
 
 }

@@ -35,157 +35,159 @@ import com.google.common.util.concurrent.Striped;
 @ApplicationScoped
 public class FeedRefreshUpdater {
 
-	protected static Logger log = LoggerFactory
-			.getLogger(FeedRefreshUpdater.class);
+  protected static Logger log = LoggerFactory.getLogger(FeedRefreshUpdater.class);
 
-	@Inject
-	FeedUpdateService feedUpdateService;
+  @Inject
+  FeedUpdateService feedUpdateService;
 
-	@Inject
-	SubscriptionHandler handler;
+  @Inject
+  SubscriptionHandler handler;
 
-	@Inject
-	FeedRefreshTaskGiver taskGiver;
+  @Inject
+  FeedRefreshTaskGiver taskGiver;
 
-	@Inject
-	FeedDAO feedDAO;
+  @Inject
+  FeedDAO feedDAO;
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	@Inject
-	MetricsBean metricsBean;
+  @Inject
+  MetricsBean metricsBean;
 
-	@Inject
-	FeedSubscriptionDAO feedSubscriptionDAO;
+  @Inject
+  FeedSubscriptionDAO feedSubscriptionDAO;
 
-	@Inject
-	FeedEntryDAO feedEntryDAO;
+  @Inject
+  FeedEntryDAO feedEntryDAO;
 
-	@Inject
-	CacheService cache;
+  @Inject
+  CacheService cache;
 
-	private FeedRefreshExecutor pool;
-	private Striped<Lock> locks;
+  private FeedRefreshExecutor pool;
+  private Striped<Lock> locks;
 
-	@PostConstruct
-	public void init() {
-		ApplicationSettings settings = applicationSettingsService.get();
-		int threads = Math.max(settings.getDatabaseUpdateThreads(), 1);
-		pool = new FeedRefreshExecutor("feed-refresh-updater", threads, 500 * threads);
-		locks = Striped.lazyWeakLock(threads * 100000);
-	}
+  @PostConstruct
+  public void init() {
+    final ApplicationSettings settings = applicationSettingsService.get();
+    final int threads = Math.max(settings.getDatabaseUpdateThreads(), 1);
+    pool = new FeedRefreshExecutor("feed-refresh-updater", threads, 500 * threads);
+    locks = Striped.lazyWeakLock(threads * 100000);
+  }
 
-	@PreDestroy
-	public void shutdown() {
-		pool.shutdown();
-	}
+  @PreDestroy
+  public void shutdown() {
+    pool.shutdown();
+  }
 
-	public void updateFeed(Feed feed, Collection<FeedEntry> entries) {
-		pool.execute(new EntryTask(feed, entries));
-	}
+  public void updateFeed(Feed feed, Collection<FeedEntry> entries) {
+    pool.execute(new EntryTask(feed, entries));
+  }
 
-	private class EntryTask implements Task {
+  private class EntryTask implements Task {
 
-		private Feed feed;
-		private Collection<FeedEntry> entries;
+    private final Feed feed;
+    private final Collection<FeedEntry> entries;
 
-		public EntryTask(Feed feed, Collection<FeedEntry> entries) {
-			this.feed = feed;
-			this.entries = entries;
-		}
+    public EntryTask(Feed feed, Collection<FeedEntry> entries) {
+      this.feed = feed;
+      this.entries = entries;
+    }
 
-		@Override
-		public void run() {
-			boolean ok = true;
-			if (entries.isEmpty() == false) {
+    @Override
+    public void run() {
+      boolean ok = true;
+      if (entries.isEmpty() == false) {
 
-				List<String> lastEntries = cache.getLastEntries(feed);
-				List<String> currentEntries = Lists.newArrayList();
+        final List<String> lastEntries = cache.getLastEntries(feed);
+        final List<String> currentEntries = Lists.newArrayList();
 
-				List<FeedSubscription> subscriptions = null;
-				for (FeedEntry entry : entries) {
-					String cacheKey = cache.buildUniqueEntryKey(feed, entry);
-					if (!lastEntries.contains(cacheKey)) {
-						log.debug("cache miss for {}", entry.getUrl());
-						if (subscriptions == null) {
-							subscriptions = feedSubscriptionDAO
-									.findByFeed(feed);
-						}
-						ok &= updateEntry(feed, entry, subscriptions);
-						metricsBean.entryCacheMiss();
-					} else {
-						log.debug("cache hit for {}", entry.getUrl());
-						metricsBean.entryCacheHit();
-					}
-					currentEntries.add(cacheKey);
-				}
-				cache.setLastEntries(feed, currentEntries);
-			}
+        List<FeedSubscription> subscriptions = null;
+        for (final FeedEntry entry : entries) {
+          final String cacheKey = cache.buildUniqueEntryKey(feed, entry);
+          if (!lastEntries.contains(cacheKey)) {
+            log.debug("cache miss for {}", entry.getUrl());
+            if (subscriptions == null) {
+              subscriptions = feedSubscriptionDAO.findByFeed(feed);
+            }
+            ok &= updateEntry(feed, entry, subscriptions);
+            metricsBean.entryCacheMiss();
+          }
+          else {
+            log.debug("cache hit for {}", entry.getUrl());
+            metricsBean.entryCacheHit();
+          }
+          currentEntries.add(cacheKey);
+        }
+        cache.setLastEntries(feed, currentEntries);
+      }
 
-			if (applicationSettingsService.get().isPubsubhubbub()) {
-				handlePubSub(feed);
-			}
-			if (!ok) {
-				feed.setDisabledUntil(null);
-			}
-			metricsBean.feedUpdated();
-			taskGiver.giveBack(feed);
-		}
+      if (applicationSettingsService.get().isPubsubhubbub()) {
+        handlePubSub(feed);
+      }
+      if (!ok) {
+        feed.setDisabledUntil(null);
+      }
+      metricsBean.feedUpdated();
+      taskGiver.giveBack(feed);
+    }
 
-		@Override
-		public boolean isUrgent() {
-			return feed.isUrgent();
-		}
-	}
+    @Override
+    public boolean isUrgent() {
+      return feed.isUrgent();
+    }
+  }
 
-	private boolean updateEntry(final Feed feed, final FeedEntry entry,
-			final List<FeedSubscription> subscriptions) {
-		boolean success = false;
+  private boolean updateEntry(final Feed feed, final FeedEntry entry,
+      final List<FeedSubscription> subscriptions) {
+    boolean success = false;
 
-		String key = StringUtils.trimToEmpty(entry.getGuid() + entry.getUrl());
-		Lock lock = locks.get(key);
-		boolean locked = false;
-		try {
-			locked = lock.tryLock(1, TimeUnit.MINUTES);
-			if (locked) {
-				feedUpdateService.updateEntry(feed, entry, subscriptions);
-				success = true;
-			} else {
-				log.error("lock timeout for " + feed.getUrl() + " - " + key);
-			}
-		} catch (InterruptedException e) {
-			log.error("interrupted while waiting for lock for " + feed.getUrl()
-					+ " : " + e.getMessage(), e);
-		} finally {
-			if (locked) {
-				lock.unlock();
-			}
-		}
-		return success;
-	}
+    final String key = StringUtils.trimToEmpty(entry.getGuid() + entry.getUrl());
+    final Lock lock = locks.get(key);
+    boolean locked = false;
+    try {
+      locked = lock.tryLock(1, TimeUnit.MINUTES);
+      if (locked) {
+        feedUpdateService.updateEntry(feed, entry, subscriptions);
+        success = true;
+      }
+      else {
+        log.error("lock timeout for " + feed.getUrl() + " - " + key);
+      }
+    }
+    catch (final InterruptedException e) {
+      log.error("interrupted while waiting for lock for " + feed.getUrl() + " : " + e.getMessage(),
+          e);
+    }
+    finally {
+      if (locked) {
+        lock.unlock();
+      }
+    }
+    return success;
+  }
 
-	private void handlePubSub(final Feed feed) {
-		if (feed.getPushHub() != null && feed.getPushTopic() != null) {
-			Date lastPing = feed.getPushLastPing();
-			Date now = new Date();
-			if (lastPing == null || lastPing.before(DateUtils.addDays(now, -3))) {
-				new Thread() {
-					@Override
-					public void run() {
-						handler.subscribe(feed);
-					}
-				}.start();
-			}
-		}
-	}
+  private void handlePubSub(final Feed feed) {
+    if (feed.getPushHub() != null && feed.getPushTopic() != null) {
+      final Date lastPing = feed.getPushLastPing();
+      final Date now = new Date();
+      if (lastPing == null || lastPing.before(DateUtils.addDays(now, -3))) {
+        new Thread() {
+          @Override
+          public void run() {
+            handler.subscribe(feed);
+          }
+        }.start();
+      }
+    }
+  }
 
-	public int getQueueSize() {
-		return pool.getQueueSize();
-	}
+  public int getQueueSize() {
+    return pool.getQueueSize();
+  }
 
-	public int getActiveCount() {
-		return pool.getActiveCount();
-	}
+  public int getActiveCount() {
+    return pool.getActiveCount();
+  }
 
 }

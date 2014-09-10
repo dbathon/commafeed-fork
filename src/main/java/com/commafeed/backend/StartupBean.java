@@ -30,83 +30,84 @@ import com.google.api.client.util.Maps;
 @ConcurrencyManagement(ConcurrencyManagementType.BEAN)
 public class StartupBean {
 
-	private static Logger log = LoggerFactory.getLogger(StartupBean.class);
-	public static final String USERNAME_ADMIN = "admin";
-	public static final String USERNAME_DEMO = "demo";
+  private static Logger log = LoggerFactory.getLogger(StartupBean.class);
+  public static final String USERNAME_ADMIN = "admin";
+  public static final String USERNAME_DEMO = "demo";
 
-	@Inject
-	DatabaseUpdater databaseUpdater;
+  @Inject
+  DatabaseUpdater databaseUpdater;
 
-	@Inject
-	UserDAO userDAO;
+  @Inject
+  UserDAO userDAO;
 
-	@Inject
-	UserService userService;
+  @Inject
+  UserService userService;
 
-	@Inject
-	FeedRefreshTaskGiver taskGiver;
+  @Inject
+  FeedRefreshTaskGiver taskGiver;
 
-	@Inject
-	ApplicationSettingsService applicationSettingsService;
+  @Inject
+  ApplicationSettingsService applicationSettingsService;
 
-	private long startupTime;
-	private Map<String, String> supportedLanguages = Maps.newHashMap();
+  private long startupTime;
+  private final Map<String, String> supportedLanguages = Maps.newHashMap();
 
-	@PostConstruct
-	private void init() {
+  @PostConstruct
+  private void init() {
 
-		startupTime = System.currentTimeMillis();
-		databaseUpdater.update();
+    startupTime = System.currentTimeMillis();
+    databaseUpdater.update();
 
-		if (userDAO.getCount() == 0) {
-			initialData();
-		}
-		applicationSettingsService.applyLogLevel();
+    if (userDAO.getCount() == 0) {
+      initialData();
+    }
+    applicationSettingsService.applyLogLevel();
 
-		initSupportedLanguages();
-		taskGiver.start();
-	}
+    initSupportedLanguages();
+    taskGiver.start();
+  }
 
-	private void initSupportedLanguages() {
-		Properties props = new Properties();
-		InputStream is = null;
-		try {
-			is = getClass().getResourceAsStream("/i18n/languages.properties");
-			props.load(new InputStreamReader(is, "UTF-8"));
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			IOUtils.closeQuietly(is);
-		}
-		for (Object key : props.keySet()) {
-			supportedLanguages.put(key.toString(),
-					props.getProperty(key.toString()));
-		}
-	}
+  private void initSupportedLanguages() {
+    final Properties props = new Properties();
+    InputStream is = null;
+    try {
+      is = getClass().getResourceAsStream("/i18n/languages.properties");
+      props.load(new InputStreamReader(is, "UTF-8"));
+    }
+    catch (final Exception e) {
+      log.error(e.getMessage(), e);
+    }
+    finally {
+      IOUtils.closeQuietly(is);
+    }
+    for (final Object key : props.keySet()) {
+      supportedLanguages.put(key.toString(), props.getProperty(key.toString()));
+    }
+  }
 
-	private void initialData() {
-		log.info("Populating database with default values");
+  private void initialData() {
+    log.info("Populating database with default values");
 
-		ApplicationSettings settings = new ApplicationSettings();
-		settings.setAnnouncement("Set the Public URL in the admin section!");
-		applicationSettingsService.save(settings);
+    final ApplicationSettings settings = new ApplicationSettings();
+    settings.setAnnouncement("Set the Public URL in the admin section!");
+    applicationSettingsService.save(settings);
 
-		try {
-			userService.register(USERNAME_ADMIN, "admin",
-					"admin@commafeed.com",
-					Arrays.asList(Role.ADMIN, Role.USER), true);
-			userService.register(USERNAME_DEMO, "demo", "demo@commafeed.com",
-					Arrays.asList(Role.USER), true);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-	}
+    try {
+      userService.register(USERNAME_ADMIN, "admin", "admin@commafeed.com",
+          Arrays.asList(Role.ADMIN, Role.USER), true);
+      userService.register(USERNAME_DEMO, "demo", "demo@commafeed.com", Arrays.asList(Role.USER),
+          true);
+    }
+    catch (final Exception e) {
+      log.error(e.getMessage(), e);
+    }
+  }
 
-	public long getStartupTime() {
-		return startupTime;
-	}
+  public long getStartupTime() {
+    return startupTime;
+  }
 
-	public Map<String, String> getSupportedLanguages() {
-		return supportedLanguages;
-	}
+  public Map<String, String> getSupportedLanguages() {
+    return supportedLanguages;
+  }
 }

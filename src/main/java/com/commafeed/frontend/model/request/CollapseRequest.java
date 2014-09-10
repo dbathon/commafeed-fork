@@ -15,26 +15,26 @@ import com.wordnik.swagger.annotations.ApiProperty;
 @ApiClass("Mark Request")
 public class CollapseRequest implements Serializable {
 
-	@ApiProperty(value = "category id", required = true)
-	private Long id;
+  @ApiProperty(value = "category id", required = true)
+  private Long id;
 
-	@ApiProperty(value = "collapse", required = true)
-	private boolean collapse;
+  @ApiProperty(value = "collapse", required = true)
+  private boolean collapse;
 
-	public Long getId() {
-		return id;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-	public boolean isCollapse() {
-		return collapse;
-	}
+  public boolean isCollapse() {
+    return collapse;
+  }
 
-	public void setCollapse(boolean collapse) {
-		this.collapse = collapse;
-	}
+  public void setCollapse(boolean collapse) {
+    this.collapse = collapse;
+  }
 
 }
