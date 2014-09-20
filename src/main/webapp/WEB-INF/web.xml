@@ -11,18 +11,10 @@
     </init-param>
   </filter>
   <filter>
-    <filter-name>WebResourceOptimizer</filter-name>
-    <filter-class>ro.isdc.wro.http.WroFilter</filter-class>
-  </filter>
-  <filter>
     <filter-name>i18n</filter-name>
     <filter-class>com.commafeed.frontend.utils.InternationalizationDevelopmentFilter</filter-class>
   </filter>
 
-  <filter-mapping>
-    <filter-name>WebResourceOptimizer</filter-name>
-    <url-pattern>/wro/*</url-pattern>
-  </filter-mapping>
   <filter-mapping>
     <filter-name>Wicket</filter-name>
     <url-pattern>/*</url-pattern>
@@ -31,8 +23,4 @@
     <filter-name>i18n</filter-name>
     <url-pattern>/templates/*</url-pattern>
   </filter-mapping>
-
-  <listener>
-    <listener-class>com.commafeed.frontend.resources.WroListener</listener-class>
-  </listener>
 </web-app>

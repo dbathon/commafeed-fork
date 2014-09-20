@@ -111,6 +111,23 @@
           <failOnNoGitDirectory>false</failOnNoGitDirectory>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>ro.isdc.wro4j</groupId>
+        <artifactId>wro4j-maven-plugin</artifactId>
+        <version>1.6.3</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <targetGroups>all</targetGroups>
+          <wroManagerFactory>ro.isdc.wro.maven.plugin.manager.factory.ConfigurableWroManagerFactory</wroManagerFactory>
+          <destinationFolder>${project.build.directory}/${project.build.finalName}/static/</destinationFolder>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -315,6 +332,8 @@
       <groupId>ro.isdc.wro4j</groupId>
       <artifactId>wro4j-extensions</artifactId>
       <version>1.6.3</version>
+      <!-- only needed during compile/build -->
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -332,46 +351,6 @@
   </dependencies>
 
   <profiles>
-    <profile>
-      <id>default</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>ro.isdc.wro4j</groupId>
-            <artifactId>wro4j-maven-plugin</artifactId>
-            <version>1.6.3</version>
-            <executions>
-              <execution>
-                <id>js</id>
-                <phase>test</phase>
-                <goals>
-                  <goal>jshint</goal>
-                </goals>
-                <configuration>
-                  <targetGroups>app</targetGroups>
-                  <options>indent,devel,noarg,quotmark,laxcomma,laxbreak</options>
-                </configuration>
-              </execution>
-              <execution>
-                <id>css</id>
-                <phase>test</phase>
-                <goals>
-                  <goal>csslint</goal>
-                </goals>
-                <configuration>
-                  <targetGroups>app</targetGroups>
-                  <options>display-property-grouping,duplicate-properties,compatible-vendor-prefixes,vendor-prefix</options>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
     <profile>
       <id>cache</id>
       <properties>
@@ -472,23 +451,6 @@
                 </configuration>
               </execution>
             </executions>
-          </plugin>
-          <plugin>
-            <groupId>ro.isdc.wro4j</groupId>
-            <artifactId>wro4j-maven-plugin</artifactId>
-            <version>1.6.3</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <targetGroups>all</targetGroups>
-              <wroManagerFactory>ro.isdc.wro.maven.plugin.manager.factory.ConfigurableWroManagerFactory</wroManagerFactory>
-              <destinationFolder>${project.build.directory}/${project.build.finalName}/static/</destinationFolder>
-            </configuration>
           </plugin>
           <plugin>
             <artifactId>maven-war-plugin</artifactId>

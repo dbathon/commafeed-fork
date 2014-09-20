@@ -102,25 +102,11 @@ public abstract class BasePage extends WebPage {
   public void renderHead(IHeaderResponse response) {
     super.renderHead(response);
 
-    if (getApplication().getConfigurationType() == RuntimeConfigurationType.DEPLOYMENT) {
-      final long startupTime = startupBean.getStartupTime();
-      final String suffix = "?" + startupTime;
-      response.render(JavaScriptHeaderItem.forUrl("static/all.js" + suffix));
-      response.render(CssHeaderItem.forUrl("static/all.css" + suffix));
-    }
-    else {
-      response.render(JavaScriptHeaderItem.forUrl("wro/lib.js"));
-      response.render(CssHeaderItem.forUrl("wro/lib.css"));
-      response.render(CssHeaderItem.forUrl("wro/app.css"));
-
-      response.render(JavaScriptHeaderItem.forUrl("js/welcome.js"));
-      response.render(JavaScriptHeaderItem.forUrl("js/main.js"));
-      response.render(JavaScriptHeaderItem.forUrl("js/controllers.js"));
-      response.render(JavaScriptHeaderItem.forUrl("js/directives.js"));
-      response.render(JavaScriptHeaderItem.forUrl("js/filters.js"));
-      response.render(JavaScriptHeaderItem.forUrl("js/services.js"));
-
-    }
+    final boolean production =
+        getApplication().getConfigurationType() == RuntimeConfigurationType.DEPLOYMENT;
+    final String suffix = production ? "?" + startupBean.getStartupTime() : "";
+    response.render(JavaScriptHeaderItem.forUrl("static/all.js" + suffix));
+    response.render(CssHeaderItem.forUrl("static/all.css" + suffix));
 
     if (StringUtils.isNotBlank(settings.getGoogleAnalyticsTrackingCode())) {
       final Map<String, Object> vars = Maps.newHashMap();
