@@ -305,11 +305,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.wicket</groupId>
-      <artifactId>wicket-extensions</artifactId>
-      <version>6.8.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.wicket</groupId>
       <artifactId>wicket-cdi</artifactId>
       <version>6.8.0</version>
     </dependency>

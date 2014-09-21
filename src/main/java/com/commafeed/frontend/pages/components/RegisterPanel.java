@@ -5,7 +5,6 @@ import java.util.Arrays;
 import javax.inject.Inject;
 
 import org.apache.wicket.authentication.IAuthenticationStrategy;
-import org.apache.wicket.extensions.validation.validator.RfcCompliantEmailAddressValidator;
 import org.apache.wicket.feedback.ContainerFeedbackMessageFilter;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
@@ -25,6 +24,7 @@ import com.commafeed.backend.services.ApplicationSettingsService;
 import com.commafeed.backend.services.UserService;
 import com.commafeed.frontend.CommaFeedSession;
 import com.commafeed.frontend.model.request.RegistrationRequest;
+import com.commafeed.frontend.pages.RfcCompliantEmailAddressValidator;
 import com.commafeed.frontend.utils.ModelFactory.MF;
 
 @SuppressWarnings("serial")
