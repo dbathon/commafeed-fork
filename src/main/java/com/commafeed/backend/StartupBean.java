@@ -35,9 +35,6 @@ public class StartupBean {
   public static final String USERNAME_DEMO = "demo";
 
   @Inject
-  DatabaseUpdater databaseUpdater;
-
-  @Inject
   UserDAO userDAO;
 
   @Inject
@@ -54,9 +51,7 @@ public class StartupBean {
 
   @PostConstruct
   private void init() {
-
     startupTime = System.currentTimeMillis();
-    databaseUpdater.update();
 
     if (userDAO.getCount() == 0) {
       initialData();
