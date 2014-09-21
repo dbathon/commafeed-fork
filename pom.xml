@@ -144,12 +144,6 @@
       <artifactId>hibernate-entitymanager</artifactId>
       <version>4.3.5.Final</version>
       <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>dom4j</artifactId>
-          <groupId>dom4j</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>redis.clients</groupId>
@@ -306,32 +300,14 @@
       </properties>
     </profile>
     <profile>
-      <id>mysql</id>
-      <properties>
-        <jpa.datasource.name>java:openejb/Resource/MySQL</jpa.datasource.name>
-      </properties>
-    </profile>
-    <profile>
       <id>pgsql</id>
       <properties>
-        <jpa.datasource.name>java:openejb/Resource/PostgreSQL</jpa.datasource.name>
-      </properties>
-    </profile>
-    <profile>
-      <id>mssql</id>
-      <properties>
-        <jpa.datasource.name>java:openejb/Resource/MSSQL</jpa.datasource.name>
-      </properties>
-    </profile>
-    <profile>
-      <id>pgsql-jboss</id>
-      <properties>
         <jpa.datasource.name>java:jboss/datasources/CommafeedDS</jpa.datasource.name>
-        <jpa.dialect>org.hibernate.dialect.PostgreSQLDialect</jpa.dialect>
+        <jpa.dialect>com.commafeed.backend.hibernate.PostgreSQL9WithTextClobDialect</jpa.dialect>
       </properties>
     </profile>
     <profile>
-      <id>hsqldb-jboss</id>
+      <id>hsqldb</id>
       <properties>
         <jpa.datasource.name>java:jboss/datasources/CommafeedDS</jpa.datasource.name>
         <jpa.dialect>org.hibernate.dialect.HSQLDialect</jpa.dialect>
