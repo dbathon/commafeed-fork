@@ -31,10 +31,10 @@ public class Feed extends AbstractModel {
   @Column(length = 40, nullable = false)
   private String urlHash;
 
-  @Column(length = 2048, nullable = false)
+  @Column(length = 2048)
   private String normalizedUrl;
 
-  @Column(length = 40, nullable = false)
+  @Column(length = 40)
   private String normalizedUrlHash;
 
   /**
