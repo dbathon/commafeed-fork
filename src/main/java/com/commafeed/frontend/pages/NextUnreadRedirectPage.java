@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.request.flow.RedirectToUrlException;
@@ -67,7 +66,7 @@ public class NextUnreadRedirectPage extends WebPage {
       }
     }
 
-    if (CollectionUtils.isEmpty(statuses)) {
+    if (statuses == null || statuses.isEmpty()) {
       setResponsePage(HomePage.class);
     }
     else {

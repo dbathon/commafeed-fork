@@ -2,7 +2,6 @@ package com.commafeed.backend.rome;
 
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -28,7 +27,7 @@ public class RSSRDF10Parser extends RSS10Parser {
     final Namespace defaultNS = rssRoot.getNamespace();
     final List additionalNSs = Lists.newArrayList(rssRoot.getAdditionalNamespaces());
     final List<Element> children = rssRoot.getChildren();
-    if (CollectionUtils.isNotEmpty(children)) {
+    if (children != null && !children.isEmpty()) {
       final Element child = children.get(0);
       additionalNSs.add(child.getNamespace());
       additionalNSs.addAll(child.getAdditionalNamespaces());

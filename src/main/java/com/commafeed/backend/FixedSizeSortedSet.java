@@ -5,8 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 
-import org.apache.commons.collections.CollectionUtils;
-
 import com.google.common.collect.Lists;
 
 public class FixedSizeSortedSet<E> extends TreeSet<E> {
@@ -42,7 +40,7 @@ public class FixedSizeSortedSet<E> extends TreeSet<E> {
 
   @Override
   public boolean addAll(Collection<? extends E> c) {
-    if (CollectionUtils.isEmpty(c)) {
+    if (c == null || c.isEmpty()) {
       return false;
     }
 
