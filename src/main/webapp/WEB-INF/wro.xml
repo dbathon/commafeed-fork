@@ -25,7 +25,7 @@
   </group>
 
   <group name="app">
-    <css>/sass/app.scss</css>
+    <css>/sass/app.css</css>
     <js>/js/*.js</js>
   </group>
 

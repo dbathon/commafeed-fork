@@ -84,8 +84,9 @@ public abstract class BasePage extends WebPage {
       }
     }
 
-    add(new TransparentWebMarkupContainer("html").setMarkupId("theme-" + theme).add(
-        new AttributeModifier("lang", lang)));
+    add(new TransparentWebMarkupContainer("html").setMarkupId("theme-" + theme)
+        .add(new AttributeModifier("lang", lang))
+        .add(new AttributeModifier("timestamp", Long.toString(startupBean.getStartupTime()))));
 
     settings = applicationSettingsService.get();
     add(new HeaderResponseContainer("footer-container", "footer-container"));

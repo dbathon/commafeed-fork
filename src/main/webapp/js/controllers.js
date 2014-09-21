@@ -1281,7 +1281,7 @@ function($scope, $location, SettingsService, AnalyticsService, ServerService) {
 	
 	$scope.ServerService = ServerService.get();
 	
-	$scope.themes = ['default', 'ebraminio', 'MRACHINI', 'svetla'];
+	$scope.themes = ['default'];
 	
 	$scope.settingsService = SettingsService;
 	$scope.$watch('settingsService.settings', function(value) {
