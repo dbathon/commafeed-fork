@@ -13,6 +13,7 @@ import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
 import org.apache.wicket.validation.validator.StringValidator;
@@ -25,7 +26,6 @@ import com.commafeed.backend.services.UserService;
 import com.commafeed.frontend.CommaFeedSession;
 import com.commafeed.frontend.model.request.RegistrationRequest;
 import com.commafeed.frontend.pages.RfcCompliantEmailAddressValidator;
-import com.commafeed.frontend.utils.ModelFactory.MF;
 
 @SuppressWarnings("serial")
 public class RegisterPanel extends Panel {
@@ -63,8 +63,7 @@ public class RegisterPanel extends Panel {
     add(form);
     add(new BootstrapFeedbackPanel("feedback", new ContainerFeedbackMessageFilter(form)));
 
-    final RegistrationRequest p = MF.p(RegistrationRequest.class);
-    form.add(new RequiredTextField<String>("name", MF.m(model, p.getName())).add(
+    form.add(new RequiredTextField<String>("name", new PropertyModel<String>(model, "name")).add(
         StringValidator.lengthBetween(3, 32)).add((IValidator<String>) validatable -> {
       final String name = validatable.getValue();
       final User user = userDAO.findByName(name);
@@ -72,9 +71,9 @@ public class RegisterPanel extends Panel {
         validatable.error(new ValidationError("Name is already taken."));
       }
     }));
-    form.add(new PasswordTextField("password", MF.m(model, p.getPassword()))
+    form.add(new PasswordTextField("password", new PropertyModel<String>(model, "password"))
         .setResetPassword(false).add(StringValidator.minimumLength(6)));
-    form.add(new RequiredTextField<String>("email", MF.m(model, p.getEmail())) {
+    form.add(new RequiredTextField<String>("email", new PropertyModel<String>(model, "email")) {
       @Override
       protected String getInputType() {
         return "email";
