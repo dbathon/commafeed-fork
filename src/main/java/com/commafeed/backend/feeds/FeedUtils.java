@@ -32,8 +32,6 @@ import com.google.api.client.util.Base64;
 import com.google.api.client.util.Lists;
 import com.steadystate.css.parser.CSSOMParser;
 
-import edu.uci.ics.crawler4j.url.URLCanonicalizer;
-
 public class FeedUtils {
 
   protected static Logger log = LoggerFactory.getLogger(FeedUtils.class);
