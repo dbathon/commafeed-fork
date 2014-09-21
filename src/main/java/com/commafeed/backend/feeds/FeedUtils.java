@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.commons.math.stat.descriptive.SummaryStatistics;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Document.OutputSettings;
@@ -327,12 +326,12 @@ public class FeedUtils {
 
     final List<Long> timestamps = getSortedTimestamps(entries);
 
-    final SummaryStatistics stats = new SummaryStatistics();
+    double sum = 0.0;
     for (int i = 0; i < timestamps.size() - 1; i++) {
       final long diff = Math.abs(timestamps.get(i) - timestamps.get(i + 1));
-      stats.addValue(diff);
+      sum += diff;
     }
-    return (long) stats.getMean();
+    return (long) (sum / (timestamps.size() - 1));
   }
 
   public static List<Long> getSortedTimestamps(List<FeedEntry> entries) {
