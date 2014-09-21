@@ -29,7 +29,7 @@ import com.commafeed.backend.model.FeedSubscription;
 import com.commafeed.backend.pubsubhubbub.SubscriptionHandler;
 import com.commafeed.backend.services.ApplicationSettingsService;
 import com.commafeed.backend.services.FeedUpdateService;
-import com.google.api.client.util.Lists;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Striped;
 
 @ApplicationScoped

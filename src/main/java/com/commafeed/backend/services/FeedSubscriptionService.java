@@ -23,7 +23,7 @@ import com.commafeed.backend.model.FeedEntryStatus;
 import com.commafeed.backend.model.FeedSubscription;
 import com.commafeed.backend.model.Models;
 import com.commafeed.backend.model.User;
-import com.google.api.client.util.Lists;
+import com.google.common.collect.Lists;
 
 public class FeedSubscriptionService {
 
