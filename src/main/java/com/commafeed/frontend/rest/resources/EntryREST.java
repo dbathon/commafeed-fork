@@ -100,6 +100,8 @@ public class EntryREST extends AbstractResourceREST {
       @ApiParam(value = "limit for paging") @DefaultValue("-1") @QueryParam("limit") int limit) {
     keywords = StringUtils.trimToEmpty(keywords);
     limit = Math.min(limit, 50);
+    limit = Math.max(0, limit);
+
     Preconditions.checkArgument(StringUtils.length(keywords) >= 3);
 
     final Entries entries = new Entries();
@@ -107,7 +109,7 @@ public class EntryREST extends AbstractResourceREST {
     final List<Entry> list = Lists.newArrayList();
     final List<FeedSubscription> subs = feedSubscriptionDAO.findAll(getUser());
     final List<FeedEntryStatus> entriesStatus =
-        feedEntryStatusDAO.findBySubscriptions(subs, keywords, null, offset, limit,
+        feedEntryStatusDAO.findBySubscriptions(subs, keywords, null, offset, limit + 1,
             ReadingOrder.desc, true);
     for (final FeedEntryStatus status : entriesStatus) {
       list.add(Entry.build(status, applicationSettingsService.get().getPublicUrl(),
@@ -116,6 +118,13 @@ public class EntryREST extends AbstractResourceREST {
 
     entries.setName("Search for : " + keywords);
     entries.getEntries().addAll(list);
+
+    final boolean hasMore = entries.getEntries().size() > limit;
+    if (hasMore) {
+      entries.setHasMore(true);
+      entries.getEntries().remove(entries.getEntries().size() - 1);
+    }
+
     return Response.ok(entries).build();
   }
 
