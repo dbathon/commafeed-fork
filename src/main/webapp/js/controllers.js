@@ -676,7 +676,6 @@ function($scope, $stateParams, $http, $route, $state, $window, EntryService, Set
 		}
 	});
 
-	$scope.limit = SettingsService.settings.viewMode == 'title' ? 10 : 5;
 	$scope.busy = false;
 	$scope.hasMore = true;
 
@@ -687,16 +686,18 @@ function($scope, $stateParams, $http, $route, $state, $window, EntryService, Set
 			return;
 		$scope.busy = true;
 
-		var limit = $scope.limit;
-		if ($scope.entries.length === 0) {
-			$window = angular.element($window);
-			if (SettingsService.settings.viewMode == 'title') {
-				limit = $window.height() / 33;
-				limit = parseInt(limit, 10) + 5;
-			} else {
-				limit = $window.height() / 97;
-				limit = parseInt(limit, 10) + 1;
-			}
+		var limit;
+		$window = angular.element($window);
+		if (SettingsService.settings.viewMode == 'title') {
+			limit = $window.height() / 33;
+			limit = parseInt(limit, 10) + 5;
+		} else {
+			limit = $window.height() / 97;
+			limit = parseInt(limit, 10) + 1;
+		}
+		if ($scope.entries.length !== 0) {
+			// only fetch half a page when loading more
+			limit = parseInt(limit / 2, 10);
 		}
 
 		var callback = function(data) {
