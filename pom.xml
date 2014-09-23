@@ -134,8 +134,8 @@
   <dependencies>
     <dependency>
       <groupId>org.jboss.spec</groupId>
-      <artifactId>jboss-javaee-6.0</artifactId>
-      <version>1.0.0.Final</version>
+      <artifactId>jboss-javaee-7.0</artifactId>
+      <version>1.0.1.Final</version>
       <type>pom</type>
       <scope>provided</scope>
     </dependency>
@@ -360,11 +360,13 @@
                     project.properties['prefix'];
                     def dest =
                     project.properties['destination'];
-                    def i18n =
+                    def
+                    i18n =
                     project.properties['i18nPath'];
                     new
                     HTMLConcat().concat(source,
-                    prefix, dest, i18n);
+                    prefix, dest,
+                    i18n);
                   </source>
                 </configuration>
               </execution>
