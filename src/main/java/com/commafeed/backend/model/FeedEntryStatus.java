@@ -6,6 +6,7 @@ import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -16,7 +17,10 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
-@Table(name = "FEEDENTRYSTATUSES")
+@Table(name = "FEEDENTRYSTATUSES", indexes = { @Index(columnList = "subscription_id, entry_id"),
+    @Index(columnList = "subscription_id, read_status, entryUpdated"),
+    @Index(columnList = "user_id, read_status, entryUpdated"),
+    @Index(columnList = "user_id, read_status, subscription_id") })
 @SuppressWarnings("serial")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)

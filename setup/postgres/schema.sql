@@ -145,6 +145,21 @@ create table USERSETTINGS (
   primary key (id)
 );
 
+create index UK_rdbgxqktl8ribogimricm4xxt on FEEDENTRIES (guidHash);
+create index UK_p5nmay0paseebxmlwgw9l8ufo on FEEDENTRIES (inserted);
+create index UK_ji594pog5wx9lvh9b73bbw5xt on FEEDENTRIES (updated);
+create index UK_tb5npe7leh9gos12r8wso9d5 on FEEDENTRYSTATUSES (subscription_id, entry_id);
+create index UK_avw2s5g0b5s7oocvvh9nc6ye on FEEDENTRYSTATUSES (subscription_id, read_status, entryUpdated);
+create index UK_oiog75k2bs9ob92t6kxk9irf7 on FEEDENTRYSTATUSES (user_id, read_status, entryUpdated);
+create index UK_luovps3dqgcvcxb26bie1e3c1 on FEEDENTRYSTATUSES (user_id, read_status, subscription_id);
+create index UK_ovvnv8yae726mkp2ccgmpr7ax on FEEDS (disabledUntil, lastUpdated);
+create index UK_jf9ce2w2mrmnb1uc4c6w6x6xq on FEEDS (lastUpdated);
+create index UK_br5ya6ovoro4v4d7xvchuabji on FEEDS (urlHash);
+create index UK_2sbf438f2ukoe6y1q8naj74ne on FEEDS (push_topic_hash);
+create index UK_ju09vfqn1ekxei4n2gtemtu4j on FEEDS (normalizedUrlHash);
+create index UK_2cy3jecqr5dqimh3prsgto37s on FEEDS (lastContentHash);
+create index UK_tgv9hww0io1uco606t6nt5yxp on FEED_FEEDENTRIES (FEED_ID, entryUpdated);
+
 alter table FEEDENTRIES add constraint UK_meqpfqilqcjxfd9lwdhqo4ncg unique (content_id);
 alter table USERS add constraint UK_s7wep93120xdlalhu7mmiuj2h unique (apiKey);
 alter table USERS add constraint UK_avh1b2ec82audum2lyjx2p1ws unique (email);
