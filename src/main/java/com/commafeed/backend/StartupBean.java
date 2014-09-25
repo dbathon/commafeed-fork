@@ -56,7 +56,6 @@ public class StartupBean {
     if (userDAO.getCount() == 0) {
       initialData();
     }
-    applicationSettingsService.applyLogLevel();
 
     initSupportedLanguages();
     taskGiver.start();

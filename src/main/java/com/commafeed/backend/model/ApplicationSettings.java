@@ -7,8 +7,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.log4j.Level;
-
 @Entity
 @Table(name = "APPLICATIONSETTINGS")
 @SuppressWarnings("serial")
@@ -31,7 +29,7 @@ public class ApplicationSettings extends AbstractModel {
   private boolean heavyLoad;
   private boolean pubsubhubbub;
   private boolean feedbackButton = true;
-  private String logLevel = Level.INFO.toString();
+  private String logLevel = null;
   private boolean imageProxyEnabled;
   private int queryTimeout;
   private boolean crawlingPaused;
@@ -167,10 +165,12 @@ public class ApplicationSettings extends AbstractModel {
     this.databaseUpdateThreads = databaseUpdateThreads;
   }
 
+  @Deprecated
   public String getLogLevel() {
     return logLevel;
   }
 
+  @Deprecated
   public void setLogLevel(String logLevel) {
     this.logLevel = logLevel;
   }
