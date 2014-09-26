@@ -69,17 +69,20 @@ public class FeedRefreshTaskGiver {
     }
   }
 
-  public void start() {
+  private void sleep(int millis) {
     try {
-      // sleeping for a little while, let everything settle
-      Thread.sleep(5000);
+      Thread.sleep(millis);
     }
     catch (final InterruptedException e) {
-      log.error("interrupted while sleeping");
+      log.info("interrupted while sleeping");
     }
-    log.info("starting feed refresh task giver");
+  }
 
+  public void start() {
     executor.execute(() -> {
+      sleep(10000);
+      log.info("starting feed refresh task giver");
+
       while (!executor.isShutdown()) {
         try {
           final Feed feed = take();
@@ -89,12 +92,7 @@ public class FeedRefreshTaskGiver {
           }
           else {
             log.debug("nothing to do, sleeping for 15s");
-            try {
-              Thread.sleep(15000);
-            }
-            catch (final InterruptedException e1) {
-              log.error("interrupted while sleeping");
-            }
+            sleep(15000);
           }
         }
         catch (final Exception e2) {
