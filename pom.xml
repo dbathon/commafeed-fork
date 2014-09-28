@@ -253,6 +253,13 @@
       <groupId>org.apache.wicket</groupId>
       <artifactId>wicket-cdi</artifactId>
       <version>6.8.0</version>
+      <exclusions>
+        <!-- is provided -->
+        <exclusion>
+          <groupId>javax.enterprise</groupId>
+          <artifactId>cdi-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
