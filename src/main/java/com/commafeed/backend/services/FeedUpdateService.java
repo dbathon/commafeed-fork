@@ -9,7 +9,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import com.commafeed.backend.MetricsBean;
-import com.commafeed.backend.cache.CacheService;
 import com.commafeed.backend.dao.FeedEntryDAO;
 import com.commafeed.backend.dao.FeedEntryDAO.EntryWithFeed;
 import com.commafeed.backend.dao.FeedEntryStatusDAO;
@@ -41,9 +40,6 @@ public class FeedUpdateService {
 
   @Inject
   MetricsBean metricsBean;
-
-  @Inject
-  CacheService cache;
 
   public void updateEntry(Feed feed, FeedEntry entry, List<FeedSubscription> subscriptions) {
 
@@ -80,7 +76,6 @@ public class FeedUpdateService {
         statusUpdateList.add(status);
         users.add(user);
       }
-      cache.invalidateUserData(users.toArray(new User[0]));
       feedEntryDAO.saveOrUpdate(update);
       feedEntryStatusDAO.saveOrUpdate(statusUpdateList);
       em.persist(ffe);

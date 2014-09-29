@@ -19,7 +19,6 @@
     <jpa.datasource.name>java:openejb/Resource/My DataSource</jpa.datasource.name>
     <jpa.cache>false</jpa.cache>
     <jpa.table.encoding>utf8mb4</jpa.table.encoding>
-    <cache_service.class>com.commafeed.backend.cache.NoopCacheService</cache_service.class>
   </properties>
 
   <build>
@@ -144,11 +143,6 @@
       <artifactId>hibernate-entitymanager</artifactId>
       <version>4.3.5.Final</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>redis.clients</groupId>
-      <artifactId>jedis</artifactId>
-      <version>2.1.0</version>
     </dependency>
 
     <dependency>
@@ -286,12 +280,6 @@
       <id>cache</id>
       <properties>
         <jpa.cache>true</jpa.cache>
-      </properties>
-    </profile>
-    <profile>
-      <id>redis</id>
-      <properties>
-        <cache_service.class>com.commafeed.backend.cache.RedisCacheService</cache_service.class>
       </properties>
     </profile>
     <profile>

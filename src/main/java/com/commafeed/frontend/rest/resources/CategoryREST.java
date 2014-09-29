@@ -22,7 +22,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.commafeed.backend.cache.CacheService;
 import com.commafeed.backend.dao.FeedCategoryDAO;
 import com.commafeed.backend.dao.FeedEntryStatusDAO;
 import com.commafeed.backend.dao.FeedSubscriptionDAO;
@@ -75,9 +74,6 @@ public class CategoryREST extends AbstractResourceREST {
 
   @Inject
   FeedSubscriptionService feedSubscriptionService;
-
-  @Inject
-  CacheService cache;
 
   @Path("/entries")
   @GET
@@ -241,7 +237,6 @@ public class CategoryREST extends AbstractResourceREST {
           feedSubscriptionDAO.findByCategories(getUser(), categories);
       feedEntryStatusDAO.markSubscriptionEntries(subs, olderThan);
     }
-    cache.invalidateUserData(getUser());
     return Response.ok(Status.OK).build();
   }
 
@@ -263,7 +258,6 @@ public class CategoryREST extends AbstractResourceREST {
       cat.setParent(parent);
     }
     feedCategoryDAO.saveOrUpdate(cat);
-    cache.invalidateUserData(getUser());
     return Response.ok().build();
   }
 
@@ -292,7 +286,6 @@ public class CategoryREST extends AbstractResourceREST {
       feedCategoryDAO.saveOrUpdate(categories);
 
       feedCategoryDAO.delete(cat);
-      cache.invalidateUserData(getUser());
       return Response.ok().build();
     }
     else {
@@ -346,7 +339,6 @@ public class CategoryREST extends AbstractResourceREST {
     }
 
     feedCategoryDAO.saveOrUpdate(category);
-    cache.invalidateUserData(getUser());
     return Response.ok(Status.OK).build();
   }
 
@@ -364,7 +356,6 @@ public class CategoryREST extends AbstractResourceREST {
     }
     category.setCollapsed(req.isCollapse());
     feedCategoryDAO.saveOrUpdate(category);
-    cache.invalidateUserData(getUser());
     return Response.ok(Status.OK).build();
   }
 
@@ -389,18 +380,13 @@ public class CategoryREST extends AbstractResourceREST {
   public Response getSubscriptions() {
     final User user = getUser();
 
-    Category root = cache.getRootCategory(user);
-    if (root == null) {
-      log.debug("root category cache miss for {}", user.getName());
-      final List<FeedCategory> categories = feedCategoryDAO.findAll(user);
-      final List<FeedSubscription> subscriptions = feedSubscriptionDAO.findAll(getUser());
-      final Map<Long, Long> unreadCount = feedSubscriptionService.getUnreadCount(getUser());
+    final List<FeedCategory> categories = feedCategoryDAO.findAll(user);
+    final List<FeedSubscription> subscriptions = feedSubscriptionDAO.findAll(getUser());
+    final Map<Long, Long> unreadCount = feedSubscriptionService.getUnreadCount(getUser());
 
-      root = buildCategory(null, categories, subscriptions, unreadCount);
-      root.setId("all");
-      root.setName("All");
-      cache.setRootCategory(user, root);
-    }
+    final Category root = buildCategory(null, categories, subscriptions, unreadCount);
+    root.setId("all");
+    root.setName("All");
     return Response.ok(root).build();
   }
 

@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.commafeed.backend.MetricsBean;
-import com.commafeed.backend.cache.CacheService;
 import com.commafeed.backend.dao.FeedDAO;
 import com.commafeed.backend.dao.FeedEntryDAO;
 import com.commafeed.backend.dao.FeedSubscriptionDAO;
@@ -29,7 +28,6 @@ import com.commafeed.backend.model.FeedSubscription;
 import com.commafeed.backend.pubsubhubbub.SubscriptionHandler;
 import com.commafeed.backend.services.ApplicationSettingsService;
 import com.commafeed.backend.services.FeedUpdateService;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Striped;
 
 @ApplicationScoped
@@ -60,9 +58,6 @@ public class FeedRefreshUpdater {
 
   @Inject
   FeedEntryDAO feedEntryDAO;
-
-  @Inject
-  CacheService cache;
 
   private FeedRefreshExecutor pool;
   private Striped<Lock> locks;
@@ -98,28 +93,13 @@ public class FeedRefreshUpdater {
     public void run() {
       boolean ok = true;
       if (entries.isEmpty() == false) {
-
-        final List<String> lastEntries = cache.getLastEntries(feed);
-        final List<String> currentEntries = Lists.newArrayList();
-
         List<FeedSubscription> subscriptions = null;
         for (final FeedEntry entry : entries) {
-          final String cacheKey = cache.buildUniqueEntryKey(feed, entry);
-          if (!lastEntries.contains(cacheKey)) {
-            log.debug("cache miss for {}", entry.getUrl());
-            if (subscriptions == null) {
-              subscriptions = feedSubscriptionDAO.findByFeed(feed);
-            }
-            ok &= updateEntry(feed, entry, subscriptions);
-            metricsBean.entryCacheMiss();
+          if (subscriptions == null) {
+            subscriptions = feedSubscriptionDAO.findByFeed(feed);
           }
-          else {
-            log.debug("cache hit for {}", entry.getUrl());
-            metricsBean.entryCacheHit();
-          }
-          currentEntries.add(cacheKey);
+          ok &= updateEntry(feed, entry, subscriptions);
         }
-        cache.setLastEntries(feed, currentEntries);
       }
 
       if (applicationSettingsService.get().isPubsubhubbub()) {

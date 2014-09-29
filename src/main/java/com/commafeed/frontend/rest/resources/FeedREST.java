@@ -37,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.commafeed.backend.StartupBean;
-import com.commafeed.backend.cache.CacheService;
 import com.commafeed.backend.dao.FeedCategoryDAO;
 import com.commafeed.backend.dao.FeedEntryStatusDAO;
 import com.commafeed.backend.dao.FeedSubscriptionDAO;
@@ -113,9 +112,6 @@ public class FeedREST extends AbstractResourceREST {
 
   @Inject
   OPMLExporter opmlExporter;
-
-  @Inject
-  CacheService cache;
 
   @Context
   private HttpServletRequest request;
@@ -294,7 +290,6 @@ public class FeedREST extends AbstractResourceREST {
     if (subscription != null) {
       feedEntryStatusDAO.markSubscriptionEntries(Arrays.asList(subscription), olderThan);
     }
-    cache.invalidateUserData(getUser());
     return Response.ok(Status.OK).build();
   }
 
@@ -381,7 +376,6 @@ public class FeedREST extends AbstractResourceREST {
       return Response.status(Status.SERVICE_UNAVAILABLE)
           .entity("Failed to subscribe to URL " + url + ": " + e.getMessage()).build();
     }
-    cache.invalidateUserData(getUser());
     return Response.ok(Status.OK).build();
   }
 
@@ -424,7 +418,6 @@ public class FeedREST extends AbstractResourceREST {
     final FeedSubscription sub = feedSubscriptionDAO.findById(getUser(), req.getId());
     if (sub != null) {
       feedSubscriptionDAO.delete(sub);
-      cache.invalidateUserData(getUser());
       return Response.ok(Status.OK).build();
     }
     else {
@@ -475,7 +468,6 @@ public class FeedREST extends AbstractResourceREST {
     else {
       feedSubscriptionDAO.saveOrUpdate(subscription);
     }
-    cache.invalidateUserData(getUser());
     return Response.ok(Status.OK).build();
   }
 
@@ -513,7 +505,6 @@ public class FeedREST extends AbstractResourceREST {
       throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(e.getMessage()).build());
     }
-    cache.invalidateUserData(getUser());
     return Response.temporaryRedirect(URI.create(applicationSettingsService.get().getPublicUrl()))
         .build();
   }

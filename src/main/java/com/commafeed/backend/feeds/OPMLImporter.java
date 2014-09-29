@@ -13,7 +13,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.commafeed.backend.cache.CacheService;
 import com.commafeed.backend.dao.FeedCategoryDAO;
 import com.commafeed.backend.model.FeedCategory;
 import com.commafeed.backend.model.User;
@@ -34,9 +33,6 @@ public class OPMLImporter {
 
   @Inject
   FeedCategoryDAO feedCategoryDAO;
-
-  @Inject
-  CacheService cache;
 
   @SuppressWarnings("unchecked")
   @Asynchronous
@@ -101,6 +97,5 @@ public class OPMLImporter {
         log.error("error while importing {}: {}", outline.getXmlUrl(), e.getMessage());
       }
     }
-    cache.invalidateUserData(user);
   }
 }

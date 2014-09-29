@@ -10,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.commafeed.backend.cache.CacheService;
 import com.commafeed.backend.dao.FeedEntryDAO;
 import com.commafeed.backend.dao.FeedEntryStatusDAO;
 import com.commafeed.backend.dao.FeedSubscriptionDAO;
@@ -21,7 +20,6 @@ import com.commafeed.backend.model.FeedCategory;
 import com.commafeed.backend.model.FeedEntry;
 import com.commafeed.backend.model.FeedEntryStatus;
 import com.commafeed.backend.model.FeedSubscription;
-import com.commafeed.backend.model.Models;
 import com.commafeed.backend.model.User;
 import com.google.common.collect.Lists;
 
@@ -54,9 +52,6 @@ public class FeedSubscriptionService {
 
   @Inject
   FeedRefreshTaskGiver taskGiver;
-
-  @Inject
-  CacheService cache;
 
   public Feed subscribe(User user, String url, String title, FeedCategory category) {
 
@@ -106,12 +101,6 @@ public class FeedSubscriptionService {
   }
 
   public Map<Long, Long> getUnreadCount(User user) {
-    Map<Long, Long> map = cache.getUnreadCounts(user);
-    if (map == null) {
-      log.debug("unread count cache miss for {}", Models.getId(user));
-      map = feedEntryStatusDAO.getUnreadCount(user);
-      cache.setUnreadCounts(user, map);
-    }
-    return map;
+    return feedEntryStatusDAO.getUnreadCount(user);
   }
 }

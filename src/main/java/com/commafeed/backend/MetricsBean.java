@@ -64,16 +64,6 @@ public class MetricsBean {
     thisMinute.statusesInserted += statusesCount;
   }
 
-  public void entryCacheHit() {
-    thisHour.entryCacheHit++;
-    thisMinute.entryCacheHit++;
-  }
-
-  public void entryCacheMiss() {
-    thisHour.entryCacheMiss++;
-    thisMinute.entryCacheMiss++;
-  }
-
   public void pushReceived(int feedCount) {
 
     thisHour.pushNotificationsReceived++;
@@ -111,8 +101,6 @@ public class MetricsBean {
     private int threadWaited;
     private int pushNotificationsReceived;
     private int pushFeedsQueued;
-    private int entryCacheHit;
-    private int entryCacheMiss;
 
     public int getFeedsRefreshed() {
       return feedsRefreshed;
@@ -168,22 +156,6 @@ public class MetricsBean {
 
     public void setPushFeedsQueued(int pushFeedsQueued) {
       this.pushFeedsQueued = pushFeedsQueued;
-    }
-
-    public int getEntryCacheHit() {
-      return entryCacheHit;
-    }
-
-    public void setEntryCacheHit(int entryCacheHit) {
-      this.entryCacheHit = entryCacheHit;
-    }
-
-    public int getEntryCacheMiss() {
-      return entryCacheMiss;
-    }
-
-    public void setEntryCacheMiss(int entryCacheMiss) {
-      this.entryCacheMiss = entryCacheMiss;
     }
 
   }
