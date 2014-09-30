@@ -11,7 +11,7 @@ import com.google.common.collect.Iterables;
 public class ApplicationSettingsService {
 
   @Inject
-  ApplicationSettingsDAO applicationSettingsDAO;
+  private ApplicationSettingsDAO applicationSettingsDAO;
 
   private ApplicationSettings settings;
 

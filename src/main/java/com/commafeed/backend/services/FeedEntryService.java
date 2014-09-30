@@ -15,13 +15,13 @@ import com.commafeed.backend.model.User;
 public class FeedEntryService {
 
   @Inject
-  FeedEntryStatusDAO feedEntryStatusDAO;
+  private FeedEntryStatusDAO feedEntryStatusDAO;
 
   @Inject
-  FeedSubscriptionDAO feedSubscriptionDAO;
+  private FeedSubscriptionDAO feedSubscriptionDAO;
 
   @Inject
-  FeedEntryDAO feedEntryDAO;
+  private FeedEntryDAO feedEntryDAO;
 
   public void markEntry(User user, Long entryId, Long subscriptionId, boolean read) {
     final FeedSubscription sub = feedSubscriptionDAO.findById(user, subscriptionId);

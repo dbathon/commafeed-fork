@@ -19,10 +19,10 @@ import com.sun.syndication.feed.opml.Outline;
 public class OPMLExporter {
 
   @Inject
-  FeedCategoryDAO feedCategoryDAO;
+  private FeedCategoryDAO feedCategoryDAO;
 
   @Inject
-  FeedSubscriptionDAO feedSubscriptionDAO;
+  private FeedSubscriptionDAO feedSubscriptionDAO;
 
   @SuppressWarnings("unchecked")
   public Opml export(User user) {

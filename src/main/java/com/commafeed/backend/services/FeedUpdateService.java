@@ -12,7 +12,6 @@ import com.commafeed.backend.MetricsBean;
 import com.commafeed.backend.dao.FeedEntryDAO;
 import com.commafeed.backend.dao.FeedEntryDAO.EntryWithFeed;
 import com.commafeed.backend.dao.FeedEntryStatusDAO;
-import com.commafeed.backend.dao.FeedSubscriptionDAO;
 import com.commafeed.backend.feeds.FeedUtils;
 import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.FeedEntry;
@@ -30,16 +29,13 @@ public class FeedUpdateService {
   protected EntityManager em;
 
   @Inject
-  FeedSubscriptionDAO feedSubscriptionDAO;
+  private FeedEntryDAO feedEntryDAO;
 
   @Inject
-  FeedEntryDAO feedEntryDAO;
+  private FeedEntryStatusDAO feedEntryStatusDAO;
 
   @Inject
-  FeedEntryStatusDAO feedEntryStatusDAO;
-
-  @Inject
-  MetricsBean metricsBean;
+  private MetricsBean metricsBean;
 
   public void updateEntry(Feed feed, FeedEntry entry, List<FeedSubscription> subscriptions) {
 

@@ -40,25 +40,25 @@ import com.wordnik.swagger.annotations.ApiParam;
 public class UserREST extends AbstractResourceREST {
 
   @Inject
-  UserDAO userDAO;
+  private UserDAO userDAO;
 
   @Inject
-  UserSettingsDAO userSettingsDAO;
+  private UserSettingsDAO userSettingsDAO;
 
   @Inject
-  UserRoleDAO userRoleDAO;
+  private UserRoleDAO userRoleDAO;
 
   @Inject
-  StartupBean startupBean;
+  private StartupBean startupBean;
 
   @Inject
-  UserService userService;
+  private UserService userService;
 
   @Inject
-  PasswordEncryptionService encryptionService;
+  private PasswordEncryptionService encryptionService;
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private ApplicationSettingsService applicationSettingsService;
 
   @Path("/settings")
   @GET

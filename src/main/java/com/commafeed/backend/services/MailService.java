@@ -24,7 +24,7 @@ public class MailService implements Serializable {
   protected static Logger log = LoggerFactory.getLogger(MailService.class);
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private ApplicationSettingsService applicationSettingsService;
 
   public void sendMail(User user, String subject, String content) throws Exception {
 

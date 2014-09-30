@@ -29,10 +29,10 @@ public class SubscriptionHandler {
   private static Logger log = LoggerFactory.getLogger(SubscriptionHandler.class);
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private ApplicationSettingsService applicationSettingsService;
 
   @Inject
-  FeedRefreshTaskGiver taskGiver;
+  private FeedRefreshTaskGiver taskGiver;
 
   public void subscribe(Feed feed) {
 

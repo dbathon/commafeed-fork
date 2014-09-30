@@ -31,16 +31,16 @@ public class FeedRefreshTaskGiver {
   protected static final Logger log = LoggerFactory.getLogger(FeedRefreshTaskGiver.class);
 
   @Inject
-  FeedDAO feedDAO;
+  private FeedDAO feedDAO;
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private ApplicationSettingsService applicationSettingsService;
 
   @Inject
-  MetricsBean metricsBean;
+  private MetricsBean metricsBean;
 
   @Inject
-  FeedRefreshWorker worker;
+  private FeedRefreshWorker worker;
 
   private int backgroundThreads;
 

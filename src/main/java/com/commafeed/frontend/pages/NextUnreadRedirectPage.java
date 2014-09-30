@@ -31,13 +31,13 @@ public class NextUnreadRedirectPage extends WebPage {
   public static final String PARAM_READINGORDER = "order";
 
   @Inject
-  FeedCategoryDAO feedCategoryDAO;
+  private FeedCategoryDAO feedCategoryDAO;
 
   @Inject
-  FeedEntryStatusDAO feedEntryStatusDAO;
+  private FeedEntryStatusDAO feedEntryStatusDAO;
 
   @Inject
-  FeedSubscriptionDAO feedSubscriptionDAO;
+  private FeedSubscriptionDAO feedSubscriptionDAO;
 
   public NextUnreadRedirectPage(PageParameters params) {
     final String categoryId = params.get(PARAM_CATEGORYID).toString();

@@ -12,7 +12,7 @@ import com.commafeed.frontend.pages.components.RegisterPanel;
 public class WelcomePage extends BasePage {
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private ApplicationSettingsService applicationSettingsService;
 
   public WelcomePage() {
     add(new BookmarkablePageLink<Void>("logo-link", getApplication().getHomePage()));

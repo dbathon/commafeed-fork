@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import com.commafeed.backend.dao.FeedDAO;
-import com.commafeed.backend.dao.FeedSubscriptionDAO;
 import com.commafeed.backend.feeds.FeedUtils;
 import com.commafeed.backend.model.Feed;
 
@@ -16,10 +15,7 @@ import com.commafeed.backend.model.Feed;
 public class FeedService {
 
   @Inject
-  FeedDAO feedDAO;
-
-  @Inject
-  FeedSubscriptionDAO feedSubscriptionDAO;
+  private FeedDAO feedDAO;
 
   @Lock(LockType.WRITE)
   public Feed findOrCreate(String url) {

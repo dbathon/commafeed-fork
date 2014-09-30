@@ -20,10 +20,10 @@ public class CommaFeedSession extends AuthenticatedWebSession {
   private static final long serialVersionUID = 1L;
 
   @Inject
-  UserService userService;
+  private UserService userService;
 
   @Inject
-  UserRoleDAO userRoleDAO;
+  private UserRoleDAO userRoleDAO;
 
   private User user;
   private Roles roles = new Roles();

@@ -64,16 +64,16 @@ public class CategoryREST extends AbstractResourceREST {
   public static final String STARRED = "starred";
 
   @Inject
-  FeedEntryStatusDAO feedEntryStatusDAO;
+  private FeedEntryStatusDAO feedEntryStatusDAO;
 
   @Inject
-  FeedCategoryDAO feedCategoryDAO;
+  private FeedCategoryDAO feedCategoryDAO;
 
   @Inject
-  FeedSubscriptionDAO feedSubscriptionDAO;
+  private FeedSubscriptionDAO feedSubscriptionDAO;
 
   @Inject
-  FeedSubscriptionService feedSubscriptionService;
+  private FeedSubscriptionService feedSubscriptionService;
 
   @Path("/entries")
   @GET

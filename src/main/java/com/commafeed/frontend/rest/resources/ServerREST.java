@@ -22,10 +22,10 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class ServerREST extends AbstractResourceREST {
 
   @Inject
-  StartupBean startupBean;
+  private StartupBean startupBean;
 
   @Inject
-  HttpGetter httpGetter;
+  private HttpGetter httpGetter;
 
   @Path("/get")
   @GET

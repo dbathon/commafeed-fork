@@ -33,7 +33,7 @@ public class FaviconFetcher {
       "text/html");
 
   @Inject
-  HttpGetter getter;
+  private HttpGetter getter;
 
   public byte[] fetch(String url) {
 

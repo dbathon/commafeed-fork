@@ -40,7 +40,7 @@ public abstract class BasePage extends WebPage {
   protected FeedDAO feedDAO;
 
   @Inject
-  StartupBean startupBean;
+  private StartupBean startupBean;
 
   @Inject
   protected FeedSubscriptionDAO feedSubscriptionDAO;
@@ -64,10 +64,10 @@ public abstract class BasePage extends WebPage {
   protected UserRoleDAO userRoleDAO;
 
   @Inject
-  MailService mailService;
+  protected MailService mailService;
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  protected ApplicationSettingsService applicationSettingsService;
 
   private final ApplicationSettings settings;
 

@@ -27,10 +27,10 @@ public class PasswordRecoveryCallbackPage extends BasePage {
   public static final String PARAM_TOKEN = "token";
 
   @Inject
-  PasswordEncryptionService encryptionService;
+  private PasswordEncryptionService encryptionService;
 
   @Inject
-  UserService userService;
+  private UserService userService;
 
   public PasswordRecoveryCallbackPage(PageParameters params) {
     final String email = params.get(PARAM_EMAIL).toString();

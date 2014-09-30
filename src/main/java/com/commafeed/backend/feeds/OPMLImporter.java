@@ -29,10 +29,10 @@ public class OPMLImporter {
   private static Logger log = LoggerFactory.getLogger(OPMLImporter.class);
 
   @Inject
-  FeedSubscriptionService feedSubscriptionService;
+  private FeedSubscriptionService feedSubscriptionService;
 
   @Inject
-  FeedCategoryDAO feedCategoryDAO;
+  private FeedCategoryDAO feedCategoryDAO;
 
   @SuppressWarnings("unchecked")
   @Asynchronous

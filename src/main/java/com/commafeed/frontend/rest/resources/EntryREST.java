@@ -35,13 +35,13 @@ import com.wordnik.swagger.annotations.ApiParam;
 public class EntryREST extends AbstractResourceREST {
 
   @Inject
-  FeedEntryService feedEntryService;
+  private FeedEntryService feedEntryService;
 
   @Inject
-  FeedEntryStatusDAO feedEntryStatusDAO;
+  private FeedEntryStatusDAO feedEntryStatusDAO;
 
   @Inject
-  FeedSubscriptionDAO feedSubscriptionDAO;
+  private FeedSubscriptionDAO feedSubscriptionDAO;
 
   @Path("/mark")
   @POST

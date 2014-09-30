@@ -68,7 +68,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
       (o1, o2) -> compareDatesAndIds(o1.getEntryUpdated(), o2.getEntryUpdated(), o1, o2);
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private ApplicationSettingsService applicationSettingsService;
 
   public FeedEntryStatus getStatus(FeedSubscription sub, FeedEntry entry) {
 

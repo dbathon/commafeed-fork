@@ -39,19 +39,19 @@ public class PubSubHubbubCallbackREST {
   HttpServletRequest request;
 
   @Inject
-  FeedDAO feedDAO;
+  private FeedDAO feedDAO;
 
   @Inject
-  FeedParser parser;
+  private FeedParser parser;
 
   @Inject
-  FeedRefreshTaskGiver taskGiver;
+  private FeedRefreshTaskGiver taskGiver;
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private ApplicationSettingsService applicationSettingsService;
 
   @Inject
-  MetricsBean metricsBean;
+  private MetricsBean metricsBean;
 
   @Path("/callback")
   @GET

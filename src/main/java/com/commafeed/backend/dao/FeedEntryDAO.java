@@ -27,7 +27,7 @@ import com.google.common.collect.Iterables;
 public class FeedEntryDAO extends GenericDAO<FeedEntry> {
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private ApplicationSettingsService applicationSettingsService;
 
   protected static final Logger log = LoggerFactory.getLogger(FeedEntryDAO.class);
 

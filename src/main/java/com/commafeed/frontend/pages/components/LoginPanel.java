@@ -15,7 +15,7 @@ import com.commafeed.frontend.pages.PasswordRecoveryPage;
 public class LoginPanel extends SignInPanel {
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private ApplicationSettingsService applicationSettingsService;
 
   public LoginPanel(String id) {
     super(id);

@@ -35,16 +35,16 @@ public class StartupBean {
   public static final String USERNAME_DEMO = "demo";
 
   @Inject
-  UserDAO userDAO;
+  private UserDAO userDAO;
 
   @Inject
-  UserService userService;
+  private UserService userService;
 
   @Inject
-  FeedRefreshTaskGiver taskGiver;
+  private FeedRefreshTaskGiver taskGiver;
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private ApplicationSettingsService applicationSettingsService;
 
   private long startupTime;
   private final Map<String, String> supportedLanguages = Maps.newHashMap();

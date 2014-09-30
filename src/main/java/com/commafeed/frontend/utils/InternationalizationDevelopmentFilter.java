@@ -38,7 +38,7 @@ public class InternationalizationDevelopmentFilter implements Filter {
   private static Logger log = LoggerFactory.getLogger(InternationalizationDevelopmentFilter.class);
 
   @Inject
-  UserSettingsDAO userSettingsDAO;
+  private UserSettingsDAO userSettingsDAO;
 
   private boolean production = true;
 

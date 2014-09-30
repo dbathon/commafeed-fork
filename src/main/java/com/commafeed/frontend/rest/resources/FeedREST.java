@@ -84,34 +84,34 @@ public class FeedREST extends AbstractResourceREST {
   private static Logger log = LoggerFactory.getLogger(FeedREST.class);
 
   @Inject
-  StartupBean startupBean;
+  private StartupBean startupBean;
 
   @Inject
-  FeedCategoryDAO feedCategoryDAO;
+  private FeedCategoryDAO feedCategoryDAO;
 
   @Inject
-  FaviconFetcher faviconFetcher;
+  private FaviconFetcher faviconFetcher;
 
   @Inject
-  FeedSubscriptionDAO feedSubscriptionDAO;
+  private FeedSubscriptionDAO feedSubscriptionDAO;
 
   @Inject
-  FeedSubscriptionService feedSubscriptionService;
+  private FeedSubscriptionService feedSubscriptionService;
 
   @Inject
-  FeedFetcher feedFetcher;
+  private FeedFetcher feedFetcher;
 
   @Inject
-  FeedEntryStatusDAO feedEntryStatusDAO;
+  private FeedEntryStatusDAO feedEntryStatusDAO;
 
   @Inject
-  FeedRefreshTaskGiver taskGiver;
+  private FeedRefreshTaskGiver taskGiver;
 
   @Inject
-  OPMLImporter opmlImporter;
+  private OPMLImporter opmlImporter;
 
   @Inject
-  OPMLExporter opmlExporter;
+  private OPMLExporter opmlExporter;
 
   @Context
   private HttpServletRequest request;

@@ -31,13 +31,13 @@ import com.commafeed.frontend.pages.RfcCompliantEmailAddressValidator;
 public class RegisterPanel extends Panel {
 
   @Inject
-  UserDAO userDAO;
+  private UserDAO userDAO;
 
   @Inject
-  UserService userService;
+  private UserService userService;
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private ApplicationSettingsService applicationSettingsService;
 
   public RegisterPanel(String markupId) {
     super(markupId);

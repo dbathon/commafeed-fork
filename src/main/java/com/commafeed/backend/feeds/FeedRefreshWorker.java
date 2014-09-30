@@ -13,8 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.commafeed.backend.HttpGetter.NotModifiedException;
-import com.commafeed.backend.MetricsBean;
-import com.commafeed.backend.dao.FeedEntryDAO;
 import com.commafeed.backend.feeds.FeedRefreshExecutor.Task;
 import com.commafeed.backend.model.ApplicationSettings;
 import com.commafeed.backend.model.Feed;
@@ -28,22 +26,16 @@ public class FeedRefreshWorker {
   private static Logger log = LoggerFactory.getLogger(FeedRefreshWorker.class);
 
   @Inject
-  FeedRefreshUpdater feedRefreshUpdater;
+  private FeedRefreshUpdater feedRefreshUpdater;
 
   @Inject
-  FeedFetcher fetcher;
+  private FeedFetcher fetcher;
 
   @Inject
-  FeedRefreshTaskGiver taskGiver;
+  private FeedRefreshTaskGiver taskGiver;
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
-
-  @Inject
-  MetricsBean metricsBean;
-
-  @Inject
-  FeedEntryDAO feedEntryDAO;
+  private ApplicationSettingsService applicationSettingsService;
 
   private FeedRefreshExecutor pool;
 

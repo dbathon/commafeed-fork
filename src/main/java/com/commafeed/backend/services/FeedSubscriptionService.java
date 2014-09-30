@@ -36,22 +36,22 @@ public class FeedSubscriptionService {
   }
 
   @Inject
-  FeedService feedService;
+  private FeedService feedService;
 
   @Inject
-  FeedEntryDAO feedEntryDAO;
+  private FeedEntryDAO feedEntryDAO;
 
   @Inject
-  FeedEntryStatusDAO feedEntryStatusDAO;
+  private FeedEntryStatusDAO feedEntryStatusDAO;
 
   @Inject
-  FeedSubscriptionDAO feedSubscriptionDAO;
+  private FeedSubscriptionDAO feedSubscriptionDAO;
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private ApplicationSettingsService applicationSettingsService;
 
   @Inject
-  FeedRefreshTaskGiver taskGiver;
+  private FeedRefreshTaskGiver taskGiver;
 
   public Feed subscribe(User user, String url, String title, FeedCategory category) {
 

@@ -12,7 +12,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 
 import com.commafeed.backend.dao.FeedCategoryDAO;
-import com.commafeed.backend.dao.FeedEntryStatusDAO;
 import com.commafeed.backend.dao.UserDAO;
 import com.commafeed.backend.dao.UserSettingsDAO;
 import com.commafeed.backend.model.User;
@@ -24,22 +23,19 @@ import com.google.common.base.Preconditions;
 public class UserService {
 
   @Inject
-  UserDAO userDAO;
+  private UserDAO userDAO;
 
   @Inject
-  FeedEntryStatusDAO feedEntryStatusDAO;
+  private FeedCategoryDAO feedCategoryDAO;
 
   @Inject
-  FeedCategoryDAO feedCategoryDAO;
+  private UserSettingsDAO userSettingsDAO;
 
   @Inject
-  UserSettingsDAO userSettingsDAO;
+  private PasswordEncryptionService encryptionService;
 
   @Inject
-  PasswordEncryptionService encryptionService;
-
-  @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private ApplicationSettingsService applicationSettingsService;
 
   public User login(String name, String password) {
     if (name == null || password == null) {

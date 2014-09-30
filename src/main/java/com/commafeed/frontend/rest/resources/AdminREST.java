@@ -33,7 +33,6 @@ import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserRole;
 import com.commafeed.backend.model.UserRole.Role;
-import com.commafeed.backend.services.FeedService;
 import com.commafeed.backend.services.PasswordEncryptionService;
 import com.commafeed.backend.services.UserService;
 import com.commafeed.frontend.SecurityCheck;
@@ -54,37 +53,34 @@ import com.wordnik.swagger.annotations.ApiParam;
 public class AdminREST extends AbstractResourceREST {
 
   @Inject
-  FeedService feedService;
+  private UserService userService;
 
   @Inject
-  UserService userService;
+  private UserDAO userDAO;
 
   @Inject
-  UserDAO userDAO;
+  private UserRoleDAO userRoleDAO;
 
   @Inject
-  UserRoleDAO userRoleDAO;
+  private FeedDAO feedDAO;
 
   @Inject
-  FeedDAO feedDAO;
+  private MetricsBean metricsBean;
 
   @Inject
-  MetricsBean metricsBean;
+  private DatabaseCleaner cleaner;
 
   @Inject
-  DatabaseCleaner cleaner;
+  private FeedRefreshWorker feedRefreshWorker;
 
   @Inject
-  FeedRefreshWorker feedRefreshWorker;
+  private FeedRefreshUpdater feedRefreshUpdater;
 
   @Inject
-  FeedRefreshUpdater feedRefreshUpdater;
+  private FeedRefreshTaskGiver taskGiver;
 
   @Inject
-  FeedRefreshTaskGiver taskGiver;
-
-  @Inject
-  PasswordEncryptionService encryptionService;
+  private PasswordEncryptionService encryptionService;
 
   @Path("/user/save")
   @POST

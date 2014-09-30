@@ -25,10 +25,10 @@ public class FeedFetcher {
   private static Logger log = LoggerFactory.getLogger(FeedFetcher.class);
 
   @Inject
-  FeedParser parser;
+  private FeedParser parser;
 
   @Inject
-  HttpGetter getter;
+  private HttpGetter getter;
 
   public FetchedFeed fetch(String feedUrl, boolean extractFeedUrlFromHtml, String lastModified,
       String eTag, Date lastPublishedDate, String lastContentHash) throws FeedException,

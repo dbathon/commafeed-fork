@@ -17,8 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.commafeed.backend.MetricsBean;
-import com.commafeed.backend.dao.FeedDAO;
-import com.commafeed.backend.dao.FeedEntryDAO;
 import com.commafeed.backend.dao.FeedSubscriptionDAO;
 import com.commafeed.backend.feeds.FeedRefreshExecutor.Task;
 import com.commafeed.backend.model.ApplicationSettings;
@@ -36,28 +34,22 @@ public class FeedRefreshUpdater {
   protected static Logger log = LoggerFactory.getLogger(FeedRefreshUpdater.class);
 
   @Inject
-  FeedUpdateService feedUpdateService;
+  private FeedUpdateService feedUpdateService;
 
   @Inject
-  SubscriptionHandler handler;
+  private SubscriptionHandler handler;
 
   @Inject
-  FeedRefreshTaskGiver taskGiver;
+  private FeedRefreshTaskGiver taskGiver;
 
   @Inject
-  FeedDAO feedDAO;
+  private ApplicationSettingsService applicationSettingsService;
 
   @Inject
-  ApplicationSettingsService applicationSettingsService;
+  private MetricsBean metricsBean;
 
   @Inject
-  MetricsBean metricsBean;
-
-  @Inject
-  FeedSubscriptionDAO feedSubscriptionDAO;
-
-  @Inject
-  FeedEntryDAO feedEntryDAO;
+  private FeedSubscriptionDAO feedSubscriptionDAO;
 
   private FeedRefreshExecutor pool;
   private Striped<Lock> locks;
