@@ -15,12 +15,12 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.commafeed.backend.FixedSizeSortedSet;
+import com.commafeed.backend.dao.SearchStringParser.Result;
 import com.commafeed.backend.model.AbstractModel;
 import com.commafeed.backend.model.AbstractModel_;
 import com.commafeed.backend.model.FeedEntry;
@@ -118,6 +118,8 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
       String keywords, Date newerThan, int offset, int limit, ReadingOrder order,
       boolean includeContent) {
 
+    final Result search = SearchStringParser.parse(keywords);
+
     final int capacity = offset + limit;
     final Comparator<FeedEntry> comparator =
         order == ReadingOrder.desc ? ENTRY_COMPARATOR_DESC : ENTRY_COMPARATOR_ASC;
@@ -135,17 +137,17 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
         predicates.add(builder.greaterThanOrEqualTo(root.get(FeedEntry_.inserted), newerThan));
       }
 
-      if (keywords != null) {
+      if (!search.terms.isEmpty()) {
         final Join<FeedEntry, FeedEntryContent> contentJoin = root.join(FeedEntry_.content);
 
-        String joinedKeywords = StringUtils.join(keywords.toLowerCase().split(" "), "%");
-        joinedKeywords = "%" + joinedKeywords + "%";
-
-        final Predicate content =
-            builder.like(builder.lower(contentJoin.get(FeedEntryContent_.content)), joinedKeywords);
-        final Predicate title =
-            builder.like(builder.lower(contentJoin.get(FeedEntryContent_.title)), joinedKeywords);
-        predicates.add(builder.or(content, title));
+        search.terms.forEach(term -> {
+          final String likeTerm = "%" + term.toLowerCase() + "%";
+          final Predicate content =
+              builder.like(builder.lower(contentJoin.get(FeedEntryContent_.content)), likeTerm);
+          final Predicate title =
+              builder.like(builder.lower(contentJoin.get(FeedEntryContent_.title)), likeTerm);
+          predicates.add(builder.or(content, title));
+        });
       }
 
       if (order != null && !set.isEmpty() && set.isFull()) {
