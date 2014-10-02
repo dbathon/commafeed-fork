@@ -24,7 +24,7 @@ public class PasswordRecoveryPage extends BasePage {
 
   public PasswordRecoveryPage() {
 
-    final IModel<String> email = new Model<String>();
+    final IModel<String> email = new Model<>();
     add(new BootstrapFeedbackPanel("feedback"));
     final Form<String> form = new Form<String>("form", email) {
       @Override

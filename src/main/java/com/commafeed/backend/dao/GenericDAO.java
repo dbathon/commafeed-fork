@@ -36,13 +36,8 @@ public abstract class GenericDAO<T extends AbstractModel> {
 
   public void saveOrUpdate(Collection<? extends AbstractModel> models) {
     final Session session = em.unwrap(Session.class);
-    final int i = 1;
     for (final AbstractModel model : models) {
       session.saveOrUpdate(model);
-      if (i % 50 == 0) {
-        session.flush();
-        session.clear();
-      }
     }
   }
 

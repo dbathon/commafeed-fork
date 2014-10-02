@@ -63,7 +63,7 @@ public class RegisterPanel extends Panel {
     add(form);
     add(new BootstrapFeedbackPanel("feedback", new ContainerFeedbackMessageFilter(form)));
 
-    form.add(new RequiredTextField<String>("name", new PropertyModel<String>(model, "name")).add(
+    form.add(new RequiredTextField<>("name", new PropertyModel<String>(model, "name")).add(
         StringValidator.lengthBetween(3, 32)).add((IValidator<String>) validatable -> {
       final String name = validatable.getValue();
       final User user = userDAO.findByName(name);

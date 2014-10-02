@@ -22,6 +22,5 @@ public class OPML11Parser extends OPML10Parser {
     }
 
     return false;
-
-  };
+  }
 }

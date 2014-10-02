@@ -47,8 +47,8 @@ public class PasswordRecoveryCallbackPage extends BasePage {
       throw new DisplayException("token expired");
     }
 
-    final IModel<String> password = new Model<String>();
-    final IModel<String> confirm = new Model<String>();
+    final IModel<String> password = new Model<>();
+    final IModel<String> confirm = new Model<>();
     add(new BootstrapFeedbackPanel("feedback"));
     final Form<Void> form = new Form<Void>("form") {
       @Override

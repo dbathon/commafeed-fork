@@ -122,7 +122,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
     final Comparator<FeedEntry> comparator =
         order == ReadingOrder.desc ? ENTRY_COMPARATOR_DESC : ENTRY_COMPARATOR_ASC;
     final FixedSizeSortedSet<FeedEntry> set =
-        new FixedSizeSortedSet<FeedEntry>(capacity < 0 ? Integer.MAX_VALUE : capacity, comparator);
+        new FixedSizeSortedSet<>(capacity < 0 ? Integer.MAX_VALUE : capacity, comparator);
     for (final FeedSubscription sub : subscriptions) {
       final CriteriaQuery<FeedEntry> query = builder.createQuery(FeedEntry.class);
       final Root<FeedEntry> root = query.from(FeedEntry.class);
@@ -196,8 +196,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
     final Comparator<FeedEntryStatus> comparator =
         order == ReadingOrder.desc ? STATUS_COMPARATOR_DESC : STATUS_COMPARATOR_ASC;
     final FixedSizeSortedSet<FeedEntryStatus> set =
-        new FixedSizeSortedSet<FeedEntryStatus>(capacity < 0 ? Integer.MAX_VALUE : capacity,
-            comparator);
+        new FixedSizeSortedSet<>(capacity < 0 ? Integer.MAX_VALUE : capacity, comparator);
     for (final FeedSubscription sub : subscriptions) {
       final CriteriaQuery<FeedEntryStatus> query = builder.createQuery(getType());
       final Root<FeedEntryStatus> root = query.from(getType());

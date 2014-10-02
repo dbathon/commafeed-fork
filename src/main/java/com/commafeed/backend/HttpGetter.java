@@ -141,12 +141,13 @@ public class HttpGetter {
 
       final HttpEntity entity = response.getEntity();
       byte[] content = null;
+      Header contentType = null;
       if (entity != null) {
         content = EntityUtils.toByteArray(entity);
+        contentType = entity.getContentType();
       }
 
       final long duration = System.currentTimeMillis() - start;
-      final Header contentType = entity.getContentType();
       result =
           new HttpResult(content, contentType == null ? null : contentType.getValue(),
               lastModifiedHeader == null ? null : lastModifiedHeader.getValue(), eTagHeader == null
@@ -251,5 +252,5 @@ public class HttpGetter {
     public boolean verify(String string, SSLSession ssls) {
       return true;
     }
-  };
+  }
 }
