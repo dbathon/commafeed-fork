@@ -43,6 +43,9 @@ import com.google.common.collect.Maps;
 @Stateless
 public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 
+  private static final String CATEGORY_ID_SEARCH_OPTION = "categoryId";
+  private static final String FEED_ID_SEARCH_OPTION = "feedId";
+
   protected static Logger log = LoggerFactory.getLogger(FeedEntryStatusDAO.class);
 
   private static int compareDatesAndIds(Date date1, Date date2, AbstractModel e1, AbstractModel e2) {
@@ -126,6 +129,16 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
     final FixedSizeSortedSet<FeedEntry> set =
         new FixedSizeSortedSet<>(capacity < 0 ? Integer.MAX_VALUE : capacity, comparator);
     for (final FeedSubscription sub : subscriptions) {
+      if (search.options.containsKey(CATEGORY_ID_SEARCH_OPTION)
+          && (sub.getCategory() == null || !search.options.containsEntry(CATEGORY_ID_SEARCH_OPTION,
+              sub.getCategory().getId().toString()))) {
+        continue;
+      }
+      if (search.options.containsKey(FEED_ID_SEARCH_OPTION)
+          && !search.options.containsEntry(FEED_ID_SEARCH_OPTION, sub.getFeed().getId().toString())) {
+        continue;
+      }
+
       final CriteriaQuery<FeedEntry> query = builder.createQuery(FeedEntry.class);
       final Root<FeedEntry> root = query.from(FeedEntry.class);
       final Join<FeedEntry, FeedFeedEntry> ffeJoin = root.join(FeedEntry_.feedRelationships);
