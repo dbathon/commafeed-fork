@@ -17,7 +17,9 @@ public class ApplicationSettings extends AbstractModel {
   private String publicUrl;
   private boolean allowRegistrations = false;
   private String googleAnalyticsTrackingCode;
+  @Deprecated
   private String googleClientId;
+  @Deprecated
   private String googleClientSecret;
   private int backgroundThreads = 3;
   private int databaseUpdateThreads = 1;
@@ -54,19 +56,19 @@ public class ApplicationSettings extends AbstractModel {
     this.allowRegistrations = allowRegistrations;
   }
 
-  public String getGoogleClientId() {
+  protected String getGoogleClientId() {
     return googleClientId;
   }
 
-  public void setGoogleClientId(String googleClientId) {
+  protected void setGoogleClientId(String googleClientId) {
     this.googleClientId = googleClientId;
   }
 
-  public String getGoogleClientSecret() {
+  protected String getGoogleClientSecret() {
     return googleClientSecret;
   }
 
-  public void setGoogleClientSecret(String googleClientSecret) {
+  protected void setGoogleClientSecret(String googleClientSecret) {
     this.googleClientSecret = googleClientSecret;
   }
 
