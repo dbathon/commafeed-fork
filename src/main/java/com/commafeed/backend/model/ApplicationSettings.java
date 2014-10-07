@@ -27,6 +27,7 @@ public class ApplicationSettings extends AbstractModel {
   private String smtpUserName;
   private String smtpPassword;
   private boolean heavyLoad;
+  @Deprecated
   private boolean pubsubhubbub;
   private boolean feedbackButton = true;
   private String logLevel = null;
@@ -141,11 +142,11 @@ public class ApplicationSettings extends AbstractModel {
     this.feedbackButton = feedbackButton;
   }
 
-  public boolean isPubsubhubbub() {
+  protected boolean isPubsubhubbub() {
     return pubsubhubbub;
   }
 
-  public void setPubsubhubbub(boolean pubsubhubbub) {
+  protected void setPubsubhubbub(boolean pubsubhubbub) {
     this.pubsubhubbub = pubsubhubbub;
   }
 

@@ -8,7 +8,6 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,9 +111,7 @@ public class FeedRefreshWorker {
       feed.setMessage(null);
       feed.setDisabledUntil(disabledUntil);
 
-      handlePubSub(feed, fetchedFeed.getFeed());
       feedRefreshUpdater.updateFeed(feed, entries);
-
     }
     catch (final NotModifiedException e) {
       log.debug("Feed not modified : {} - {}", feed.getUrl(), e.getMessage());
@@ -147,27 +144,4 @@ public class FeedRefreshWorker {
     }
   }
 
-  private void handlePubSub(Feed feed, Feed fetchedFeed) {
-    final String hub = fetchedFeed.getPushHub();
-    String topic = fetchedFeed.getPushTopic();
-    if (hub != null && topic != null) {
-      if (hub.contains("hubbub.api.typepad.com")) {
-        // that hub does not exist anymore
-        return;
-      }
-      if (topic.startsWith("www.")) {
-        topic = "http://" + topic;
-      }
-      else if (topic.startsWith("feed://")) {
-        topic = "http://" + topic.substring(7);
-      }
-      else if (topic.startsWith("http") == false) {
-        topic = "http://" + topic;
-      }
-      log.debug("feed {} has pubsub info: {}", feed.getUrl(), topic);
-      feed.setPushHub(hub);
-      feed.setPushTopic(topic);
-      feed.setPushTopicHash(DigestUtils.sha1Hex(topic));
-    }
-  }
 }

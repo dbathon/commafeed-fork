@@ -121,21 +121,25 @@ public class Feed extends AbstractModel {
    * detected hub for pubsubhubbub
    */
   @Column(length = 2048)
+  @Deprecated
   private String pushHub;
 
   /**
    * detected topic for pubsubhubbub
    */
   @Column(length = 2048)
+  @Deprecated
   private String pushTopic;
 
   @Column(name = "push_topic_hash", length = 2048)
+  @Deprecated
   private String pushTopicHash;
 
   /**
    * last time we subscribed for that topic on that hub
    */
   @Temporal(TemporalType.TIMESTAMP)
+  @Deprecated
   private Date pushLastPing;
 
   /**
@@ -241,27 +245,27 @@ public class Feed extends AbstractModel {
     this.lastUpdateSuccess = lastUpdateSuccess;
   }
 
-  public String getPushHub() {
+  protected String getPushHub() {
     return pushHub;
   }
 
-  public void setPushHub(String pushHub) {
+  protected void setPushHub(String pushHub) {
     this.pushHub = pushHub;
   }
 
-  public String getPushTopic() {
+  protected String getPushTopic() {
     return pushTopic;
   }
 
-  public void setPushTopic(String pushTopic) {
+  protected void setPushTopic(String pushTopic) {
     this.pushTopic = pushTopic;
   }
 
-  public Date getPushLastPing() {
+  protected Date getPushLastPing() {
     return pushLastPing;
   }
 
-  public void setPushLastPing(Date pushLastPing) {
+  protected void setPushLastPing(Date pushLastPing) {
     this.pushLastPing = pushLastPing;
   }
 
@@ -297,11 +301,11 @@ public class Feed extends AbstractModel {
     this.lastEntryDate = lastEntryDate;
   }
 
-  public String getPushTopicHash() {
+  protected String getPushTopicHash() {
     return pushTopicHash;
   }
 
-  public void setPushTopicHash(String pushTopicHash) {
+  protected void setPushTopicHash(String pushTopicHash) {
     this.pushTopicHash = pushTopicHash;
   }
 

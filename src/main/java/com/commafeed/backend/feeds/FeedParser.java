@@ -60,8 +60,6 @@ public class FeedParser {
       handleForeignMarkup(rss);
 
       fetchedFeed.setTitle(rss.getTitle());
-      feed.setPushHub(findHub(rss));
-      feed.setPushTopic(findSelf(rss));
       feed.setUrl(feedUrl);
       feed.setLink(rss.getLink());
       final List<SyndEntry> items = rss.getEntries();
@@ -208,28 +206,6 @@ public class FeedParser {
       }
     }
     return title;
-  }
-
-  @SuppressWarnings("unchecked")
-  private String findHub(SyndFeed feed) {
-    for (final SyndLink l : (List<SyndLink>) feed.getLinks()) {
-      if ("hub".equalsIgnoreCase(l.getRel())) {
-        log.debug("found hub {} for feed {}", l.getHref(), feed.getLink());
-        return l.getHref();
-      }
-    }
-    return null;
-  }
-
-  @SuppressWarnings("unchecked")
-  private String findSelf(SyndFeed feed) {
-    for (final SyndLink l : (List<SyndLink>) feed.getLinks()) {
-      if ("self".equalsIgnoreCase(l.getRel())) {
-        log.debug("found self {} for feed {}", l.getHref(), feed.getLink());
-        return l.getHref();
-      }
-    }
-    return null;
   }
 
 }

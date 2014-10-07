@@ -1,7 +1,6 @@
 package com.commafeed.backend.feeds;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -12,7 +11,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +21,6 @@ import com.commafeed.backend.model.ApplicationSettings;
 import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.FeedEntry;
 import com.commafeed.backend.model.FeedSubscription;
-import com.commafeed.backend.pubsubhubbub.SubscriptionHandler;
 import com.commafeed.backend.services.ApplicationSettingsService;
 import com.commafeed.backend.services.FeedUpdateService;
 import com.google.common.util.concurrent.Striped;
@@ -35,9 +32,6 @@ public class FeedRefreshUpdater {
 
   @Inject
   private FeedUpdateService feedUpdateService;
-
-  @Inject
-  private SubscriptionHandler handler;
 
   @Inject
   private FeedRefreshTaskGiver taskGiver;
@@ -94,9 +88,6 @@ public class FeedRefreshUpdater {
         }
       }
 
-      if (applicationSettingsService.get().isPubsubhubbub()) {
-        handlePubSub(feed);
-      }
       if (!ok) {
         feed.setDisabledUntil(null);
       }
@@ -137,21 +128,6 @@ public class FeedRefreshUpdater {
       }
     }
     return success;
-  }
-
-  private void handlePubSub(final Feed feed) {
-    if (feed.getPushHub() != null && feed.getPushTopic() != null) {
-      final Date lastPing = feed.getPushLastPing();
-      final Date now = new Date();
-      if (lastPing == null || lastPing.before(DateUtils.addDays(now, -3))) {
-        new Thread() {
-          @Override
-          public void run() {
-            handler.subscribe(feed);
-          }
-        }.start();
-      }
-    }
   }
 
   public int getQueueSize() {

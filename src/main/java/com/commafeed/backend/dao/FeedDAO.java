@@ -129,8 +129,8 @@ public class FeedDAO extends GenericDAO<Feed> {
 
   public static enum DuplicateMode {
     NORMALIZED_URL(Feed_.normalizedUrlHash),
-    LAST_CONTENT(Feed_.lastContentHash),
-    PUSH_TOPIC(Feed_.pushTopicHash);
+    LAST_CONTENT(Feed_.lastContentHash);
+
     private final SingularAttribute<Feed, String> path;
 
     private DuplicateMode(SingularAttribute<Feed, String> path) {
