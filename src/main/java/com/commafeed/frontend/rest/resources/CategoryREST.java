@@ -45,7 +45,9 @@ import com.commafeed.frontend.model.request.IDRequest;
 import com.commafeed.frontend.model.request.MarkRequest;
 import com.commafeed.frontend.rest.Enums.ReadType;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.synd.SyndFeedImpl;
@@ -410,8 +412,11 @@ public class CategoryREST extends AbstractResourceREST {
         category.getChildren().add(child);
       }
     }
-    Collections.sort(category.getChildren(),
-        (o1, o2) -> ObjectUtils.compare(o1.getPosition(), o2.getPosition()));
+    Collections.sort(
+        category.getChildren(),
+        (o1, o2) -> ComparisonChain.start()
+            .compare(o1.getPosition(), o2.getPosition(), Ordering.natural().nullsFirst())
+            .compare(o1.getId(), o2.getId()).result());
 
     for (final FeedSubscription subscription : subscriptions) {
       if ((id == null && subscription.getCategory() == null)
@@ -425,8 +430,11 @@ public class CategoryREST extends AbstractResourceREST {
         category.getFeeds().add(sub);
       }
     }
-    Collections.sort(category.getFeeds(),
-        (o1, o2) -> ObjectUtils.compare(o1.getPosition(), o2.getPosition()));
+    Collections.sort(
+        category.getFeeds(),
+        (o1, o2) -> ComparisonChain.start()
+            .compare(o1.getPosition(), o2.getPosition(), Ordering.natural().nullsFirst())
+            .compare(o1.getId(), o2.getId()).result());
     return category;
   }
 
