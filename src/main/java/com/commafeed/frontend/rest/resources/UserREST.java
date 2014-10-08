@@ -25,11 +25,11 @@ import com.commafeed.backend.model.UserSettings.ViewMode;
 import com.commafeed.backend.services.ApplicationSettingsService;
 import com.commafeed.backend.services.PasswordEncryptionService;
 import com.commafeed.backend.services.UserService;
-import com.commafeed.frontend.SecurityCheck;
 import com.commafeed.frontend.model.Settings;
 import com.commafeed.frontend.model.UserModel;
 import com.commafeed.frontend.model.request.ProfileModificationRequest;
 import com.commafeed.frontend.model.request.RegistrationRequest;
+import com.commafeed.frontend.rest.RestSecurityCheck;
 import com.google.common.base.Preconditions;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -174,7 +174,7 @@ public class UserREST extends AbstractResourceREST {
   @Path("/register")
   @POST
   @ApiOperation(value = "Register a new account")
-  @SecurityCheck(Role.NONE)
+  @RestSecurityCheck(Role.NONE)
   public Response register(@ApiParam(required = true) RegistrationRequest req) {
     try {
       userService.register(req.getName(), req.getPassword(), req.getEmail(),

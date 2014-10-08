@@ -32,7 +32,6 @@ import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserRole.Role;
 import com.commafeed.backend.model.UserSettings.ReadingOrder;
 import com.commafeed.backend.services.FeedSubscriptionService;
-import com.commafeed.frontend.SecurityCheck;
 import com.commafeed.frontend.model.Category;
 import com.commafeed.frontend.model.Entries;
 import com.commafeed.frontend.model.Entry;
@@ -44,6 +43,7 @@ import com.commafeed.frontend.model.request.CollapseRequest;
 import com.commafeed.frontend.model.request.IDRequest;
 import com.commafeed.frontend.model.request.MarkRequest;
 import com.commafeed.frontend.rest.Enums.ReadType;
+import com.commafeed.frontend.rest.RestSecurityCheck;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
@@ -175,7 +175,7 @@ public class CategoryREST extends AbstractResourceREST {
   @GET
   @ApiOperation(value = "Get category entries as feed", notes = "Get a feed of category entries")
   @Produces(MediaType.APPLICATION_XML)
-  @SecurityCheck(value = Role.USER, apiKeyAllowed = true)
+  @RestSecurityCheck(value = Role.USER, apiKeyAllowed = true)
   public Response getCategoryEntriesAsFeed(@ApiParam(
       value = "id of the category, 'all' or 'starred'", required = true) @QueryParam("id") String id) {
 

@@ -40,6 +40,7 @@ import com.commafeed.frontend.pages.DemoLoginPage;
 import com.commafeed.frontend.pages.HomePage;
 import com.commafeed.frontend.pages.LogoutPage;
 import com.commafeed.frontend.pages.NextUnreadRedirectPage;
+import com.commafeed.frontend.pages.PagesSecurityCheck;
 import com.commafeed.frontend.pages.PasswordRecoveryCallbackPage;
 import com.commafeed.frontend.pages.PasswordRecoveryPage;
 import com.commafeed.frontend.pages.WelcomePage;
@@ -121,9 +122,10 @@ public class CommaFeedApplication extends AuthenticatedWebApplication {
           Class<T> componentClass) {
         boolean authorized = true;
 
-        final boolean restricted = componentClass.isAnnotationPresent(SecurityCheck.class);
+        final boolean restricted = componentClass.isAnnotationPresent(PagesSecurityCheck.class);
         if (restricted) {
-          final SecurityCheck annotation = componentClass.getAnnotation(SecurityCheck.class);
+          final PagesSecurityCheck annotation =
+              componentClass.getAnnotation(PagesSecurityCheck.class);
           final Roles roles = CommaFeedSession.get().getRoles();
           authorized = roles.hasAnyRole(new Roles(annotation.value().name()));
         }

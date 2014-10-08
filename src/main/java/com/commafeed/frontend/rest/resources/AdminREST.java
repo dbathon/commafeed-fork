@@ -35,10 +35,10 @@ import com.commafeed.backend.model.UserRole;
 import com.commafeed.backend.model.UserRole.Role;
 import com.commafeed.backend.services.PasswordEncryptionService;
 import com.commafeed.backend.services.UserService;
-import com.commafeed.frontend.SecurityCheck;
 import com.commafeed.frontend.model.UserModel;
 import com.commafeed.frontend.model.request.FeedMergeRequest;
 import com.commafeed.frontend.model.request.IDRequest;
+import com.commafeed.frontend.rest.RestSecurityCheck;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -47,7 +47,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 
-@SecurityCheck(Role.ADMIN)
+@RestSecurityCheck(Role.ADMIN)
 @Path("/admin")
 @Api(value = "/admin", description = "Operations about application administration")
 public class AdminREST extends AbstractResourceREST {

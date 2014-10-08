@@ -54,7 +54,6 @@ import com.commafeed.backend.model.FeedSubscription;
 import com.commafeed.backend.model.UserRole.Role;
 import com.commafeed.backend.model.UserSettings.ReadingOrder;
 import com.commafeed.backend.services.FeedSubscriptionService;
-import com.commafeed.frontend.SecurityCheck;
 import com.commafeed.frontend.model.Entries;
 import com.commafeed.frontend.model.Entry;
 import com.commafeed.frontend.model.FeedInfo;
@@ -65,6 +64,7 @@ import com.commafeed.frontend.model.request.IDRequest;
 import com.commafeed.frontend.model.request.MarkRequest;
 import com.commafeed.frontend.model.request.SubscribeRequest;
 import com.commafeed.frontend.rest.Enums.ReadType;
+import com.commafeed.frontend.rest.RestSecurityCheck;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.sun.syndication.feed.opml.Opml;
@@ -180,7 +180,7 @@ public class FeedREST extends AbstractResourceREST {
   @GET
   @ApiOperation(value = "Get feed entries as a feed", notes = "Get a feed of feed entries")
   @Produces(MediaType.APPLICATION_XML)
-  @SecurityCheck(value = Role.USER, apiKeyAllowed = true)
+  @RestSecurityCheck(value = Role.USER, apiKeyAllowed = true)
   public Response getFeedEntriesAsFeed(
       @ApiParam(value = "id of the feed", required = true) @QueryParam("id") String id) {
 

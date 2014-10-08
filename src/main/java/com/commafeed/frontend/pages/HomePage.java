@@ -7,11 +7,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.commafeed.backend.model.UserRole.Role;
 import com.commafeed.backend.model.UserSettings;
 import com.commafeed.frontend.CommaFeedSession;
-import com.commafeed.frontend.SecurityCheck;
 import com.commafeed.frontend.resources.UserCustomCssReference;
 
 @SuppressWarnings("serial")
-@SecurityCheck(Role.USER)
+@PagesSecurityCheck(Role.USER)
 public class HomePage extends BasePage {
 
   @Override

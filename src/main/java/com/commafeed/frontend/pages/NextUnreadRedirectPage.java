@@ -19,12 +19,11 @@ import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserRole.Role;
 import com.commafeed.backend.model.UserSettings.ReadingOrder;
 import com.commafeed.frontend.CommaFeedSession;
-import com.commafeed.frontend.SecurityCheck;
 import com.commafeed.frontend.rest.resources.CategoryREST;
 import com.google.common.collect.Iterables;
 
 @SuppressWarnings("serial")
-@SecurityCheck(Role.USER)
+@PagesSecurityCheck(Role.USER)
 public class NextUnreadRedirectPage extends WebPage {
 
   public static final String PARAM_CATEGORYID = "category";
