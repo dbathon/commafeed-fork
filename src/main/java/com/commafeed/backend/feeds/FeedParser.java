@@ -10,8 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.jdom.Element;
 import org.jdom.Namespace;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
 import com.commafeed.backend.model.Feed;
@@ -30,8 +28,6 @@ import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
 
 public class FeedParser {
-
-  private static Logger log = LoggerFactory.getLogger(FeedParser.class);
 
   private static final String ATOM_10_URI = "http://www.w3.org/2005/Atom";
   private static final Namespace ATOM_10_NS = Namespace.getNamespace(ATOM_10_URI);

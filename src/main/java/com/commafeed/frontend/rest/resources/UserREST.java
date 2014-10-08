@@ -22,7 +22,6 @@ import com.commafeed.backend.model.UserSettings;
 import com.commafeed.backend.model.UserSettings.ReadingMode;
 import com.commafeed.backend.model.UserSettings.ReadingOrder;
 import com.commafeed.backend.model.UserSettings.ViewMode;
-import com.commafeed.backend.services.ApplicationSettingsService;
 import com.commafeed.backend.services.PasswordEncryptionService;
 import com.commafeed.backend.services.UserService;
 import com.commafeed.frontend.model.Settings;
@@ -56,9 +55,6 @@ public class UserREST extends AbstractREST {
 
   @Inject
   private PasswordEncryptionService encryptionService;
-
-  @Inject
-  private ApplicationSettingsService applicationSettingsService;
 
   @Path("/settings")
   @GET
