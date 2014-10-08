@@ -117,9 +117,7 @@ public class FeedRefreshTaskGiver {
   }
 
   private Date getThreshold() {
-    final boolean heavyLoad = applicationSettingsService.get().isHeavyLoad();
-    final Date threshold = DateUtils.addMinutes(new Date(), heavyLoad ? -15 : -5);
-    return threshold;
+    return DateUtils.addMinutes(new Date(), -5);
   }
 
   public void add(Feed feed) {

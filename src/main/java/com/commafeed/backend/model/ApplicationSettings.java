@@ -28,6 +28,7 @@ public class ApplicationSettings extends AbstractModel {
   private boolean smtpTls;
   private String smtpUserName;
   private String smtpPassword;
+  @Deprecated
   private boolean heavyLoad;
   @Deprecated
   private boolean pubsubhubbub;
@@ -152,11 +153,11 @@ public class ApplicationSettings extends AbstractModel {
     this.pubsubhubbub = pubsubhubbub;
   }
 
-  public boolean isHeavyLoad() {
+  protected boolean isHeavyLoad() {
     return heavyLoad;
   }
 
-  public void setHeavyLoad(boolean heavyLoad) {
+  protected void setHeavyLoad(boolean heavyLoad) {
     this.heavyLoad = heavyLoad;
   }
 

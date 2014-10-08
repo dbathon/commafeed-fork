@@ -91,39 +91,26 @@ public class FeedRefreshWorker {
       // thrown
       final List<FeedEntry> entries = fetchedFeed.getEntries();
 
-      Date disabledUntil = null;
-      if (applicationSettingsService.get().isHeavyLoad()) {
-        disabledUntil =
-            FeedUtils.buildDisabledUntil(fetchedFeed.getFeed().getLastEntryDate(), fetchedFeed
-                .getFeed().getAverageEntryInterval());
-      }
-
       feed.setLastUpdateSuccess(now);
       feed.setLink(fetchedFeed.getFeed().getLink());
       feed.setLastModifiedHeader(fetchedFeed.getFeed().getLastModifiedHeader());
       feed.setEtagHeader(fetchedFeed.getFeed().getEtagHeader());
       feed.setLastContentHash(fetchedFeed.getFeed().getLastContentHash());
       feed.setLastPublishedDate(fetchedFeed.getFeed().getLastPublishedDate());
-      feed.setAverageEntryInterval(fetchedFeed.getFeed().getAverageEntryInterval());
       feed.setLastEntryDate(fetchedFeed.getFeed().getLastEntryDate());
 
       feed.setErrorCount(0);
       feed.setMessage(null);
-      feed.setDisabledUntil(disabledUntil);
+      feed.setDisabledUntil(null);
 
       feedRefreshUpdater.updateFeed(feed, entries);
     }
     catch (final NotModifiedException e) {
       log.debug("Feed not modified : {} - {}", feed.getUrl(), e.getMessage());
 
-      Date disabledUntil = null;
-      if (applicationSettingsService.get().isHeavyLoad()) {
-        disabledUntil =
-            FeedUtils.buildDisabledUntil(feed.getLastEntryDate(), feed.getAverageEntryInterval());
-      }
       feed.setErrorCount(0);
       feed.setMessage(null);
-      feed.setDisabledUntil(disabledUntil);
+      feed.setDisabledUntil(null);
 
       taskGiver.giveBack(feed);
     }

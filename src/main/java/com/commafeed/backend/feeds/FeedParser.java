@@ -108,7 +108,6 @@ public class FeedParser {
         publishedDate = getFeedPublishedDate(publishedDate, entries);
       }
       feed.setLastPublishedDate(validateDate(publishedDate, true));
-      feed.setAverageEntryInterval(FeedUtils.averageTimeBetweenEntries(entries));
       feed.setLastEntryDate(lastEntryDate);
 
     }

@@ -285,55 +285,6 @@ public class FeedUtils {
     return null;
   }
 
-  /**
-   * When the feed was refreshed successfully
-   */
-  public static Date buildDisabledUntil(Date publishedDate, Long averageEntryInterval) {
-    final Date now = new Date();
-
-    if (publishedDate == null) {
-      // feed with no entries, recheck in 24 hours
-      return DateUtils.addHours(now, 24);
-    }
-    else if (publishedDate.before(DateUtils.addMonths(now, -1))) {
-      // older than a month, recheck in 24 hours
-      return DateUtils.addHours(now, 24);
-    }
-    else if (publishedDate.before(DateUtils.addDays(now, -14))) {
-      // older than two weeks, recheck in 12 hours
-      return DateUtils.addHours(now, 12);
-    }
-    else if (publishedDate.before(DateUtils.addDays(now, -7))) {
-      // older than a week, recheck in 6 hours
-      return DateUtils.addHours(now, 6);
-    }
-    else if (averageEntryInterval != null) {
-      // use average time between entries to decide when to refresh next
-      final int factor = 2;
-      return new Date(Math.min(DateUtils.addHours(now, 6).getTime(), now.getTime()
-          + averageEntryInterval / factor));
-    }
-    else {
-      // unknown case, recheck in 24 hours
-      return DateUtils.addHours(now, 24);
-    }
-  }
-
-  public static Long averageTimeBetweenEntries(List<FeedEntry> entries) {
-    if (entries.isEmpty() || entries.size() == 1) {
-      return null;
-    }
-
-    final List<Long> timestamps = getSortedTimestamps(entries);
-
-    double sum = 0.0;
-    for (int i = 0; i < timestamps.size() - 1; i++) {
-      final long diff = Math.abs(timestamps.get(i) - timestamps.get(i + 1));
-      sum += diff;
-    }
-    return (long) (sum / (timestamps.size() - 1));
-  }
-
   public static List<Long> getSortedTimestamps(List<FeedEntry> entries) {
     final List<Long> timestamps = Lists.newArrayList();
     for (final FeedEntry entry : entries) {

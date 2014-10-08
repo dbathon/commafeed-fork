@@ -103,6 +103,7 @@ public class Feed extends AbstractModel {
   /**
    * average time between entries in the feed
    */
+  @Deprecated
   private Long averageEntryInterval;
 
   /**
@@ -285,11 +286,11 @@ public class Feed extends AbstractModel {
     this.lastContentHash = lastContentHash;
   }
 
-  public Long getAverageEntryInterval() {
+  protected Long getAverageEntryInterval() {
     return averageEntryInterval;
   }
 
-  public void setAverageEntryInterval(Long averageEntryInterval) {
+  protected void setAverageEntryInterval(Long averageEntryInterval) {
     this.averageEntryInterval = averageEntryInterval;
   }
 
