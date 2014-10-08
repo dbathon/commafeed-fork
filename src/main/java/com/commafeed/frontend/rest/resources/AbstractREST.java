@@ -19,12 +19,19 @@ import org.apache.wicket.util.crypt.Base64;
 
 import com.commafeed.backend.dao.UserDAO;
 import com.commafeed.backend.model.User;
+import com.commafeed.backend.model.UserRole.Role;
+import com.commafeed.backend.services.ApplicationSettingsService;
 import com.commafeed.frontend.CommaFeedApplication;
 import com.commafeed.frontend.CommaFeedSession;
+import com.commafeed.frontend.rest.RestSecurityCheck;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RestSecurityCheck(Role.USER)
 public abstract class AbstractREST {
+
+  @Inject
+  protected ApplicationSettingsService applicationSettingsService;
 
   @Context
   private HttpServletRequest request;

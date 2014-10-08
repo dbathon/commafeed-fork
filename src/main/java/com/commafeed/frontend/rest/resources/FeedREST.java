@@ -79,7 +79,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 @Path("/feed")
 @Api(value = "/feed", description = "Operations about feeds")
-public class FeedREST extends AbstractResourceREST {
+public class FeedREST extends AbstractREST {
 
   private static Logger log = LoggerFactory.getLogger(FeedREST.class);
 

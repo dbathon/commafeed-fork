@@ -50,7 +50,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 @RestSecurityCheck(Role.ADMIN)
 @Path("/admin")
 @Api(value = "/admin", description = "Operations about application administration")
-public class AdminREST extends AbstractResourceREST {
+public class AdminREST extends AbstractREST {
 
   @Inject
   private UserService userService;

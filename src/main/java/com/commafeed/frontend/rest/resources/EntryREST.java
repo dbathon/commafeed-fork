@@ -32,7 +32,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 @Path("/entry")
 @Api(value = "/entry", description = "Operations about feed entries")
-public class EntryREST extends AbstractResourceREST {
+public class EntryREST extends AbstractREST {
 
   @Inject
   private FeedEntryService feedEntryService;

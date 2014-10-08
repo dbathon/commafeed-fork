@@ -58,7 +58,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 @Path("/category")
 @Api(value = "/category", description = "Operations about user categories")
-public class CategoryREST extends AbstractResourceREST {
+public class CategoryREST extends AbstractREST {
 
   private static Logger log = LoggerFactory.getLogger(CategoryREST.class);
 

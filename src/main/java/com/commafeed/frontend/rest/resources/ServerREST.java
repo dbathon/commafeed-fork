@@ -19,7 +19,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Path("/server")
 @Api(value = "/server", description = "Operations about server infos")
-public class ServerREST extends AbstractResourceREST {
+public class ServerREST extends AbstractREST {
 
   @Inject
   private StartupBean startupBean;
