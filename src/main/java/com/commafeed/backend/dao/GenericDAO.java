@@ -1,7 +1,7 @@
 package com.commafeed.backend.dao;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -34,15 +34,15 @@ public abstract class GenericDAO<T extends AbstractModel> {
     builder = em.getCriteriaBuilder();
   }
 
-  public void saveOrUpdate(Collection<? extends AbstractModel> models) {
+  public void saveOrUpdate(Collection<T> models) {
     final Session session = em.unwrap(Session.class);
     for (final AbstractModel model : models) {
       session.saveOrUpdate(model);
     }
   }
 
-  public void saveOrUpdate(AbstractModel... models) {
-    saveOrUpdate(Arrays.asList(models));
+  public void saveOrUpdate(T model) {
+    saveOrUpdate(Collections.singleton(model));
   }
 
   public void delete(AbstractModel object) {
