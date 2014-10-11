@@ -8,12 +8,13 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.hibernate.Hibernate;
+
 import com.commafeed.backend.model.AbstractModel_;
 import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.FeedCategory;
 import com.commafeed.backend.model.FeedSubscription;
 import com.commafeed.backend.model.FeedSubscription_;
-import com.commafeed.backend.model.Models;
 import com.commafeed.backend.model.User;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -134,8 +135,8 @@ public class FeedSubscriptionDAO extends GenericDAO<FeedSubscription> {
 
   private void initRelations(FeedSubscription sub) {
     if (sub != null) {
-      Models.initialize(sub.getFeed());
-      Models.initialize(sub.getCategory());
+      Hibernate.initialize(sub.getFeed());
+      Hibernate.initialize(sub.getCategory());
     }
   }
 }

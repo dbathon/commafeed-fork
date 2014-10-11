@@ -16,6 +16,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,6 @@ import com.commafeed.backend.model.FeedEntry_;
 import com.commafeed.backend.model.FeedFeedEntry;
 import com.commafeed.backend.model.FeedFeedEntry_;
 import com.commafeed.backend.model.FeedSubscription;
-import com.commafeed.backend.model.Models;
 import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserSettings.ReadingOrder;
 import com.commafeed.backend.services.ApplicationSettingsService;
@@ -307,8 +307,8 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
       List<FeedEntryStatus> results) {
     if (includeContent) {
       for (final FeedEntryStatus status : results) {
-        Models.initialize(status.getSubscription().getFeed());
-        Models.initialize(status.getEntry().getContent());
+        Hibernate.initialize(status.getSubscription().getFeed());
+        Hibernate.initialize(status.getEntry().getContent());
       }
     }
     return results;
