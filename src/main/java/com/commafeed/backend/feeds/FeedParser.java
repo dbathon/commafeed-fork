@@ -33,7 +33,6 @@ public class FeedParser {
   private static final Namespace ATOM_10_NS = Namespace.getNamespace(ATOM_10_URI);
 
   private static final Date START = new Date(86400000);
-  private static final Date END = new Date(1000l * Integer.MAX_VALUE - 86400000);
 
   private static final Function<SyndContent, String> CONTENT_TO_STRING = content -> content
       .getValue();
@@ -165,11 +164,7 @@ public class FeedParser {
     if (date == null) {
       return nullToNow ? now : null;
     }
-    if (date.before(START) || date.after(END)) {
-      return now;
-    }
-
-    if (date.after(now)) {
+    if (date.before(START) || date.after(now)) {
       return now;
     }
     return date;
