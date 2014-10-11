@@ -40,6 +40,45 @@ public class FeedUtils {
       "border");
   private static final char[] DISALLOWED_IFRAME_CSS_RULE_CHARACTERS = new char[] { '(', ')' };
 
+  private static final Whitelist CONTENT_WHITELIST = buildContentWhitelist();
+
+  private static Whitelist buildContentWhitelist() {
+    final Whitelist whitelist = new Whitelist();
+    whitelist.addTags("a", "b", "blockquote", "br", "caption", "cite", "code", "col", "colgroup",
+        "dd", "div", "dl", "dt", "em", "h1", "h2", "h3", "h4", "h5", "h6", "i", "iframe", "img",
+        "li", "ol", "p", "pre", "q", "small", "strike", "strong", "sub", "sup", "table", "tbody",
+        "td", "tfoot", "th", "thead", "tr", "u", "ul");
+
+    whitelist.addAttributes("div", "dir");
+    whitelist.addAttributes("pre", "dir");
+    whitelist.addAttributes("code", "dir");
+    whitelist.addAttributes("table", "dir");
+    whitelist.addAttributes("p", "dir");
+    whitelist.addAttributes("a", "href", "title");
+    whitelist.addAttributes("blockquote", "cite");
+    whitelist.addAttributes("col", "span", "width");
+    whitelist.addAttributes("colgroup", "span", "width");
+    whitelist.addAttributes("iframe", "src", "height", "width", "allowfullscreen", "frameborder",
+        "style");
+    whitelist.addAttributes("img", "align", "alt", "height", "src", "title", "width");
+    whitelist.addAttributes("ol", "start", "type");
+    whitelist.addAttributes("q", "cite");
+    whitelist.addAttributes("table", "border", "bordercolor", "summary", "width");
+    whitelist.addAttributes("td", "border", "bordercolor", "abbr", "axis", "colspan", "rowspan",
+        "width");
+    whitelist.addAttributes("th", "border", "bordercolor", "abbr", "axis", "colspan", "rowspan",
+        "scope", "width");
+    whitelist.addAttributes("ul", "type");
+
+    whitelist.addProtocols("a", "href", "ftp", "http", "https", "mailto");
+    whitelist.addProtocols("blockquote", "cite", "http", "https");
+    whitelist.addProtocols("img", "src", "http", "https");
+    whitelist.addProtocols("q", "cite", "http", "https");
+
+    whitelist.addEnforcedAttribute("a", "target", "_blank");
+    return whitelist;
+  }
+
   public static String truncate(String string, int length) {
     if (string != null) {
       string = string.substring(0, Math.min(length, string.length()));
@@ -140,44 +179,8 @@ public class FeedUtils {
 
   public static String handleContent(String content, String baseUri, boolean keepTextOnly) {
     if (StringUtils.isNotBlank(content)) {
-      baseUri = StringUtils.trimToEmpty(baseUri);
-      final Whitelist whitelist = new Whitelist();
-      whitelist.addTags("a", "b", "blockquote", "br", "caption", "cite", "code", "col", "colgroup",
-          "dd", "div", "dl", "dt", "em", "h1", "h2", "h3", "h4", "h5", "h6", "i", "iframe", "img",
-          "li", "ol", "p", "pre", "q", "small", "strike", "strong", "sub", "sup", "table", "tbody",
-          "td", "tfoot", "th", "thead", "tr", "u", "ul");
-
-      whitelist.addAttributes("div", "dir");
-      whitelist.addAttributes("pre", "dir");
-      whitelist.addAttributes("code", "dir");
-      whitelist.addAttributes("table", "dir");
-      whitelist.addAttributes("p", "dir");
-      whitelist.addAttributes("a", "href", "title");
-      whitelist.addAttributes("blockquote", "cite");
-      whitelist.addAttributes("col", "span", "width");
-      whitelist.addAttributes("colgroup", "span", "width");
-      whitelist.addAttributes("iframe", "src", "height", "width", "allowfullscreen", "frameborder",
-          "style");
-      whitelist.addAttributes("img", "align", "alt", "height", "src", "title", "width");
-      whitelist.addAttributes("ol", "start", "type");
-      whitelist.addAttributes("q", "cite");
-      whitelist.addAttributes("table", "border", "bordercolor", "summary", "width");
-      whitelist.addAttributes("td", "border", "bordercolor", "abbr", "axis", "colspan", "rowspan",
-          "width");
-      whitelist.addAttributes("th", "border", "bordercolor", "abbr", "axis", "colspan", "rowspan",
-          "scope", "width");
-      whitelist.addAttributes("ul", "type");
-
-      whitelist.addProtocols("a", "href", "ftp", "http", "https", "mailto");
-      whitelist.addProtocols("blockquote", "cite", "http", "https");
-      whitelist.addProtocols("img", "src", "http", "https");
-      whitelist.addProtocols("q", "cite", "http", "https");
-
-      whitelist.addEnforcedAttribute("a", "target", "_blank");
-
-      final Document dirty = Jsoup.parseBodyFragment(content, baseUri);
-      final Cleaner cleaner = new Cleaner(whitelist);
-      final Document clean = cleaner.clean(dirty);
+      final Document dirty = Jsoup.parseBodyFragment(content, StringUtils.trimToEmpty(baseUri));
+      final Document clean = new Cleaner(CONTENT_WHITELIST).clean(dirty);
 
       for (final Element e : clean.select("iframe[style]")) {
         final String style = e.attr("style");
