@@ -22,6 +22,7 @@ import com.commafeed.backend.feeds.FeedRefreshTaskGiver;
 import com.commafeed.backend.model.ApplicationSettings;
 import com.commafeed.backend.model.UserRole.Role;
 import com.commafeed.backend.services.ApplicationSettingsService;
+import com.commafeed.backend.services.FeedUpdateService;
 import com.commafeed.backend.services.UserService;
 import com.google.common.collect.Maps;
 
@@ -46,6 +47,9 @@ public class StartupBean {
   @Inject
   private ApplicationSettingsService applicationSettingsService;
 
+  @Inject
+  private FeedUpdateService feedUpdateService;
+
   private long startupTime;
   private final Map<String, String> supportedLanguages = Maps.newHashMap();
 
@@ -59,6 +63,8 @@ public class StartupBean {
 
     initSupportedLanguages();
     taskGiver.start();
+
+    feedUpdateService.updateFeedEntryContentSearchTextsAsync();
   }
 
   private void initSupportedLanguages() {

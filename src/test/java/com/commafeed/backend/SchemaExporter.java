@@ -15,7 +15,7 @@ import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.hbm2ddl.SchemaExport.Type;
 import org.hibernate.tool.hbm2ddl.Target;
 
-import com.commafeed.backend.hibernate.PostgreSQL9WithTextClobDialect;
+import com.commafeed.backend.hibernate.CommafeedPostgreSQL9Dialect;
 
 public class SchemaExporter {
 
@@ -54,7 +54,7 @@ public class SchemaExporter {
   }
 
   public static void main(String[] args) {
-    exportSchema(PostgreSQL9WithTextClobDialect.class, "postgres");
+    exportSchema(CommafeedPostgreSQL9Dialect.class, "postgres");
     exportSchema(HSQLDialect.class, "hsql");
   }
 

@@ -48,6 +48,7 @@
         content text,
         enclosureType varchar(255),
         enclosureUrl varchar(2048),
+        searchText text,
         title varchar(2048),
         primary key (id)
     );

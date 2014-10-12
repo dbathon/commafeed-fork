@@ -46,3 +46,8 @@ alter table FEEDS
   drop column pushLastPing,
   drop column pushTopic,
   drop column push_topic_hash;
+
+
+alter table FEEDENTRYCONTENTS add column searchText text;
+
+create index idx_feedentrycontents_fts on FEEDENTRYCONTENTS using gin(to_tsvector('simple', searchText));

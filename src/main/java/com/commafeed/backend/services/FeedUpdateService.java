@@ -4,10 +4,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import javax.ejb.Asynchronous;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.commafeed.backend.MetricsBean;
 import com.commafeed.backend.dao.FeedEntryDAO;
@@ -22,8 +30,13 @@ import com.google.common.collect.Lists;
 @Stateless
 public class FeedUpdateService {
 
+  private static Logger log = LoggerFactory.getLogger(FeedUpdateService.class);
+
   @PersistenceContext
-  protected EntityManager em;
+  private EntityManager em;
+
+  @EJB
+  private FeedUpdateService self;
 
   @Inject
   private FeedEntryDAO feedEntryDAO;
@@ -63,6 +76,8 @@ public class FeedUpdateService {
       content.setContent(newContent.getContent());
       content.setEnclosureType(newContent.getEnclosureType());
       content.setEnclosureUrl(newContent.getEnclosureUrl());
+
+      content.updateSearchText();
     }
   }
 
@@ -73,6 +88,7 @@ public class FeedUpdateService {
     if (existing == null) {
       entry.setInserted(new Date());
       entry.setFeed(feed);
+      entry.getContent().updateSearchText();
       feedEntryDAO.saveOrUpdate(entry);
 
       createAndSaveEntryStatuses(entry, subscriptions);
@@ -81,6 +97,35 @@ public class FeedUpdateService {
       // just update the content if there are changes
       processContentChanges(existing, entry.getContent());
     }
+  }
+
+  @Asynchronous
+  @TransactionAttribute(TransactionAttributeType.NEVER)
+  public void updateFeedEntryContentSearchTextsAsync() {
+    Long lastId = Long.MIN_VALUE;
+    // do the update in batches
+    while (lastId != null) {
+      lastId = self.internalUpdateFeedEntryContentSearch(lastId);
+    }
+  }
+
+  public Long internalUpdateFeedEntryContentSearch(Long lastId) {
+    Long resultLastId = null;
+
+    final TypedQuery<FeedEntryContent> query =
+        em.createQuery("select c from FeedEntryContent c "
+            + "where c.searchText is null and c.id > :lastId order by c.id", FeedEntryContent.class);
+    query.setParameter("lastId", lastId);
+    query.setMaxResults(100);
+    final List<FeedEntryContent> items = query.getResultList();
+
+    for (final FeedEntryContent item : items) {
+      item.updateSearchText();
+      resultLastId = item.getId();
+    }
+
+    log.info("updated search text of " + items.size() + " entry contents");
+    return resultLastId;
   }
 
 }

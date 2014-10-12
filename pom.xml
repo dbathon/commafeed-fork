@@ -286,7 +286,7 @@
       <id>pgsql</id>
       <properties>
         <jpa.datasource.name>java:jboss/datasources/CommafeedDS</jpa.datasource.name>
-        <jpa.dialect>com.commafeed.backend.hibernate.PostgreSQL9WithTextClobDialect</jpa.dialect>
+        <jpa.dialect>com.commafeed.backend.hibernate.CommafeedPostgreSQL9Dialect</jpa.dialect>
       </properties>
     </profile>
     <profile>

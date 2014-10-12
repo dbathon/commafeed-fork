@@ -1,5 +1,8 @@
 package com.commafeed.backend.model;
 
+import java.util.Set;
+import java.util.TreeSet;
+
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,6 +12,9 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import com.commafeed.backend.feeds.FeedUtils;
+import com.google.common.base.Joiner;
+
 @Entity
 @Table(name = "FEEDENTRYCONTENTS")
 @SuppressWarnings("serial")
@@ -16,12 +22,21 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 public class FeedEntryContent extends AbstractModel {
 
+  private static final Joiner SPACE_JOINER = Joiner.on(" ");
+
   @Column(length = 2048)
   private String title;
 
   @Lob
   @Column(length = Integer.MAX_VALUE)
   private String content;
+
+  /**
+   * The "words" extracted from title and content for full text search.
+   */
+  @Lob
+  @Column(length = Integer.MAX_VALUE)
+  private String searchText;
 
   @Column(length = 2048)
   private String enclosureUrl;
@@ -59,6 +74,22 @@ public class FeedEntryContent extends AbstractModel {
 
   public void setTitle(String title) {
     this.title = title;
+  }
+
+  public String getSearchText() {
+    return searchText;
+  }
+
+  public void setSearchText(String searchText) {
+    this.searchText = searchText;
+  }
+
+  public void updateSearchText() {
+    final Set<String> searchWords = new TreeSet<>();
+    FeedUtils.extractSearchWords(getTitle(), false, searchWords);
+    FeedUtils.extractSearchWords(getContent(), true, searchWords);
+
+    setSearchText(SPACE_JOINER.join(searchWords));
   }
 
 }

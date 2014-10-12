@@ -1,7 +1,14 @@
 package com.commafeed.backend.feeds;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableSet;
 
 public class FeedUtilsTest {
 
@@ -29,19 +36,35 @@ public class FeedUtilsTest {
     final String urld2 =
         "http://fivefilters.org/content-only/makefulltextfeed.php?url=http://feeds2.feedburner.com/Frandroid";
 
-    Assert.assertEquals(FeedUtils.normalizeURL(urla1), FeedUtils.normalizeURL(urla2));
-    Assert.assertEquals(FeedUtils.normalizeURL(urla1), FeedUtils.normalizeURL(urla3));
-    Assert.assertEquals(FeedUtils.normalizeURL(urla1), FeedUtils.normalizeURL(urla4));
-    Assert.assertEquals(FeedUtils.normalizeURL(urla1), FeedUtils.normalizeURL(urla5));
+    assertEquals(FeedUtils.normalizeURL(urla1), FeedUtils.normalizeURL(urla2));
+    assertEquals(FeedUtils.normalizeURL(urla1), FeedUtils.normalizeURL(urla3));
+    assertEquals(FeedUtils.normalizeURL(urla1), FeedUtils.normalizeURL(urla4));
+    assertEquals(FeedUtils.normalizeURL(urla1), FeedUtils.normalizeURL(urla5));
 
-    Assert.assertEquals(FeedUtils.normalizeURL(urlb1), FeedUtils.normalizeURL(urlb2));
+    assertEquals(FeedUtils.normalizeURL(urlb1), FeedUtils.normalizeURL(urlb2));
 
-    Assert.assertEquals(FeedUtils.normalizeURL(urlc1), FeedUtils.normalizeURL(urlc2));
-    Assert.assertEquals(FeedUtils.normalizeURL(urlc1), FeedUtils.normalizeURL(urlc3));
-    Assert.assertEquals(FeedUtils.normalizeURL(urlc1), FeedUtils.normalizeURL(urlc4));
-    Assert.assertEquals(FeedUtils.normalizeURL(urlc1), FeedUtils.normalizeURL(urlc5));
+    assertEquals(FeedUtils.normalizeURL(urlc1), FeedUtils.normalizeURL(urlc2));
+    assertEquals(FeedUtils.normalizeURL(urlc1), FeedUtils.normalizeURL(urlc3));
+    assertEquals(FeedUtils.normalizeURL(urlc1), FeedUtils.normalizeURL(urlc4));
+    assertEquals(FeedUtils.normalizeURL(urlc1), FeedUtils.normalizeURL(urlc5));
 
-    Assert.assertNotEquals(FeedUtils.normalizeURL(urld1), FeedUtils.normalizeURL(urld2));
-
+    assertNotEquals(FeedUtils.normalizeURL(urld1), FeedUtils.normalizeURL(urld2));
   }
+
+  private void testExtractSearchWords(String input, boolean html, String... expected) {
+    final Set<String> resultSet = new HashSet<>();
+    FeedUtils.extractSearchWords(input, html, resultSet);
+    assertEquals(ImmutableSet.copyOf(expected), resultSet);
+  }
+
+  @Test
+  public void testExtractSearchWords() {
+    testExtractSearchWords(" one tWo2 Three three 123 ", false, "one", "two2", "three", "123");
+    testExtractSearchWords(" <!\"§$%&/() '# +*~,.-_:; & a word", false, "a", "word");
+    testExtractSearchWords("äÖü abc  漢字 コンピュータ 简化字", false, "abc", "äöü", "漢字", "コンピュータ", "简化字");
+
+    testExtractSearchWords("<a hREf=\"http://example.com/HELLO\" other=\"foo\">text 123 漢字</a>",
+        true, "text", "123", "漢字", "http", "example", "com", "hello");
+  }
+
 }

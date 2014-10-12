@@ -2,8 +2,10 @@ package com.commafeed.backend.dao;
 
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -22,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.commafeed.backend.FixedSizeSortedSet;
 import com.commafeed.backend.dao.SearchStringParser.Result;
+import com.commafeed.backend.feeds.FeedUtils;
 import com.commafeed.backend.model.AbstractModel;
 import com.commafeed.backend.model.AbstractModel_;
 import com.commafeed.backend.model.FeedEntry;
@@ -150,7 +153,11 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
       if (!search.terms.isEmpty()) {
         final Join<FeedEntry, FeedEntryContent> contentJoin = root.join(FeedEntry_.content);
 
+        final Set<String> searchWords = new HashSet<>();
+
         search.terms.forEach(term -> {
+          FeedUtils.extractSearchWords(term, false, searchWords);
+
           final String likeTerm = "%" + term.toLowerCase() + "%";
           final Predicate content =
               builder.like(builder.lower(contentJoin.get(FeedEntryContent_.content)), likeTerm);
@@ -158,6 +165,18 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
               builder.like(builder.lower(contentJoin.get(FeedEntryContent_.title)), likeTerm);
           predicates.add(builder.or(content, title));
         });
+
+        // add full text search match in addition to like, because it is indexed
+        final StringBuilder ftsQueryBuilder = new StringBuilder();
+        for (final String word : searchWords) {
+          if (ftsQueryBuilder.length() > 0) {
+            ftsQueryBuilder.append(" & ");
+          }
+          ftsQueryBuilder.append(word).append(":*");
+        }
+        predicates.add(builder.isTrue(builder.function("pg_fts_simple_match", Boolean.class,
+            contentJoin.get(FeedEntryContent_.searchText),
+            builder.literal(ftsQueryBuilder.toString()))));
       }
 
       if (order != null && !set.isEmpty() && set.isFull()) {

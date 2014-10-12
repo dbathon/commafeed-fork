@@ -6,6 +6,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
@@ -28,6 +31,7 @@ import org.w3c.dom.css.CSSStyleDeclaration;
 
 import com.commafeed.backend.model.FeedEntry;
 import com.commafeed.backend.model.FeedSubscription;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.steadystate.css.parser.CSSOMParser;
 
@@ -39,6 +43,9 @@ public class FeedUtils {
   private static final List<String> ALLOWED_IFRAME_CSS_RULES = Arrays.asList("height", "width",
       "border");
   private static final char[] DISALLOWED_IFRAME_CSS_RULE_CHARACTERS = new char[] { '(', ')' };
+
+  private static final Pattern ALNUM_PATTERN = Pattern.compile("\\p{Alnum}+",
+      Pattern.UNICODE_CHARACTER_CLASS);
 
   private static final Whitelist CONTENT_WHITELIST = buildContentWhitelist();
 
@@ -372,6 +379,38 @@ public class FeedUtils {
 
   public static String imageProxyDecoder(String code) {
     return rot13(new String(Base64.decodeBase64(code)));
+  }
+
+  private static void extractAlnumWords(final String text, Set<String> resultSet) {
+    if (!Strings.isNullOrEmpty(text)) {
+      final Matcher matcher = ALNUM_PATTERN.matcher(text);
+      while (matcher.find()) {
+        resultSet.add(matcher.group().toLowerCase(Locale.ROOT));
+      }
+    }
+  }
+
+  public static void extractSearchWords(String input, boolean html, Set<String> resultSet) {
+    if (Strings.isNullOrEmpty(input)) {
+      return;
+    }
+    final String text;
+    if (html) {
+      final Document document = Jsoup.parseBodyFragment(input);
+      // also include urls in the result
+      for (final Element element : document.select("[href], [src], [cite]")) {
+        extractAlnumWords(element.attr("href"), resultSet);
+        extractAlnumWords(element.attr("src"), resultSet);
+        extractAlnumWords(element.attr("cite"), resultSet);
+      }
+
+      text = document.text();
+    }
+    else {
+      text = input;
+    }
+
+    extractAlnumWords(text, resultSet);
   }
 
 }
