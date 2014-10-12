@@ -17,10 +17,6 @@ public class ApplicationSettings extends AbstractModel {
   private String publicUrl;
   private boolean allowRegistrations = false;
   private String googleAnalyticsTrackingCode;
-  @Deprecated
-  private String googleClientId;
-  @Deprecated
-  private String googleClientSecret;
   private int backgroundThreads = 3;
   private int databaseUpdateThreads = 1;
   private String smtpHost;
@@ -28,12 +24,7 @@ public class ApplicationSettings extends AbstractModel {
   private boolean smtpTls;
   private String smtpUserName;
   private String smtpPassword;
-  @Deprecated
-  private boolean heavyLoad;
-  @Deprecated
-  private boolean pubsubhubbub;
   private boolean feedbackButton = true;
-  private String logLevel = null;
   private boolean imageProxyEnabled;
   private int queryTimeout;
   private boolean crawlingPaused;
@@ -55,22 +46,6 @@ public class ApplicationSettings extends AbstractModel {
 
   public void setAllowRegistrations(boolean allowRegistrations) {
     this.allowRegistrations = allowRegistrations;
-  }
-
-  protected String getGoogleClientId() {
-    return googleClientId;
-  }
-
-  protected void setGoogleClientId(String googleClientId) {
-    this.googleClientId = googleClientId;
-  }
-
-  protected String getGoogleClientSecret() {
-    return googleClientSecret;
-  }
-
-  protected void setGoogleClientSecret(String googleClientSecret) {
-    this.googleClientSecret = googleClientSecret;
   }
 
   public int getBackgroundThreads() {
@@ -145,38 +120,12 @@ public class ApplicationSettings extends AbstractModel {
     this.feedbackButton = feedbackButton;
   }
 
-  protected boolean isPubsubhubbub() {
-    return pubsubhubbub;
-  }
-
-  protected void setPubsubhubbub(boolean pubsubhubbub) {
-    this.pubsubhubbub = pubsubhubbub;
-  }
-
-  protected boolean isHeavyLoad() {
-    return heavyLoad;
-  }
-
-  protected void setHeavyLoad(boolean heavyLoad) {
-    this.heavyLoad = heavyLoad;
-  }
-
   public int getDatabaseUpdateThreads() {
     return databaseUpdateThreads;
   }
 
   public void setDatabaseUpdateThreads(int databaseUpdateThreads) {
     this.databaseUpdateThreads = databaseUpdateThreads;
-  }
-
-  @Deprecated
-  public String getLogLevel() {
-    return logLevel;
-  }
-
-  @Deprecated
-  public void setLogLevel(String logLevel) {
-    this.logLevel = logLevel;
   }
 
   public boolean isImageProxyEnabled() {

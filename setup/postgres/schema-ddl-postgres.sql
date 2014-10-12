@@ -8,13 +8,8 @@
         databaseUpdateThreads int4 not null,
         feedbackButton boolean not null,
         googleAnalyticsTrackingCode varchar(255),
-        googleClientId varchar(255),
-        googleClientSecret varchar(255),
-        heavyLoad boolean not null,
         imageProxyEnabled boolean not null,
-        logLevel varchar(255),
         publicUrl varchar(255),
-        pubsubhubbub boolean not null,
         queryTimeout int4 not null,
         smtpHost varchar(255),
         smtpPassword varchar(255),
@@ -71,7 +66,6 @@
 
     create table FEEDS (
         id int8 not null,
-        averageEntryInterval int8,
         disabledUntil timestamp,
         errorCount int4 not null,
         etagHeader varchar(255),
@@ -85,10 +79,6 @@
         message varchar(1024),
         normalizedUrl varchar(2048),
         normalizedUrlHash varchar(40),
-        pushHub varchar(2048),
-        pushLastPing timestamp,
-        pushTopic varchar(2048),
-        push_topic_hash varchar(2048),
         url varchar(2048) not null,
         urlHash varchar(40) not null,
         primary key (id)
@@ -166,8 +156,6 @@
     create index UK_jf9ce2w2mrmnb1uc4c6w6x6xq on FEEDS (lastUpdated);
 
     create index UK_br5ya6ovoro4v4d7xvchuabji on FEEDS (urlHash);
-
-    create index UK_2sbf438f2ukoe6y1q8naj74ne on FEEDS (push_topic_hash);
 
     create index UK_ju09vfqn1ekxei4n2gtemtu4j on FEEDS (normalizedUrlHash);
 

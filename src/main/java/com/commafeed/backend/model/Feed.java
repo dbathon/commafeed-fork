@@ -19,8 +19,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Table(name = "FEEDS", indexes = { @Index(columnList = "disabledUntil, lastUpdated"),
     @Index(columnList = "lastUpdated"), @Index(columnList = "urlHash"),
-    @Index(columnList = "push_topic_hash"), @Index(columnList = "normalizedUrlHash"),
-    @Index(columnList = "lastContentHash") })
+    @Index(columnList = "normalizedUrlHash"), @Index(columnList = "lastContentHash") })
 @SuppressWarnings("serial")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
@@ -101,12 +100,6 @@ public class Feed extends AbstractModel {
   private String etagHeader;
 
   /**
-   * average time between entries in the feed
-   */
-  @Deprecated
-  private Long averageEntryInterval;
-
-  /**
    * last hash of the content of the feed xml
    */
   @Column(length = 40)
@@ -114,31 +107,6 @@ public class Feed extends AbstractModel {
 
   @OneToMany(mappedBy = "feed")
   private Set<FeedSubscription> subscriptions;
-
-  /**
-   * detected hub for pubsubhubbub
-   */
-  @Column(length = 2048)
-  @Deprecated
-  private String pushHub;
-
-  /**
-   * detected topic for pubsubhubbub
-   */
-  @Column(length = 2048)
-  @Deprecated
-  private String pushTopic;
-
-  @Column(name = "push_topic_hash", length = 2048)
-  @Deprecated
-  private String pushTopicHash;
-
-  /**
-   * last time we subscribed for that topic on that hub
-   */
-  @Temporal(TemporalType.TIMESTAMP)
-  @Deprecated
-  private Date pushLastPing;
 
   /**
    * Denotes a feed that needs to be refreshed before others. Currently used when a feed is queued
@@ -243,30 +211,6 @@ public class Feed extends AbstractModel {
     this.lastUpdateSuccess = lastUpdateSuccess;
   }
 
-  protected String getPushHub() {
-    return pushHub;
-  }
-
-  protected void setPushHub(String pushHub) {
-    this.pushHub = pushHub;
-  }
-
-  protected String getPushTopic() {
-    return pushTopic;
-  }
-
-  protected void setPushTopic(String pushTopic) {
-    this.pushTopic = pushTopic;
-  }
-
-  protected Date getPushLastPing() {
-    return pushLastPing;
-  }
-
-  protected void setPushLastPing(Date pushLastPing) {
-    this.pushLastPing = pushLastPing;
-  }
-
   public Date getLastPublishedDate() {
     return lastPublishedDate;
   }
@@ -283,28 +227,12 @@ public class Feed extends AbstractModel {
     this.lastContentHash = lastContentHash;
   }
 
-  protected Long getAverageEntryInterval() {
-    return averageEntryInterval;
-  }
-
-  protected void setAverageEntryInterval(Long averageEntryInterval) {
-    this.averageEntryInterval = averageEntryInterval;
-  }
-
   public Date getLastEntryDate() {
     return lastEntryDate;
   }
 
   public void setLastEntryDate(Date lastEntryDate) {
     this.lastEntryDate = lastEntryDate;
-  }
-
-  protected String getPushTopicHash() {
-    return pushTopicHash;
-  }
-
-  protected void setPushTopicHash(String pushTopicHash) {
-    this.pushTopicHash = pushTopicHash;
   }
 
   public boolean isUrgent() {

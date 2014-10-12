@@ -89,8 +89,4 @@ public class FeedDAO extends GenericDAO<Feed> {
     return null;
   }
 
-  public List<Feed> findByTopic(String topic) {
-    return findByField(Feed_.pushTopicHash, DigestUtils.sha1Hex(topic));
-  }
-
 }

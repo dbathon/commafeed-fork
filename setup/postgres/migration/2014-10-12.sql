@@ -31,3 +31,18 @@ drop index UK_rdbgxqktl8ribogimricm4xxt;
         add constraint UK_m5ro6vxmo0jynl3t2gf7hjaj6  unique (guidHash, feed_id, url);
 
     create index UK_bx7u9d4nyge272bjsaerca6j8 on FEEDENTRIES (feed_id, updated);
+
+
+alter table APPLICATIONSETTINGS
+  drop column googleClientId,
+  drop column googleClientSecret,
+  drop column heavyLoad,
+  drop column logLevel,
+  drop column pubsubhubbub;
+
+alter table FEEDS
+  drop column averageEntryInterval,
+  drop column pushHub,
+  drop column pushLastPing,
+  drop column pushTopic,
+  drop column push_topic_hash;
