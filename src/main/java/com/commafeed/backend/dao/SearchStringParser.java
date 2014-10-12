@@ -15,14 +15,14 @@ public class SearchStringParser {
 
   private static final Pattern OPTION_PATTERN = Pattern.compile("(\\w+):(.*)", Pattern.DOTALL);
 
-  public static class Result {
-    public static final Result EMPTY_RESULT = new Result(ImmutableSet.of(),
+  public static class ParsedSearch {
+    public static final ParsedSearch EMPTY_RESULT = new ParsedSearch(ImmutableSet.of(),
         ImmutableSetMultimap.of());
 
     public final Set<String> terms;
     public final SetMultimap<String, String> options;
 
-    public Result(Set<String> terms, SetMultimap<String, String> options) {
+    public ParsedSearch(Set<String> terms, SetMultimap<String, String> options) {
       this.terms = ImmutableSet.copyOf(terms);
       this.options = ImmutableSetMultimap.copyOf(options);
     }
@@ -49,9 +49,9 @@ public class SearchStringParser {
     }
   }
 
-  public static Result parse(String searchString) {
+  public static ParsedSearch parse(String searchString) {
     if (Strings.isNullOrEmpty(searchString)) {
-      return Result.EMPTY_RESULT;
+      return ParsedSearch.EMPTY_RESULT;
     }
 
     final Set<String> terms = new LinkedHashSet<>();
@@ -115,7 +115,7 @@ public class SearchStringParser {
       processTerm(currentTerm, firstQuoteIndex, terms, options);
     }
 
-    return new Result(terms, options);
+    return new ParsedSearch(terms, options);
   }
 
 }

@@ -1,11 +1,11 @@
 package com.commafeed.backend.dao;
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -17,15 +17,12 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.commafeed.backend.FixedSizeSortedSet;
-import com.commafeed.backend.dao.SearchStringParser.Result;
+import com.commafeed.backend.dao.SearchStringParser.ParsedSearch;
 import com.commafeed.backend.feeds.FeedUtils;
-import com.commafeed.backend.model.AbstractModel;
 import com.commafeed.backend.model.AbstractModel_;
 import com.commafeed.backend.model.FeedEntry;
 import com.commafeed.backend.model.FeedEntryContent;
@@ -40,6 +37,7 @@ import com.commafeed.backend.services.ApplicationSettingsService;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.SetMultimap;
 
 @Stateless
 public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
@@ -48,28 +46,6 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
   private static final String FEED_ID_SEARCH_OPTION = "feedId";
 
   protected static Logger log = LoggerFactory.getLogger(FeedEntryStatusDAO.class);
-
-  private static int compareDatesAndIds(Date date1, Date date2, AbstractModel e1, AbstractModel e2) {
-    final int c1 = ObjectUtils.compare(date1, date2);
-    if (c1 == 0) {
-      return ObjectUtils.compare(e1.getId(), e2.getId());
-    }
-    else {
-      return c1;
-    }
-  }
-
-  private static final Comparator<FeedEntry> ENTRY_COMPARATOR_DESC =
-      (o1, o2) -> compareDatesAndIds(o2.getUpdated(), o1.getUpdated(), o2, o1);
-
-  private static final Comparator<FeedEntry> ENTRY_COMPARATOR_ASC = (o1, o2) -> compareDatesAndIds(
-      o1.getUpdated(), o2.getUpdated(), o1, o2);
-
-  private static final Comparator<FeedEntryStatus> STATUS_COMPARATOR_DESC =
-      (o1, o2) -> compareDatesAndIds(o2.getEntryUpdated(), o1.getEntryUpdated(), o2, o1);
-
-  private static final Comparator<FeedEntryStatus> STATUS_COMPARATOR_ASC =
-      (o1, o2) -> compareDatesAndIds(o1.getEntryUpdated(), o2.getEntryUpdated(), o1, o2);
 
   @Inject
   private ApplicationSettingsService applicationSettingsService;
@@ -118,105 +94,84 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
     return lazyLoadContent(includeContent, q.getResultList());
   }
 
+  private boolean searchIncludesSubscription(ParsedSearch search, FeedSubscription sub) {
+    final SetMultimap<String, String> options = search.options;
+    if (options.containsKey(CATEGORY_ID_SEARCH_OPTION)
+        && (sub.getCategory() == null || !options.containsEntry(CATEGORY_ID_SEARCH_OPTION, sub
+            .getCategory().getId().toString()))) {
+      return false;
+    }
+    if (options.containsKey(FEED_ID_SEARCH_OPTION)
+        && !options.containsEntry(FEED_ID_SEARCH_OPTION, sub.getFeed().getId().toString())) {
+      return false;
+    }
+    return true;
+  }
+
   public List<FeedEntryStatus> findBySubscriptions(List<FeedSubscription> subscriptions,
       String keywords, Date newerThan, int offset, int limit, ReadingOrder order,
       boolean includeContent) {
 
-    final Result search = SearchStringParser.parse(keywords);
+    final ParsedSearch search = SearchStringParser.parse(keywords);
 
-    final int capacity = offset + limit;
-    final Comparator<FeedEntry> comparator =
-        order == ReadingOrder.desc ? ENTRY_COMPARATOR_DESC : ENTRY_COMPARATOR_ASC;
-    final FixedSizeSortedSet<FeedEntry> set =
-        new FixedSizeSortedSet<>(capacity < 0 ? Integer.MAX_VALUE : capacity, comparator);
-    for (final FeedSubscription sub : subscriptions) {
-      if (search.options.containsKey(CATEGORY_ID_SEARCH_OPTION)
-          && (sub.getCategory() == null || !search.options.containsEntry(CATEGORY_ID_SEARCH_OPTION,
-              sub.getCategory().getId().toString()))) {
-        continue;
-      }
-      if (search.options.containsKey(FEED_ID_SEARCH_OPTION)
-          && !search.options.containsEntry(FEED_ID_SEARCH_OPTION, sub.getFeed().getId().toString())) {
-        continue;
-      }
+    final Map<Long, FeedSubscription> filteredFeeds =
+        subscriptions.stream().filter(sub -> searchIncludesSubscription(search, sub))
+            .collect(Collectors.toMap(sub -> sub.getFeed().getId(), sub -> sub));
 
-      final CriteriaQuery<FeedEntry> query = builder.createQuery(FeedEntry.class);
-      final Root<FeedEntry> root = query.from(FeedEntry.class);
+    final CriteriaQuery<FeedEntry> query = builder.createQuery(FeedEntry.class);
+    final Root<FeedEntry> root = query.from(FeedEntry.class);
 
-      final List<Predicate> predicates = Lists.newArrayList();
-      predicates.add(builder.equal(root.get(FeedEntry_.feed), sub.getFeed()));
+    final List<Predicate> predicates = Lists.newArrayList();
+    predicates.add(root.get(FeedEntry_.feed).get(AbstractModel_.id).in(filteredFeeds.keySet()));
 
-      if (newerThan != null) {
-        predicates.add(builder.greaterThanOrEqualTo(root.get(FeedEntry_.inserted), newerThan));
-      }
-
-      if (!search.terms.isEmpty()) {
-        final Join<FeedEntry, FeedEntryContent> contentJoin = root.join(FeedEntry_.content);
-
-        final Set<String> searchWords = new HashSet<>();
-
-        search.terms.forEach(term -> {
-          FeedUtils.extractSearchWords(term, false, searchWords);
-
-          final String likeTerm = "%" + term.toLowerCase() + "%";
-          final Predicate content =
-              builder.like(builder.lower(contentJoin.get(FeedEntryContent_.content)), likeTerm);
-          final Predicate title =
-              builder.like(builder.lower(contentJoin.get(FeedEntryContent_.title)), likeTerm);
-          predicates.add(builder.or(content, title));
-        });
-
-        // add full text search match in addition to like, because it is indexed
-        final StringBuilder ftsQueryBuilder = new StringBuilder();
-        for (final String word : searchWords) {
-          if (ftsQueryBuilder.length() > 0) {
-            ftsQueryBuilder.append(" & ");
-          }
-          ftsQueryBuilder.append(word).append(":*");
-        }
-        predicates.add(builder.isTrue(builder.function("pg_fts_simple_match", Boolean.class,
-            contentJoin.get(FeedEntryContent_.searchText),
-            builder.literal(ftsQueryBuilder.toString()))));
-      }
-
-      if (order != null && !set.isEmpty() && set.isFull()) {
-        Predicate filter = null;
-        final FeedEntry last = set.last();
-        if (order == ReadingOrder.desc) {
-          filter = builder.greaterThan(root.get(FeedEntry_.updated), last.getUpdated());
-        }
-        else {
-          filter = builder.lessThan(root.get(FeedEntry_.updated), last.getUpdated());
-        }
-        predicates.add(filter);
-      }
-      query.where(predicates.toArray(new Predicate[0]));
-      orderBy(query, root.get(FeedEntry_.updated), order, root.get(AbstractModel_.id));
-
-      final TypedQuery<FeedEntry> q = em.createQuery(query);
-      limit(q, 0, capacity);
-      setTimeout(q);
-
-      final List<FeedEntry> list = q.getResultList();
-      for (final FeedEntry entry : list) {
-        entry.setSubscription(sub);
-      }
-      set.addAll(list);
+    if (newerThan != null) {
+      predicates.add(builder.greaterThanOrEqualTo(root.get(FeedEntry_.inserted), newerThan));
     }
 
-    List<FeedEntry> entries = set.asList();
-    final int size = entries.size();
-    if (size < offset) {
-      return Lists.newArrayList();
+    if (!search.terms.isEmpty()) {
+      final Join<FeedEntry, FeedEntryContent> contentJoin = root.join(FeedEntry_.content);
+
+      final Set<String> searchWords = new HashSet<>();
+
+      search.terms.forEach(term -> {
+        FeedUtils.extractSearchWords(term, false, searchWords);
+
+        final String likeTerm = "%" + term.toLowerCase() + "%";
+        final Predicate content =
+            builder.like(builder.lower(contentJoin.get(FeedEntryContent_.content)), likeTerm);
+        final Predicate title =
+            builder.like(builder.lower(contentJoin.get(FeedEntryContent_.title)), likeTerm);
+        predicates.add(builder.or(content, title));
+      });
+
+      // add full text search match in addition to like, because it is indexed
+      final StringBuilder ftsQueryBuilder = new StringBuilder();
+      for (final String word : searchWords) {
+        if (ftsQueryBuilder.length() > 0) {
+          ftsQueryBuilder.append(" & ");
+        }
+        ftsQueryBuilder.append(word).append(":*");
+      }
+      predicates.add(builder.isTrue(builder.function("pg_fts_simple_match", Boolean.class,
+          contentJoin.get(FeedEntryContent_.searchText),
+          builder.literal(ftsQueryBuilder.toString()))));
     }
 
-    entries = entries.subList(Math.max(offset, 0), size);
+    query.where(predicates.toArray(new Predicate[0]));
+    orderBy(query, root.get(FeedEntry_.updated), order, root.get(AbstractModel_.id));
 
-    final List<FeedEntryStatus> results = Lists.newArrayList();
-    for (final FeedEntry entry : entries) {
-      final FeedSubscription subscription = entry.getSubscription();
-      results.add(getStatus(subscription, entry));
-    }
+    final TypedQuery<FeedEntry> q = em.createQuery(query);
+    limit(q, offset, limit);
+    setTimeout(q);
+
+    final List<FeedEntry> entries = q.getResultList();
+    entries.forEach(entry -> {
+      entry.setSubscription(filteredFeeds.get(entry.getFeed().getId()));
+    });
+
+    final List<FeedEntryStatus> results =
+        entries.stream().map(entry -> getStatus(entry.getSubscription(), entry))
+            .collect(Collectors.toList());
 
     return lazyLoadContent(includeContent, results);
   }
@@ -224,57 +179,27 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
   public List<FeedEntryStatus> findUnreadBySubscriptions(List<FeedSubscription> subscriptions,
       Date newerThan, int offset, int limit, ReadingOrder order, boolean includeContent) {
 
-    final int capacity = offset + limit;
-    final Comparator<FeedEntryStatus> comparator =
-        order == ReadingOrder.desc ? STATUS_COMPARATOR_DESC : STATUS_COMPARATOR_ASC;
-    final FixedSizeSortedSet<FeedEntryStatus> set =
-        new FixedSizeSortedSet<>(capacity < 0 ? Integer.MAX_VALUE : capacity, comparator);
-    for (final FeedSubscription sub : subscriptions) {
-      final CriteriaQuery<FeedEntryStatus> query = builder.createQuery(getType());
-      final Root<FeedEntryStatus> root = query.from(getType());
+    final CriteriaQuery<FeedEntryStatus> query = builder.createQuery(getType());
+    final Root<FeedEntryStatus> root = query.from(getType());
 
-      final List<Predicate> predicates = Lists.newArrayList();
+    final List<Predicate> predicates = Lists.newArrayList();
 
-      predicates.add(builder.equal(root.get(FeedEntryStatus_.subscription), sub));
-      predicates.add(builder.isFalse(root.get(FeedEntryStatus_.read)));
+    predicates.add(root.get(FeedEntryStatus_.subscription).in(subscriptions));
+    predicates.add(builder.isFalse(root.get(FeedEntryStatus_.read)));
 
-      if (newerThan != null) {
-        predicates.add(builder.greaterThanOrEqualTo(root.get(FeedEntryStatus_.entryInserted),
-            newerThan));
-      }
-
-      if (order != null && !set.isEmpty() && set.isFull()) {
-        Predicate filter = null;
-        final FeedEntryStatus last = set.last();
-        if (order == ReadingOrder.desc) {
-          filter =
-              builder.greaterThan(root.get(FeedEntryStatus_.entryUpdated), last.getEntryUpdated());
-        }
-        else {
-          filter =
-              builder.lessThan(root.get(FeedEntryStatus_.entryUpdated), last.getEntryUpdated());
-        }
-        predicates.add(filter);
-      }
-      query.where(predicates.toArray(new Predicate[0]));
-      orderStatusesBy(query, root, order, root.get(AbstractModel_.id));
-
-      final TypedQuery<FeedEntryStatus> q = em.createQuery(query);
-      limit(q, 0, capacity);
-      setTimeout(q);
-
-      final List<FeedEntryStatus> list = q.getResultList();
-      set.addAll(list);
+    if (newerThan != null) {
+      predicates.add(builder.greaterThanOrEqualTo(root.get(FeedEntryStatus_.entryInserted),
+          newerThan));
     }
 
-    List<FeedEntryStatus> entries = set.asList();
-    final int size = entries.size();
-    if (size < offset) {
-      return Lists.newArrayList();
-    }
+    query.where(predicates.toArray(new Predicate[0]));
+    orderStatusesBy(query, root, order, root.get(AbstractModel_.id));
 
-    entries = entries.subList(Math.max(offset, 0), size);
-    return lazyLoadContent(includeContent, entries);
+    final TypedQuery<FeedEntryStatus> q = em.createQuery(query);
+    limit(q, offset, limit);
+    setTimeout(q);
+
+    return lazyLoadContent(includeContent, q.getResultList());
   }
 
   public List<FeedEntryStatus> findAllUnread(User user, Date newerThan, int offset, int limit,
