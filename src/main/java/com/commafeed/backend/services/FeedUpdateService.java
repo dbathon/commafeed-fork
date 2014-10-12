@@ -2,6 +2,7 @@ package com.commafeed.backend.services;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -12,14 +13,12 @@ import com.commafeed.backend.MetricsBean;
 import com.commafeed.backend.dao.FeedEntryDAO;
 import com.commafeed.backend.dao.FeedEntryDAO.EntryWithFeed;
 import com.commafeed.backend.dao.FeedEntryStatusDAO;
-import com.commafeed.backend.feeds.FeedUtils;
 import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.FeedEntry;
 import com.commafeed.backend.model.FeedEntryContent;
 import com.commafeed.backend.model.FeedEntryStatus;
 import com.commafeed.backend.model.FeedFeedEntry;
 import com.commafeed.backend.model.FeedSubscription;
-import com.commafeed.backend.model.User;
 import com.google.common.collect.Lists;
 
 @Stateless
@@ -37,45 +36,59 @@ public class FeedUpdateService {
   @Inject
   private MetricsBean metricsBean;
 
-  public void updateEntry(Feed feed, FeedEntry entry, List<FeedSubscription> subscriptions) {
+  private void createAndSaveEntryStatuses(FeedEntry feedEntry, List<FeedSubscription> subscriptions) {
+    final List<FeedEntryStatus> statusUpdateList = Lists.newArrayList();
+    for (final FeedSubscription sub : subscriptions) {
+      statusUpdateList.add(new FeedEntryStatus(sub.getUser(), sub, feedEntry));
+    }
+    feedEntryStatusDAO.saveOrUpdate(statusUpdateList);
 
+    metricsBean.entryUpdated(statusUpdateList.size());
+  }
+
+  private void processContentChanges(FeedEntry entry, FeedEntryContent newContent) {
+    final FeedEntryContent oldContent = entry.getContent();
+    final boolean different =
+        !Objects.equals(oldContent.getTitle(), newContent.getTitle())
+            || !Objects.equals(oldContent.getEnclosureType(), newContent.getEnclosureType())
+            || !Objects.equals(oldContent.getEnclosureUrl(), newContent.getEnclosureUrl())
+            || !Objects.equals(oldContent.getContent(), newContent.getContent());
+    if (different) {
+      if (entry.getOriginalContent() == null) {
+        // first change, keep the original content
+        entry.setOriginalContent(entry.getContent());
+        entry.setContent(new FeedEntryContent());
+      }
+
+      final FeedEntryContent content = entry.getContent();
+      content.setTitle(newContent.getTitle());
+      content.setContent(newContent.getContent());
+      content.setEnclosureType(newContent.getEnclosureType());
+      content.setEnclosureUrl(newContent.getEnclosureUrl());
+    }
+  }
+
+  public void updateEntry(Feed feed, FeedEntry entry, List<FeedSubscription> subscriptions) {
     final EntryWithFeed existing =
         feedEntryDAO.findExisting(entry.getGuid(), entry.getUrl(), feed.getId());
 
-    FeedEntry update = null;
-    FeedFeedEntry ffe = null;
     if (existing == null) {
-      entry.setAuthor(FeedUtils.truncate(
-          FeedUtils.handleContent(entry.getAuthor(), feed.getLink(), true), 128));
-      final FeedEntryContent content = entry.getContent();
-      content.setTitle(FeedUtils.truncate(
-          FeedUtils.handleContent(content.getTitle(), feed.getLink(), true), 2048));
-      content.setContent(FeedUtils.handleContent(content.getContent(), feed.getLink(), false));
-
       entry.setInserted(new Date());
-      ffe = new FeedFeedEntry(feed, entry);
+      feedEntryDAO.saveOrUpdate(entry);
 
-      update = entry;
+      createAndSaveEntryStatuses(entry, subscriptions);
+      em.persist(new FeedFeedEntry(feed, entry));
     }
     else if (existing.ffe == null) {
-      ffe = new FeedFeedEntry(feed, existing.entry);
-      update = existing.entry;
-    }
+      createAndSaveEntryStatuses(existing.entry, subscriptions);
+      em.persist(new FeedFeedEntry(feed, existing.entry));
 
-    if (update != null) {
-      final List<FeedEntryStatus> statusUpdateList = Lists.newArrayList();
-      final List<User> users = Lists.newArrayList();
-      for (final FeedSubscription sub : subscriptions) {
-        final User user = sub.getUser();
-        final FeedEntryStatus status = new FeedEntryStatus(user, sub, update);
-        status.setSubscription(sub);
-        statusUpdateList.add(status);
-        users.add(user);
-      }
-      feedEntryDAO.saveOrUpdate(update);
-      feedEntryStatusDAO.saveOrUpdate(statusUpdateList);
-      em.persist(ffe);
-      metricsBean.entryUpdated(statusUpdateList.size());
+      processContentChanges(existing.entry, entry.getContent());
+    }
+    else {
+      // just update the content if there are changes
+      processContentChanges(existing.entry, entry.getContent());
     }
   }
+
 }

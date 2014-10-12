@@ -79,11 +79,15 @@ public class FeedParser {
         entry.setUrl(FeedUtils.truncate(FeedUtils.toAbsoluteUrl(item.getLink(), feed.getLink()),
             2048));
         entry.setUpdated(validateDate(getEntryUpdateDate(item), true));
-        entry.setAuthor(item.getAuthor());
+
+        entry.setAuthor(FeedUtils.truncate(
+            FeedUtils.handleContent(item.getAuthor(), feed.getLink(), true), 128));
 
         final FeedEntryContent content = new FeedEntryContent();
-        content.setContent(getContent(item));
-        content.setTitle(getTitle(item));
+        content.setTitle(FeedUtils.truncate(
+            FeedUtils.handleContent(getTitle(item), feed.getLink(), true), 2048));
+        content.setContent(FeedUtils.handleContent(getContent(item), feed.getLink(), false));
+
         final SyndEnclosure enclosure =
             (SyndEnclosure) Iterables.getFirst(item.getEnclosures(), null);
         if (enclosure != null) {

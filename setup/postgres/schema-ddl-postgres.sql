@@ -43,6 +43,7 @@
         updated timestamp,
         url varchar(2048),
         content_id int8 not null,
+        originalContent_id int8,
         primary key (id)
     );
 
@@ -202,6 +203,11 @@
     alter table FEEDENTRIES 
         add constraint FK_meqpfqilqcjxfd9lwdhqo4ncg 
         foreign key (content_id) 
+        references FEEDENTRYCONTENTS;
+
+    alter table FEEDENTRIES 
+        add constraint FK_keat5o9lup78w62xu86p328h1 
+        foreign key (originalContent_id) 
         references FEEDENTRYCONTENTS;
 
     alter table FEEDENTRYSTATUSES 

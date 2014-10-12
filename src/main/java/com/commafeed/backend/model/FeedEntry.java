@@ -9,7 +9,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -38,8 +37,14 @@ public class FeedEntry extends AbstractModel {
   private Set<FeedFeedEntry> feedRelationships;
 
   @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(nullable = false, updatable = false)
   private FeedEntryContent content;
+
+  /**
+   * Is initially <code>null</code> and is set when the content of the feed entry changes for the
+   * first time.
+   */
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private FeedEntryContent originalContent;
 
   @Column(length = 2048)
   private String url;
@@ -108,6 +113,14 @@ public class FeedEntry extends AbstractModel {
 
   public void setContent(FeedEntryContent content) {
     this.content = content;
+  }
+
+  public FeedEntryContent getOriginalContent() {
+    return originalContent;
+  }
+
+  public void setOriginalContent(FeedEntryContent originalContent) {
+    this.originalContent = originalContent;
   }
 
   public String getGuidHash() {
