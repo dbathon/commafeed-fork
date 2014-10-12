@@ -1226,55 +1226,6 @@ function($scope, $state, $stateParams,	$dialog, AdminUsersService) {
 	};
 }]);
 
-module.controller('ManageDuplicateFeedsCtrl', [
-	'$scope', 'AdminCleanupService',
-	function($scope, AdminCleanupService) {
-	
-	$scope.limit = 10;
-	$scope.page = 0;
-	$scope.minCount = 1;
-	$scope.mode = 'NORMALIZED_URL';
-	$scope.mergeData = {};
-	$scope.refreshData = function() {
-		AdminCleanupService.findDuplicateFeeds({
-			mode: $scope.mode,
-			limit : $scope.limit,
-			page : $scope.page, 
-			minCount: $scope.minCount
-		}, function(data) {
-			$scope.counts = data;
-		});
-	};
-	
-	$scope.autoMerge = function() {
-		var callback = function() {
-			alert('done!');
-		};
-		for (var i = 0; i < $scope.counts.length; i++) {
-			var count = $scope.counts[i];
-			if (count.autoMerge) {
-				AdminCleanupService.mergeFeeds({
-					intoFeedId: count.feeds[0].id,
-					feedIds: _.pluck(count.feeds, 'id')
-				}, callback);
-			}
-		}
-	};
-	
-	$scope.focus = function(count) {
-		$scope.current = count;
-		$scope.mergeData.intoFeedId = count.feeds[0].id;
-		$scope.mergeData.feedIds = _.pluck(count.feeds, 'id');
-	};
-	
-	$scope.merge = function() {
-		AdminCleanupService.mergeFeeds($scope.mergeData, function() {
-			alert('done!');
-		});
-	};
-	
-}]);
-
 module.controller('SettingsCtrl', ['$scope', '$location', 'SettingsService', 'AnalyticsService', 'ServerService',
 function($scope, $location, SettingsService, AnalyticsService, ServerService) {
 	
@@ -1363,9 +1314,6 @@ function($scope, $location, $state,	AdminSettingsService) {
 
 	$scope.toUsers = function() {
 		$state.transitionTo('admin.userlist');
-	};
-	$scope.toCleanup = function() {
-		$state.transitionTo('admin.duplicate_feeds');
 	};
 }]);
 

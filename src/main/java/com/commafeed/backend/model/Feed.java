@@ -113,9 +113,6 @@ public class Feed extends AbstractModel {
   private String lastContentHash;
 
   @OneToMany(mappedBy = "feed")
-  private Set<FeedFeedEntry> entryRelationships;
-
-  @OneToMany(mappedBy = "feed")
   private Set<FeedSubscription> subscriptions;
 
   /**
@@ -332,14 +329,6 @@ public class Feed extends AbstractModel {
 
   public void setNormalizedUrlHash(String normalizedUrlHash) {
     this.normalizedUrlHash = normalizedUrlHash;
-  }
-
-  public Set<FeedFeedEntry> getEntryRelationships() {
-    return entryRelationships;
-  }
-
-  public void setEntryRelationships(Set<FeedFeedEntry> entryRelationships) {
-    this.entryRelationships = entryRelationships;
   }
 
 }

@@ -41,8 +41,9 @@
         guidHash varchar(40) not null,
         inserted timestamp,
         updated timestamp,
-        url varchar(2048),
+        url varchar(2048) not null,
         content_id int8 not null,
+        feed_id int8 not null,
         originalContent_id int8,
         primary key (id)
     );
@@ -103,13 +104,6 @@
         primary key (id)
     );
 
-    create table FEED_FEEDENTRIES (
-        entryUpdated timestamp,
-        FEED_ID int8 not null,
-        FEEDENTRY_ID int8 not null,
-        primary key (FEED_ID, FEEDENTRY_ID)
-    );
-
     create table USERROLES (
         id int8 not null,
         roleName varchar(255) not null,
@@ -150,7 +144,10 @@
     alter table FEEDENTRIES 
         add constraint UK_meqpfqilqcjxfd9lwdhqo4ncg  unique (content_id);
 
-    create index UK_rdbgxqktl8ribogimricm4xxt on FEEDENTRIES (guidHash);
+    alter table FEEDENTRIES 
+        add constraint UK_m5ro6vxmo0jynl3t2gf7hjaj6  unique (guidHash, feed_id, url);
+
+    create index UK_bx7u9d4nyge272bjsaerca6j8 on FEEDENTRIES (feed_id, updated);
 
     create index UK_p5nmay0paseebxmlwgw9l8ufo on FEEDENTRIES (inserted);
 
@@ -175,8 +172,6 @@
     create index UK_ju09vfqn1ekxei4n2gtemtu4j on FEEDS (normalizedUrlHash);
 
     create index UK_2cy3jecqr5dqimh3prsgto37s on FEEDS (lastContentHash);
-
-    create index UK_tgv9hww0io1uco606t6nt5yxp on FEED_FEEDENTRIES (FEED_ID, entryUpdated);
 
     alter table USERS 
         add constraint UK_s7wep93120xdlalhu7mmiuj2h  unique (apiKey);
@@ -204,6 +199,11 @@
         add constraint FK_meqpfqilqcjxfd9lwdhqo4ncg 
         foreign key (content_id) 
         references FEEDENTRYCONTENTS;
+
+    alter table FEEDENTRIES 
+        add constraint FK_6hyvlrj242ajqvjsy25uc8h9d 
+        foreign key (feed_id) 
+        references FEEDS;
 
     alter table FEEDENTRIES 
         add constraint FK_keat5o9lup78w62xu86p328h1 
@@ -239,16 +239,6 @@
         add constraint FK_649sh9xukf1mwkmdb4urip304 
         foreign key (user_id) 
         references USERS;
-
-    alter table FEED_FEEDENTRIES 
-        add constraint FK_oqs8liutm2nhe36t12ku29grq 
-        foreign key (FEED_ID) 
-        references FEEDS;
-
-    alter table FEED_FEEDENTRIES 
-        add constraint FK_jguttws3hhshevunobu1x0ll7 
-        foreign key (FEEDENTRY_ID) 
-        references FEEDENTRIES;
 
     alter table USERROLES 
         add constraint FK_nrrxoaoog5dxgn8c02rhaej60 

@@ -11,13 +11,11 @@ import javax.persistence.PersistenceContext;
 
 import com.commafeed.backend.MetricsBean;
 import com.commafeed.backend.dao.FeedEntryDAO;
-import com.commafeed.backend.dao.FeedEntryDAO.EntryWithFeed;
 import com.commafeed.backend.dao.FeedEntryStatusDAO;
 import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.FeedEntry;
 import com.commafeed.backend.model.FeedEntryContent;
 import com.commafeed.backend.model.FeedEntryStatus;
-import com.commafeed.backend.model.FeedFeedEntry;
 import com.commafeed.backend.model.FeedSubscription;
 import com.google.common.collect.Lists;
 
@@ -69,25 +67,19 @@ public class FeedUpdateService {
   }
 
   public void updateEntry(Feed feed, FeedEntry entry, List<FeedSubscription> subscriptions) {
-    final EntryWithFeed existing =
+    final FeedEntry existing =
         feedEntryDAO.findExisting(entry.getGuid(), entry.getUrl(), feed.getId());
 
     if (existing == null) {
       entry.setInserted(new Date());
+      entry.setFeed(feed);
       feedEntryDAO.saveOrUpdate(entry);
 
       createAndSaveEntryStatuses(entry, subscriptions);
-      em.persist(new FeedFeedEntry(feed, entry));
-    }
-    else if (existing.ffe == null) {
-      createAndSaveEntryStatuses(existing.entry, subscriptions);
-      em.persist(new FeedFeedEntry(feed, existing.entry));
-
-      processContentChanges(existing.entry, entry.getContent());
     }
     else {
       // just update the content if there are changes
-      processContentChanges(existing.entry, entry.getContent());
+      processContentChanges(existing, entry.getContent());
     }
   }
 

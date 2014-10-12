@@ -30,8 +30,6 @@ import com.commafeed.backend.model.FeedEntryContent_;
 import com.commafeed.backend.model.FeedEntryStatus;
 import com.commafeed.backend.model.FeedEntryStatus_;
 import com.commafeed.backend.model.FeedEntry_;
-import com.commafeed.backend.model.FeedFeedEntry;
-import com.commafeed.backend.model.FeedFeedEntry_;
 import com.commafeed.backend.model.FeedSubscription;
 import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserSettings.ReadingOrder;
@@ -141,10 +139,9 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
 
       final CriteriaQuery<FeedEntry> query = builder.createQuery(FeedEntry.class);
       final Root<FeedEntry> root = query.from(FeedEntry.class);
-      final Join<FeedEntry, FeedFeedEntry> ffeJoin = root.join(FeedEntry_.feedRelationships);
 
       final List<Predicate> predicates = Lists.newArrayList();
-      predicates.add(builder.equal(ffeJoin.get(FeedFeedEntry_.feed), sub.getFeed()));
+      predicates.add(builder.equal(root.get(FeedEntry_.feed), sub.getFeed()));
 
       if (newerThan != null) {
         predicates.add(builder.greaterThanOrEqualTo(root.get(FeedEntry_.inserted), newerThan));
@@ -167,15 +164,16 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
         Predicate filter = null;
         final FeedEntry last = set.last();
         if (order == ReadingOrder.desc) {
-          filter = builder.greaterThan(ffeJoin.get(FeedFeedEntry_.entryUpdated), last.getUpdated());
+          filter = builder.greaterThan(root.get(FeedEntry_.updated), last.getUpdated());
         }
         else {
-          filter = builder.lessThan(ffeJoin.get(FeedFeedEntry_.entryUpdated), last.getUpdated());
+          filter = builder.lessThan(root.get(FeedEntry_.updated), last.getUpdated());
         }
         predicates.add(filter);
       }
       query.where(predicates.toArray(new Predicate[0]));
-      orderEntriesBy(query, ffeJoin, order, root.get(AbstractModel_.id));
+      orderBy(query, root.get(FeedEntry_.updated), order, root.get(AbstractModel_.id));
+
       final TypedQuery<FeedEntry> q = em.createQuery(query);
       limit(q, 0, capacity);
       setTimeout(q);
@@ -289,16 +287,16 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
   /**
    * Map between subscriptionId and unread count
    */
-  @SuppressWarnings("rawtypes")
   public Map<Long, Long> getUnreadCount(User user) {
     final Map<Long, Long> map = Maps.newHashMap();
-    final Query query = em.createNamedQuery("EntryStatus.unreadCounts");
+    final TypedQuery<Object[]> query =
+        em.createQuery("select s.subscription.id, count(s) from FeedEntryStatus s "
+            + "where s.user=:user and s.read=false group by s.subscription.id", Object[].class);
     query.setParameter("user", user);
     setTimeout(query);
-    final List resultList = query.getResultList();
-    for (final Object o : resultList) {
-      final Object[] array = (Object[]) o;
-      map.put((Long) array[0], (Long) array[1]);
+    final List<Object[]> resultList = query.getResultList();
+    for (final Object[] row : resultList) {
+      map.put((Long) row[0], (Long) row[1]);
     }
     return map;
   }
@@ -312,11 +310,6 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
       }
     }
     return results;
-  }
-
-  private void orderEntriesBy(CriteriaQuery<?> query, Path<FeedFeedEntry> ffeJoin,
-      ReadingOrder order, Path<Long> id) {
-    orderBy(query, ffeJoin.get(FeedFeedEntry_.entryUpdated), order, id);
   }
 
   private void orderStatusesBy(CriteriaQuery<?> query, Path<FeedEntryStatus> statusJoin,

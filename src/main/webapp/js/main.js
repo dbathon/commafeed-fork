@@ -91,11 +91,6 @@ app.config([ '$routeProvider', '$stateProvider', '$urlRouterProvider', '$httpPro
 				templateUrl : 'templates/admin.useredit.html',
 				controller : 'ManageUserCtrl'
 			});
-			$stateProvider.state('admin.duplicate_feeds', {
-				url : '/feeds/duplicates',
-				templateUrl : 'templates/admin.duplicate_feeds.html',
-				controller : 'ManageDuplicateFeedsCtrl'
-			});
 			$stateProvider.state('admin.settings', {
 				url : '/settings',
 				templateUrl : 'templates/admin.settings.html',

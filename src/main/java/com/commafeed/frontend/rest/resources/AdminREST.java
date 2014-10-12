@@ -1,9 +1,7 @@
 package com.commafeed.frontend.rest.resources;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
@@ -17,30 +15,23 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.commafeed.backend.DatabaseCleaner;
 import com.commafeed.backend.MetricsBean;
 import com.commafeed.backend.StartupBean;
-import com.commafeed.backend.dao.FeedDAO;
-import com.commafeed.backend.dao.FeedDAO.DuplicateMode;
-import com.commafeed.backend.dao.FeedDAO.FeedCount;
 import com.commafeed.backend.dao.UserDAO;
 import com.commafeed.backend.dao.UserRoleDAO;
 import com.commafeed.backend.feeds.FeedRefreshTaskGiver;
 import com.commafeed.backend.feeds.FeedRefreshUpdater;
 import com.commafeed.backend.feeds.FeedRefreshWorker;
 import com.commafeed.backend.model.ApplicationSettings;
-import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserRole;
 import com.commafeed.backend.model.UserRole.Role;
 import com.commafeed.backend.services.PasswordEncryptionService;
 import com.commafeed.backend.services.UserService;
 import com.commafeed.frontend.model.UserModel;
-import com.commafeed.frontend.model.request.FeedMergeRequest;
 import com.commafeed.frontend.model.request.IDRequest;
 import com.commafeed.frontend.rest.RestSecurityCheck;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.wordnik.swagger.annotations.Api;
@@ -62,13 +53,7 @@ public class AdminREST extends AbstractREST {
   private UserRoleDAO userRoleDAO;
 
   @Inject
-  private FeedDAO feedDAO;
-
-  @Inject
   private MetricsBean metricsBean;
-
-  @Inject
-  private DatabaseCleaner cleaner;
 
   @Inject
   private FeedRefreshWorker feedRefreshWorker;
@@ -243,56 +228,4 @@ public class AdminREST extends AbstractREST {
     return Response.ok(map).build();
   }
 
-  @Path("/cleanup/feeds")
-  @GET
-  @ApiOperation(value = "Feeds cleanup",
-      notes = "Delete feeds without subscriptions and entries without feeds")
-  public Response cleanupFeeds() {
-    final Map<String, Long> map = Maps.newHashMap();
-    map.put("feeds_without_subscriptions", cleaner.cleanFeedsWithoutSubscriptions());
-    map.put("entries_without_feeds", cleaner.cleanEntriesWithoutFeeds());
-    return Response.ok(map).build();
-  }
-
-  @Path("/cleanup/entries")
-  @GET
-  @ApiOperation(value = "Entries cleanup", notes = "Delete entries older than given date")
-  public Response cleanupEntries(@QueryParam("days") @DefaultValue("30") int days) {
-    final Map<String, Long> map = Maps.newHashMap();
-    map.put("old entries", cleaner.cleanEntriesOlderThan(days, TimeUnit.DAYS));
-    return Response.ok(map).build();
-  }
-
-  @Path("/cleanup/findDuplicateFeeds")
-  @GET
-  @ApiOperation(value = "Find duplicate feeds")
-  public Response findDuplicateFeeds(@QueryParam("mode") DuplicateMode mode,
-      @QueryParam("page") int page, @QueryParam("limit") int limit,
-      @QueryParam("minCount") long minCount) {
-    final List<FeedCount> list = feedDAO.findDuplicates(mode, limit * page, limit, minCount);
-    return Response.ok(list).build();
-  }
-
-  @Path("/cleanup/merge")
-  @POST
-  @ApiOperation(value = "Merge feeds", notes = "Merge feeds together")
-  public Response mergeFeeds(@ApiParam(required = true) FeedMergeRequest request) {
-    final Feed into = feedDAO.findById(request.getIntoFeedId());
-    if (into == null) {
-      return Response.status(Status.BAD_REQUEST).entity("'into feed' not found").build();
-    }
-
-    final List<Feed> feeds = Lists.newArrayList();
-    for (final Long feedId : request.getFeedIds()) {
-      final Feed feed = feedDAO.findById(feedId);
-      feeds.add(feed);
-    }
-
-    if (feeds.isEmpty()) {
-      return Response.status(Status.BAD_REQUEST).entity("'from feeds' empty").build();
-    }
-
-    cleaner.mergeFeeds(into, feeds);
-    return Response.ok().build();
-  }
 }

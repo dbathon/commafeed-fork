@@ -9,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -20,8 +21,9 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
-@Table(name = "FEEDENTRIES", indexes = { @Index(columnList = "guidHash"),
-    @Index(columnList = "inserted"), @Index(columnList = "updated") })
+@Table(name = "FEEDENTRIES", indexes = { @Index(columnList = "feed_id, updated"),
+    @Index(columnList = "guidHash, feed_id, url", unique = true), @Index(columnList = "inserted"),
+    @Index(columnList = "updated") })
 @SuppressWarnings("serial")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
@@ -33,8 +35,8 @@ public class FeedEntry extends AbstractModel {
   @Column(length = 40, nullable = false)
   private String guidHash;
 
-  @OneToMany(mappedBy = "entry", cascade = CascadeType.REMOVE)
-  private Set<FeedFeedEntry> feedRelationships;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  private Feed feed;
 
   @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
   private FeedEntryContent content;
@@ -46,7 +48,7 @@ public class FeedEntry extends AbstractModel {
   @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private FeedEntryContent originalContent;
 
-  @Column(length = 2048)
+  @Column(length = 2048, nullable = false)
   private String url;
 
   @Column(name = "author", length = 128)
@@ -139,12 +141,12 @@ public class FeedEntry extends AbstractModel {
     this.author = author;
   }
 
-  public Set<FeedFeedEntry> getFeedRelationships() {
-    return feedRelationships;
+  public Feed getFeed() {
+    return feed;
   }
 
-  public void setFeedRelationships(Set<FeedFeedEntry> feedRelationships) {
-    this.feedRelationships = feedRelationships;
+  public void setFeed(Feed feed) {
+    this.feed = feed;
   }
 
   public FeedSubscription getSubscription() {

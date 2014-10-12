@@ -1,15 +1,12 @@
 package com.commafeed.backend.dao;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.SetJoin;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -18,8 +15,6 @@ import org.slf4j.LoggerFactory;
 import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.FeedEntry;
 import com.commafeed.backend.model.FeedEntry_;
-import com.commafeed.backend.model.FeedFeedEntry;
-import com.commafeed.backend.model.FeedFeedEntry_;
 import com.commafeed.backend.services.ApplicationSettingsService;
 import com.google.common.collect.Iterables;
 
@@ -31,78 +26,28 @@ public class FeedEntryDAO extends GenericDAO<FeedEntry> {
 
   protected static final Logger log = LoggerFactory.getLogger(FeedEntryDAO.class);
 
-  public static class EntryWithFeed {
-    public FeedEntry entry;
-    public FeedFeedEntry ffe;
-
-    public EntryWithFeed(FeedEntry entry, FeedFeedEntry ffe) {
-      this.entry = entry;
-      this.ffe = ffe;
-    }
-  }
-
-  public EntryWithFeed findExisting(String guid, String url, Long feedId) {
-
-    final TypedQuery<EntryWithFeed> q =
-        em.createNamedQuery("EntryStatus.existing", EntryWithFeed.class);
+  public FeedEntry findExisting(String guid, String url, Long feedId) {
+    final TypedQuery<FeedEntry> q =
+        em.createQuery("select e FROM FeedEntry e "
+            + "where e.feed.id = :feedId and e.guidHash = :guidHash and e.url = :url",
+            FeedEntry.class);
     q.setParameter("guidHash", DigestUtils.sha1Hex(guid));
     q.setParameter("url", url);
     q.setParameter("feedId", feedId);
 
-    EntryWithFeed result = null;
-    final List<EntryWithFeed> list = q.getResultList();
-    for (final EntryWithFeed ewf : list) {
-      if (ewf.entry != null && ewf.ffe != null) {
-        result = ewf;
-        break;
-      }
-    }
-    if (result == null) {
-      result = Iterables.getFirst(list, null);
-    }
-    return result;
+    return Iterables.getFirst(q.getResultList(), null);
   }
 
   public List<FeedEntry> findByFeed(Feed feed, int offset, int limit) {
     final CriteriaQuery<FeedEntry> query = builder.createQuery(getType());
     final Root<FeedEntry> root = query.from(getType());
-    final SetJoin<FeedEntry, FeedFeedEntry> feedsJoin = root.join(FeedEntry_.feedRelationships);
 
-    query.where(builder.equal(feedsJoin.get(FeedFeedEntry_.feed), feed));
-    query.orderBy(builder.desc(feedsJoin.get(FeedFeedEntry_.entryUpdated)));
+    query.where(builder.equal(root.get(FeedEntry_.feed), feed));
+    query.orderBy(builder.desc(root.get(FeedEntry_.updated)));
     final TypedQuery<FeedEntry> q = em.createQuery(query);
     limit(q, offset, limit);
     setTimeout(q, applicationSettingsService.get().getQueryTimeout());
     return q.getResultList();
   }
 
-  public int delete(Date olderThan, int max) {
-    final CriteriaQuery<FeedEntry> query = builder.createQuery(getType());
-    final Root<FeedEntry> root = query.from(getType());
-    query.where(builder.lessThan(root.get(FeedEntry_.inserted), olderThan));
-
-    final TypedQuery<FeedEntry> q = em.createQuery(query);
-    q.setMaxResults(max);
-    final List<FeedEntry> list = q.getResultList();
-
-    final int deleted = list.size();
-    delete(list);
-    return deleted;
-  }
-
-  public int deleteWithoutFeeds(int max) {
-    final CriteriaQuery<FeedEntry> query = builder.createQuery(getType());
-    final Root<FeedEntry> root = query.from(getType());
-
-    final SetJoin<FeedEntry, FeedFeedEntry> join =
-        root.join(FeedEntry_.feedRelationships, JoinType.LEFT);
-    query.where(builder.isNull(join.get(FeedFeedEntry_.feed)));
-    final TypedQuery<FeedEntry> q = em.createQuery(query);
-    q.setMaxResults(max);
-
-    final List<FeedEntry> list = q.getResultList();
-    final int deleted = list.size();
-    delete(list);
-    return deleted;
-  }
 }
