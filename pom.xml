@@ -16,7 +16,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <production>false</production>
     <jpa.show_sql>false</jpa.show_sql>
-    <jpa.datasource.name>java:openejb/Resource/My DataSource</jpa.datasource.name>
+    <jpa.datasource.name>java:jboss/datasources/CommafeedDS</jpa.datasource.name>
     <jpa.cache>false</jpa.cache>
     <jpa.table.encoding>utf8mb4</jpa.table.encoding>
   </properties>
@@ -280,20 +280,6 @@
       <id>cache</id>
       <properties>
         <jpa.cache>true</jpa.cache>
-      </properties>
-    </profile>
-    <profile>
-      <id>pgsql</id>
-      <properties>
-        <jpa.datasource.name>java:jboss/datasources/CommafeedDS</jpa.datasource.name>
-        <jpa.dialect>com.commafeed.backend.hibernate.CommafeedPostgreSQL9Dialect</jpa.dialect>
-      </properties>
-    </profile>
-    <profile>
-      <id>hsqldb</id>
-      <properties>
-        <jpa.datasource.name>java:jboss/datasources/CommafeedDS</jpa.datasource.name>
-        <jpa.dialect>org.hibernate.dialect.HSQLDialect</jpa.dialect>
       </properties>
     </profile>
     <profile>

@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.hbm2ddl.SchemaExport.Type;
 import org.hibernate.tool.hbm2ddl.Target;
@@ -55,7 +54,6 @@ public class SchemaExporter {
 
   public static void main(String[] args) {
     exportSchema(CommafeedPostgreSQL9Dialect.class, "postgres");
-    exportSchema(HSQLDialect.class, "hsql");
   }
 
 }

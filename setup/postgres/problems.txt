@@ -1,3 +1,0 @@
-generally postgres works, but there are som problems...:
-* setTimeout is not supported, so query.setHint("javax.persistence.query.timeout", 20000) needs to be disabled
-* searching does not work...

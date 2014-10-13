@@ -1,1 +1,1 @@
-mvn -Pprod -Ppgsql-jboss clean package
+mvn -DskipTests=true -Pprod clean package
