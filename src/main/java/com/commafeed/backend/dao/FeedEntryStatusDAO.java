@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -128,20 +129,21 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
       predicates.add(builder.greaterThanOrEqualTo(root.get(FeedEntry_.inserted), newerThan));
     }
 
-    if (!search.terms.isEmpty()) {
+    final Set<String> notTerms = search.options.get("not");
+    if (!search.terms.isEmpty() || !notTerms.isEmpty()) {
       final Join<FeedEntry, FeedEntryContent> contentJoin = root.join(FeedEntry_.content);
 
       final Set<String> searchWords = new HashSet<>();
 
+      final Expression<String> lowerContent =
+          builder.lower(contentJoin.get(FeedEntryContent_.content));
+      final Expression<String> lowerTitle = builder.lower(contentJoin.get(FeedEntryContent_.title));
       search.terms.forEach(term -> {
         FeedUtils.extractSearchWords(term, false, searchWords);
 
         final String likeTerm = "%" + term.toLowerCase() + "%";
-        final Predicate content =
-            builder.like(builder.lower(contentJoin.get(FeedEntryContent_.content)), likeTerm);
-        final Predicate title =
-            builder.like(builder.lower(contentJoin.get(FeedEntryContent_.title)), likeTerm);
-        predicates.add(builder.or(content, title));
+        predicates.add(builder.or(builder.like(lowerContent, likeTerm),
+            builder.like(lowerTitle, likeTerm)));
       });
 
       // add full text search match in addition to like, because it is indexed
@@ -152,9 +154,18 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
         }
         ftsQueryBuilder.append(word).append(":*");
       }
-      predicates.add(builder.isTrue(builder.function("pg_fts_simple_match", Boolean.class,
-          contentJoin.get(FeedEntryContent_.searchText),
-          builder.literal(ftsQueryBuilder.toString()))));
+      if (ftsQueryBuilder.length() > 0) {
+        predicates.add(builder.isTrue(builder.function("pg_fts_simple_match", Boolean.class,
+            contentJoin.get(FeedEntryContent_.searchText),
+            builder.literal(ftsQueryBuilder.toString()))));
+      }
+
+      // handle notTerms (without fts for now)
+      for (final String notTerm : notTerms) {
+        final String notLikeTerm = "%" + notTerm.toLowerCase() + "%";
+        predicates.add(builder.not(builder.like(lowerContent, notLikeTerm)));
+        predicates.add(builder.not(builder.like(lowerTitle, notLikeTerm)));
+      }
     }
 
     query.where(predicates.toArray(new Predicate[0]));
