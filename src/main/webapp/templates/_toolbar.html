@@ -24,6 +24,10 @@
 			</ul>
 		</div>
 		
+		<form ng-submit="search()" class="btn-group input-append hidden-desktop">
+			<input style="width: 80px;" type="text" ng-model="keywords" placeholder="search"></input>
+			<button class="btn" type="submit"><i class="icon-search"></i></button>
+		</form>
 		<div class="btn-group hidden-desktop">
 			<button type="button" class="btn" ng-click="MobileService.toggleRightMenu()">
 				<i ng-class="{'icon-double-angle-right' : !MobileService.rightMenu, 'icon-double-angle-left': MobileService.rightMenu}"></i>
