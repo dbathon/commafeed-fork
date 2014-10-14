@@ -422,8 +422,8 @@ module.controller('CategoryDetailsCtrl', ['$scope', '$state', '$stateParams', 'F
 }]);
 
 module.controller('ToolbarCtrl', ['$scope', '$http', '$state', '$stateParams', 
-	'$route', '$location', 'SettingsService', 'EntryService', 'ProfileService', 'AnalyticsService', 'ServerService', 'FeedService', 'MobileService',
-function($scope, $http, $state, $stateParams, $route, $location,
+	'$route', '$location', '$rootScope', 'SettingsService', 'EntryService', 'ProfileService', 'AnalyticsService', 'ServerService', 'FeedService', 'MobileService',
+function($scope, $http, $state, $stateParams, $route, $location, $rootScope,
 		SettingsService, EntryService, ProfileService, AnalyticsService, ServerService, FeedService, MobileService) {
 
 	function totalActiveAjaxRequests() {
@@ -507,9 +507,13 @@ function($scope, $http, $state, $stateParams, $route, $location,
 			});
 		}
 	};
-	$scope.showButtons = function() {
-		return !$stateParams._keywords;
-	};
+	$rootScope.$on('$stateChangeStart',
+		function(event, toState, toParams, fromState, fromParams) { 
+			if (toParams._keywords) {
+				$scope.keywords = toParams._keywords;
+			}
+		}
+	);
 
 	$scope.toggleOrder = function() {
 		var settings = $scope.settingsService.settings;
