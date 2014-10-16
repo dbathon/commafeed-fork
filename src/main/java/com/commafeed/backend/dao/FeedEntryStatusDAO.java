@@ -17,6 +17,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.SetJoin;
 
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -165,6 +166,20 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
         final String notLikeTerm = "%" + notTerm.toLowerCase() + "%";
         predicates.add(builder.not(builder.like(lowerContent, notLikeTerm)));
         predicates.add(builder.not(builder.like(lowerTitle, notLikeTerm)));
+      }
+    }
+
+    final boolean unread = search.options.containsEntry("is", "unread");
+    final boolean starred = search.options.containsEntry("is", "starred");
+    if (unread || starred) {
+      final SetJoin<FeedEntry, FeedEntryStatus> statusesJoin = root.join(FeedEntry_.statuses);
+
+      predicates.add(statusesJoin.get(FeedEntryStatus_.subscription).in(filteredFeeds.values()));
+      if (unread) {
+        predicates.add(builder.isFalse(statusesJoin.get(FeedEntryStatus_.read)));
+      }
+      if (starred) {
+        predicates.add(builder.isTrue(statusesJoin.get(FeedEntryStatus_.starred)));
       }
     }
 
