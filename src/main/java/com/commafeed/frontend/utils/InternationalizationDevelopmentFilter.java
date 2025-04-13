@@ -1,5 +1,9 @@
 package com.commafeed.frontend.utils;
 
+import com.commafeed.backend.dao.UserSettingsDAO;
+import com.commafeed.backend.model.UserSettings;
+import com.commafeed.backend.services.ApplicationPropertiesService;
+import com.commafeed.frontend.CommaFeedSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,27 +11,13 @@ import java.io.InputStreamReader;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.inject.Inject;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.WriteListener;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
-
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.commafeed.backend.dao.UserSettingsDAO;
-import com.commafeed.backend.model.UserSettings;
-import com.commafeed.backend.services.ApplicationPropertiesService;
-import com.commafeed.frontend.CommaFeedSession;
 
 /**
  * Replace variables from templates on the fly in dev mode only. In production the substitution is
@@ -91,11 +81,9 @@ public class InternationalizationDevelopmentFilter implements Filter {
     try {
       is = getClass().getResourceAsStream("/i18n/" + lang + ".properties");
       props.load(new InputStreamReader(is, "UTF-8"));
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       log.error(e.getMessage(), e);
-    }
-    finally {
+    } finally {
       IOUtils.closeQuietly(is);
     }
 

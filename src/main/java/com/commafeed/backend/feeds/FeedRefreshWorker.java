@@ -1,16 +1,5 @@
 package com.commafeed.backend.feeds;
 
-import java.util.Date;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.commafeed.backend.HttpGetter.NotModifiedException;
 import com.commafeed.backend.feeds.FeedRefreshExecutor.Task;
 import com.commafeed.backend.model.ApplicationSettings;
@@ -18,6 +7,14 @@ import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.FeedEntry;
 import com.commafeed.backend.services.ApplicationSettingsService;
 import com.sun.syndication.io.FeedException;
+import java.util.Date;
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class FeedRefreshWorker {
@@ -104,8 +101,7 @@ public class FeedRefreshWorker {
       feed.setDisabledUntil(null);
 
       feedRefreshUpdater.updateFeed(feed, entries);
-    }
-    catch (final NotModifiedException e) {
+    } catch (final NotModifiedException e) {
       log.debug("Feed not modified : {} - {}", feed.getUrl(), e.getMessage());
 
       feed.setErrorCount(0);
@@ -113,13 +109,11 @@ public class FeedRefreshWorker {
       feed.setDisabledUntil(null);
 
       taskGiver.giveBack(feed);
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       final String message = "Unable to refresh feed " + feed.getUrl() + " : " + e.getMessage();
       if (e instanceof FeedException) {
         log.debug(e.getClass().getName() + " " + message, e);
-      }
-      else {
+      } else {
         log.debug(e.getClass().getName() + " " + message, e);
       }
 

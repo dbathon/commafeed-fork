@@ -1,19 +1,13 @@
 package com.commafeed.frontend.rest;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
+import com.commafeed.backend.model.UserRole.Role;
+import java.lang.annotation.*;
 import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
-import com.commafeed.backend.model.UserRole.Role;
-
 @Inherited
 @InterceptorBinding
-@Target({ ElementType.TYPE, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RestSecurityCheck {
 

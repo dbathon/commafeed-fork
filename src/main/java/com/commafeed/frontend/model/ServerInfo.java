@@ -1,14 +1,12 @@
 package com.commafeed.frontend.model;
 
+import com.google.common.collect.Maps;
+import com.wordnik.swagger.annotations.ApiClass;
 import java.io.Serializable;
 import java.util.Map;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import com.google.common.collect.Maps;
-import com.wordnik.swagger.annotations.ApiClass;
 
 @SuppressWarnings("serial")
 @XmlRootElement

@@ -1,13 +1,5 @@
 package com.commafeed.frontend.rest.resources;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import com.commafeed.backend.HttpGetter;
 import com.commafeed.backend.HttpGetter.HttpResult;
 import com.commafeed.backend.StartupBean;
@@ -16,6 +8,13 @@ import com.commafeed.backend.services.ApplicationPropertiesService;
 import com.commafeed.frontend.model.ServerInfo;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 @Path("/server")
 @Api(value = "/server", description = "Operations about server infos")
@@ -54,8 +53,7 @@ public class ServerREST extends AbstractREST {
     try {
       final HttpResult result = httpGetter.getBinary(url, 20000);
       return Response.ok(result.getContent()).build();
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       return Response.status(Status.SERVICE_UNAVAILABLE).entity(e.getMessage()).build();
     }
   }

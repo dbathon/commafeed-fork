@@ -2,24 +2,14 @@ package com.commafeed.backend.model;
 
 import java.util.Date;
 import java.util.Set;
-
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-
+import javax.persistence.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
-@Table(name = "FEEDS", indexes = { @Index(columnList = "disabledUntil, lastUpdated"),
+@Table(name = "FEEDS", indexes = {@Index(columnList = "disabledUntil, lastUpdated"),
     @Index(columnList = "lastUpdated"), @Index(columnList = "urlHash"),
-    @Index(columnList = "normalizedUrlHash"), @Index(columnList = "lastContentHash") })
+    @Index(columnList = "normalizedUrlHash"), @Index(columnList = "lastContentHash")})
 @SuppressWarnings("serial")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)

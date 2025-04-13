@@ -1,19 +1,5 @@
 package com.commafeed.backend.feeds;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.commafeed.backend.MetricsBean;
 import com.commafeed.backend.dao.FeedSubscriptionDAO;
 import com.commafeed.backend.feeds.FeedRefreshExecutor.Task;
@@ -24,6 +10,17 @@ import com.commafeed.backend.model.FeedSubscription;
 import com.commafeed.backend.services.ApplicationSettingsService;
 import com.commafeed.backend.services.FeedUpdateService;
 import com.google.common.util.concurrent.Striped;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class FeedRefreshUpdater {
@@ -102,7 +99,7 @@ public class FeedRefreshUpdater {
   }
 
   private boolean updateEntry(final Feed feed, final FeedEntry entry,
-      final List<FeedSubscription> subscriptions) {
+                              final List<FeedSubscription> subscriptions) {
     boolean success = false;
 
     final String key = StringUtils.trimToEmpty(entry.getGuid() + entry.getUrl());
@@ -113,16 +110,13 @@ public class FeedRefreshUpdater {
       if (locked) {
         feedUpdateService.updateEntry(feed, entry, subscriptions);
         success = true;
-      }
-      else {
+      } else {
         log.error("lock timeout for " + feed.getUrl() + " - " + key);
       }
-    }
-    catch (final InterruptedException e) {
+    } catch (final InterruptedException e) {
       log.error("interrupted while waiting for lock for " + feed.getUrl() + " : " + e.getMessage(),
           e);
-    }
-    finally {
+    } finally {
       if (locked) {
         lock.unlock();
       }

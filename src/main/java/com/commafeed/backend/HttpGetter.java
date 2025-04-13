@@ -4,21 +4,9 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
+import javax.net.ssl.*;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
+import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
@@ -53,13 +41,13 @@ public class HttpGetter {
   private static final String HTTPS = "https";
 
   private static SSLContext SSL_CONTEXT = null;
+
   static {
     try {
       SSL_CONTEXT = SSLContext.getInstance("TLS");
-      SSL_CONTEXT.init(new KeyManager[0], new TrustManager[] { new DefaultTrustManager() },
+      SSL_CONTEXT.init(new KeyManager[0], new TrustManager[]{new DefaultTrustManager()},
           new SecureRandom());
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       log.error("Could not configure ssl context");
     }
   }
@@ -72,17 +60,13 @@ public class HttpGetter {
   }
 
   /**
-   * @param url
-   *          the url to retrive
-   * @param lastModified
-   *          header we got last time we queried that url, or null
-   * @param eTag
-   *          header we got last time we queried that url, or null
+   * @param url          the url to retrive
+   * @param lastModified header we got last time we queried that url, or null
+   * @param eTag         header we got last time we queried that url, or null
    * @return
    * @throws ClientProtocolException
    * @throws IOException
-   * @throws NotModifiedException
-   *           if the url hasn't changed since we asked for it last time
+   * @throws NotModifiedException    if the url hasn't changed since we asked for it last time
    */
   public HttpResult getBinary(String url, String lastModified, String eTag, int timeout)
       throws ClientProtocolException, IOException, NotModifiedException {
@@ -110,17 +94,14 @@ public class HttpGetter {
         final int code = response.getStatusLine().getStatusCode();
         if (code == HttpStatus.SC_NOT_MODIFIED) {
           throw new NotModifiedException("304 http code");
-        }
-        else if (code >= 300) {
+        } else if (code >= 300) {
           throw new HttpResponseException(code, "Server returned HTTP error code " + code);
         }
 
-      }
-      catch (final HttpResponseException e) {
+      } catch (final HttpResponseException e) {
         if (e.getStatusCode() == HttpStatus.SC_NOT_MODIFIED) {
           throw new NotModifiedException("304 http code");
-        }
-        else {
+        } else {
           throw e;
         }
       }
@@ -151,9 +132,8 @@ public class HttpGetter {
       result =
           new HttpResult(content, contentType == null ? null : contentType.getValue(),
               lastModifiedHeader == null ? null : lastModifiedHeader.getValue(), eTagHeader == null
-                  ? null : eTagHeader.getValue(), duration);
-    }
-    finally {
+              ? null : eTagHeader.getValue(), duration);
+    } finally {
       client.getConnectionManager().shutdown();
     }
     return result;
@@ -168,7 +148,7 @@ public class HttpGetter {
     private final long duration;
 
     public HttpResult(byte[] content, String contentType, String lastModifiedSince, String eTag,
-        long duration) {
+                      long duration) {
       this.content = content;
       this.contentType = contentType;
       this.lastModifiedSince = lastModifiedSince;
@@ -226,10 +206,12 @@ public class HttpGetter {
 
   private static class DefaultTrustManager implements X509TrustManager {
     @Override
-    public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+    public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+    }
 
     @Override
-    public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+    public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+    }
 
     @Override
     public X509Certificate[] getAcceptedIssuers() {
@@ -240,13 +222,16 @@ public class HttpGetter {
   private static class DefaultHostnameVerifier implements X509HostnameVerifier {
 
     @Override
-    public void verify(String string, SSLSocket ssls) throws IOException {}
+    public void verify(String string, SSLSocket ssls) throws IOException {
+    }
 
     @Override
-    public void verify(String string, X509Certificate xc) throws SSLException {}
+    public void verify(String string, X509Certificate xc) throws SSLException {
+    }
 
     @Override
-    public void verify(String string, String[] strings, String[] strings1) throws SSLException {}
+    public void verify(String string, String[] strings, String[] strings1) throws SSLException {
+    }
 
     @Override
     public boolean verify(String string, SSLSession ssls) {

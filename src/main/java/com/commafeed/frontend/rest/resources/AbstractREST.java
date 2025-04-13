@@ -1,5 +1,12 @@
 package com.commafeed.frontend.rest.resources;
 
+import com.commafeed.backend.dao.UserDAO;
+import com.commafeed.backend.model.User;
+import com.commafeed.backend.model.UserRole.Role;
+import com.commafeed.backend.services.ApplicationSettingsService;
+import com.commafeed.frontend.CommaFeedApplication;
+import com.commafeed.frontend.CommaFeedSession;
+import com.commafeed.frontend.rest.RestSecurityCheck;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -9,21 +16,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-
 import org.apache.wicket.ThreadContext;
 import org.apache.wicket.authentication.IAuthenticationStrategy;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.protocol.http.servlet.ServletWebResponse;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.crypt.Base64;
-
-import com.commafeed.backend.dao.UserDAO;
-import com.commafeed.backend.model.User;
-import com.commafeed.backend.model.UserRole.Role;
-import com.commafeed.backend.services.ApplicationSettingsService;
-import com.commafeed.frontend.CommaFeedApplication;
-import com.commafeed.frontend.CommaFeedSession;
-import com.commafeed.frontend.rest.RestSecurityCheck;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

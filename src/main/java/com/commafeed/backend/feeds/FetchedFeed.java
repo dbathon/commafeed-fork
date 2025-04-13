@@ -1,10 +1,9 @@
 package com.commafeed.backend.feeds;
 
-import java.util.List;
-
 import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.FeedEntry;
 import com.google.common.collect.Lists;
+import java.util.List;
 
 public class FetchedFeed {
 

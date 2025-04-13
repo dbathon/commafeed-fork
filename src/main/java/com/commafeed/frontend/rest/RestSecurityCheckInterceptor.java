@@ -1,21 +1,18 @@
 package com.commafeed.frontend.rest;
 
+import com.commafeed.backend.model.User;
+import com.commafeed.backend.model.UserRole.Role;
+import com.commafeed.frontend.CommaFeedSession;
+import com.commafeed.frontend.rest.resources.AbstractREST;
 import java.io.Serializable;
 import java.lang.reflect.Method;
-
 import javax.annotation.Priority;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
-
-import com.commafeed.backend.model.User;
-import com.commafeed.backend.model.UserRole.Role;
-import com.commafeed.frontend.CommaFeedSession;
-import com.commafeed.frontend.rest.resources.AbstractREST;
 
 @RestSecurityCheck
 @Interceptor
@@ -53,8 +50,7 @@ public class RestSecurityCheckInterceptor implements Serializable {
       if (user == null) {
         return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to do this.")
             .build();
-      }
-      else {
+      } else {
         return Response.status(Status.FORBIDDEN).entity("You are not authorized to do this.")
             .build();
       }

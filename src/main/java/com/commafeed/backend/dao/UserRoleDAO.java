@@ -1,19 +1,17 @@
 package com.commafeed.backend.dao;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Root;
-
 import com.commafeed.backend.model.AbstractModel_;
 import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserRole;
 import com.commafeed.backend.model.UserRole.Role;
 import com.commafeed.backend.model.UserRole_;
 import com.google.common.collect.Sets;
+import java.util.List;
+import java.util.Set;
+import javax.ejb.Stateless;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
 
 @Stateless
 public class UserRoleDAO extends GenericDAO<UserRole> {

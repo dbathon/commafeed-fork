@@ -1,20 +1,5 @@
 package com.commafeed.frontend.rest.resources;
 
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import org.apache.commons.lang.StringUtils;
-
 import com.commafeed.backend.MetricsBean;
 import com.commafeed.backend.StartupBean;
 import com.commafeed.backend.dao.UserDAO;
@@ -37,6 +22,13 @@ import com.google.common.collect.Sets;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
+import java.util.Map;
+import java.util.Set;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import org.apache.commons.lang.StringUtils;
 
 @RestSecurityCheck(Role.ADMIN)
 @Path("/admin")
@@ -86,12 +78,10 @@ public class AdminREST extends AbstractREST {
       try {
         userService.register(userModel.getName(), userModel.getPassword(), userModel.getEmail(),
             roles, true);
-      }
-      catch (final Exception e) {
+      } catch (final Exception e) {
         return Response.status(Status.CONFLICT).entity(e.getMessage()).build();
       }
-    }
-    else {
+    } else {
       final User user = userDAO.findById(id);
       if (StartupBean.USERNAME_ADMIN.equals(user.getName()) && !userModel.isEnabled()) {
         return Response.status(Status.FORBIDDEN).entity("You cannot disable the admin user.")
@@ -109,8 +99,7 @@ public class AdminREST extends AbstractREST {
       final Set<Role> roles = userRoleDAO.findRoles(user);
       if (userModel.isAdmin() && !roles.contains(Role.ADMIN)) {
         userRoleDAO.saveOrUpdate(new UserRole(user, Role.ADMIN));
-      }
-      else if (!userModel.isAdmin() && roles.contains(Role.ADMIN)) {
+      } else if (!userModel.isAdmin() && roles.contains(Role.ADMIN)) {
         if (StartupBean.USERNAME_ADMIN.equals(user.getName())) {
           return Response.status(Status.FORBIDDEN)
               .entity("You cannot remove the admin role from the admin user.").build();

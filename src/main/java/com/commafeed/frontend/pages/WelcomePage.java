@@ -1,11 +1,9 @@
 package com.commafeed.frontend.pages;
 
-import javax.inject.Inject;
-
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-
 import com.commafeed.backend.services.ApplicationSettingsService;
 import com.commafeed.frontend.pages.components.LoginPanel;
+import javax.inject.Inject;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 
 @SuppressWarnings("serial")
 public class WelcomePage extends BasePage {

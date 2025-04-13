@@ -1,8 +1,12 @@
 package com.commafeed.backend.dao;
 
+import com.commafeed.backend.feeds.FeedUtils;
+import com.commafeed.backend.model.Feed;
+import com.commafeed.backend.model.Feed_;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import java.util.Date;
 import java.util.List;
-
 import javax.ejb.Stateless;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
@@ -11,15 +15,8 @@ import javax.persistence.criteria.Root;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
-
-import com.commafeed.backend.feeds.FeedUtils;
-import com.commafeed.backend.model.Feed;
-import com.commafeed.backend.model.Feed_;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 @Stateless
 public class FeedDAO extends GenericDAO<Feed> {

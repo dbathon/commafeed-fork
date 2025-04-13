@@ -31,8 +31,7 @@ public class BootstrapFeedbackPanel extends FeedbackPanel {
         }
         if (anyErrorMessage()) {
           sb.append(" alert-error");
-        }
-        else {
+        } else {
           sb.append(" alert-success");
         }
         return sb.toString();

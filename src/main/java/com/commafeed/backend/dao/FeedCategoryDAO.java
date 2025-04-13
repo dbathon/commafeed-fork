@@ -1,22 +1,19 @@
 package com.commafeed.backend.dao;
 
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-import org.apache.commons.lang.ObjectUtils;
-
 import com.commafeed.backend.model.AbstractModel_;
 import com.commafeed.backend.model.FeedCategory;
 import com.commafeed.backend.model.FeedCategory_;
 import com.commafeed.backend.model.User;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import java.util.List;
+import javax.ejb.Stateless;
+import javax.persistence.NoResultException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import org.apache.commons.lang.ObjectUtils;
 
 @Stateless
 public class FeedCategoryDAO extends GenericDAO<FeedCategory> {
@@ -58,8 +55,7 @@ public class FeedCategoryDAO extends GenericDAO<FeedCategory> {
 
     if (parent == null) {
       predicates.add(builder.isNull(root.get(FeedCategory_.parent)));
-    }
-    else {
+    } else {
       predicates.add(builder.equal(root.get(FeedCategory_.parent), parent));
     }
 
@@ -68,8 +64,7 @@ public class FeedCategoryDAO extends GenericDAO<FeedCategory> {
     FeedCategory category = null;
     try {
       category = em.createQuery(query).getSingleResult();
-    }
-    catch (final NoResultException e) {
+    } catch (final NoResultException e) {
       category = null;
     }
     return category;
@@ -84,8 +79,7 @@ public class FeedCategoryDAO extends GenericDAO<FeedCategory> {
     predicates.add(builder.equal(root.get(FeedCategory_.user), user));
     if (parent == null) {
       predicates.add(builder.isNull(root.get(FeedCategory_.parent)));
-    }
-    else {
+    } else {
       predicates.add(builder.equal(root.get(FeedCategory_.parent), parent));
     }
 

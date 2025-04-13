@@ -1,18 +1,15 @@
 package com.commafeed.backend.model;
 
+import com.commafeed.backend.feeds.FeedUtils;
+import com.google.common.base.Joiner;
 import java.util.Set;
 import java.util.TreeSet;
-
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import com.commafeed.backend.feeds.FeedUtils;
-import com.google.common.base.Joiner;
 
 @Entity
 @Table(name = "FEEDENTRYCONTENTS")

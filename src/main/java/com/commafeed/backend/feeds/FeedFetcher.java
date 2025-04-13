@@ -1,10 +1,13 @@
 package com.commafeed.backend.feeds;
 
+import com.commafeed.backend.HttpGetter;
+import com.commafeed.backend.HttpGetter.HttpResult;
+import com.commafeed.backend.HttpGetter.NotModifiedException;
+import com.commafeed.backend.model.Feed;
+import com.sun.syndication.io.FeedException;
 import java.io.IOException;
 import java.util.Date;
-
 import javax.inject.Inject;
-
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.client.ClientProtocolException;
@@ -13,12 +16,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.commafeed.backend.HttpGetter;
-import com.commafeed.backend.HttpGetter.HttpResult;
-import com.commafeed.backend.HttpGetter.NotModifiedException;
-import com.commafeed.backend.model.Feed;
-import com.sun.syndication.io.FeedException;
 
 public class FeedFetcher {
 
@@ -31,7 +28,7 @@ public class FeedFetcher {
   private HttpGetter getter;
 
   public FetchedFeed fetch(String feedUrl, boolean extractFeedUrlFromHtml, String lastModified,
-      String eTag, Date lastPublishedDate, String lastContentHash) throws FeedException,
+                           String eTag, Date lastPublishedDate, String lastContentHash) throws FeedException,
       ClientProtocolException, IOException, NotModifiedException {
     log.debug("Fetching feed {}", feedUrl);
     FetchedFeed fetchedFeed = null;
@@ -84,8 +81,7 @@ public class FeedFetcher {
       final Elements rss = doc.select("link[type=application/rss+xml]");
       if (!atom.isEmpty()) {
         foundUrl = atom.get(0).attr("abs:href").toString();
-      }
-      else if (!rss.isEmpty()) {
+      } else if (!rss.isEmpty()) {
         foundUrl = rss.get(0).attr("abs:href").toString();
       }
     }

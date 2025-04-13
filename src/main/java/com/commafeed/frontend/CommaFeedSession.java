@@ -1,15 +1,13 @@
 package com.commafeed.frontend;
 
+import com.commafeed.backend.dao.UserRoleDAO;
+import com.commafeed.backend.model.User;
+import com.commafeed.backend.services.UserService;
 import javax.inject.Inject;
-
 import org.apache.wicket.Session;
 import org.apache.wicket.authroles.authentication.AuthenticatedWebSession;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.request.Request;
-
-import com.commafeed.backend.dao.UserRoleDAO;
-import com.commafeed.backend.model.User;
-import com.commafeed.backend.services.UserService;
 
 public class CommaFeedSession extends AuthenticatedWebSession {
 
@@ -52,8 +50,7 @@ public class CommaFeedSession extends AuthenticatedWebSession {
     if (user == null) {
       this.user = null;
       roles = new Roles();
-    }
-    else {
+    } else {
       this.user = user;
       final String[] rolesArray =
           userRoleDAO.findRoles(user).stream().map(role -> role.name()).toArray(String[]::new);

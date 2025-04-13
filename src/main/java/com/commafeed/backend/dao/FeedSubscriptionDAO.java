@@ -1,23 +1,15 @@
 package com.commafeed.backend.dao;
 
+import com.commafeed.backend.model.*;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import java.util.List;
-
 import javax.ejb.Stateless;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-
 import org.hibernate.Hibernate;
-
-import com.commafeed.backend.model.AbstractModel_;
-import com.commafeed.backend.model.Feed;
-import com.commafeed.backend.model.FeedCategory;
-import com.commafeed.backend.model.FeedSubscription;
-import com.commafeed.backend.model.FeedSubscription_;
-import com.commafeed.backend.model.User;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 @Stateless
 public class FeedSubscriptionDAO extends GenericDAO<FeedSubscription> {
@@ -99,8 +91,7 @@ public class FeedSubscriptionDAO extends GenericDAO<FeedSubscription> {
     Predicate p2 = null;
     if (category == null) {
       p2 = builder.isNull(root.get(FeedSubscription_.category));
-    }
-    else {
+    } else {
       p2 =
           builder.equal(root.get(FeedSubscription_.category).get(AbstractModel_.id),
               category.getId());

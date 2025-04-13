@@ -1,11 +1,9 @@
 package com.commafeed.frontend.pages.components;
 
+import com.commafeed.backend.services.ApplicationSettingsService;
 import javax.inject.Inject;
-
 import org.apache.wicket.authroles.authentication.panel.SignInPanel;
 import org.apache.wicket.feedback.ContainerFeedbackMessageFilter;
-
-import com.commafeed.backend.services.ApplicationSettingsService;
 
 @SuppressWarnings("serial")
 public class LoginPanel extends SignInPanel {

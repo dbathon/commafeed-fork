@@ -1,20 +1,10 @@
 package com.commafeed.backend.model;
 
+import com.google.common.collect.Sets;
 import java.util.Set;
-
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
+import javax.persistence.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import com.google.common.collect.Sets;
 
 @Entity
 @Table(name = "FEEDCATEGORIES")

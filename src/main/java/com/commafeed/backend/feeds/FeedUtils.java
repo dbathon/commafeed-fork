@@ -1,16 +1,15 @@
 package com.commafeed.backend.feeds;
 
+import com.commafeed.backend.model.FeedEntry;
+import com.commafeed.backend.model.FeedSubscription;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.steadystate.css.parser.CSSOMParser;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -29,12 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.css.sac.InputSource;
 import org.w3c.dom.css.CSSStyleDeclaration;
 
-import com.commafeed.backend.model.FeedEntry;
-import com.commafeed.backend.model.FeedSubscription;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.steadystate.css.parser.CSSOMParser;
-
 public class FeedUtils {
 
   protected static Logger log = LoggerFactory.getLogger(FeedUtils.class);
@@ -42,7 +35,7 @@ public class FeedUtils {
   private static final String ESCAPED_QUESTION_MARK = Pattern.quote("?");
   private static final List<String> ALLOWED_IFRAME_CSS_RULES = Arrays.asList("height", "width",
       "border");
-  private static final char[] DISALLOWED_IFRAME_CSS_RULE_CHARACTERS = new char[] { '(', ')' };
+  private static final char[] DISALLOWED_IFRAME_CSS_RULE_CHARACTERS = new char[]{'(', ')'};
 
   private static final Pattern ALNUM_PATTERN = Pattern.compile("\\p{Alnum}+",
       Pattern.UNICODE_CHARACTER_CLASS);
@@ -119,8 +112,7 @@ public class FeedUtils {
     detector.reset();
     if (encoding == null) {
       encoding = DEFAULT_ENCODING;
-    }
-    else if (encoding.equalsIgnoreCase("ISO-8859-1")) {
+    } else if (encoding.equalsIgnoreCase("ISO-8859-1")) {
       encoding = "windows-1252";
     }
     return encoding;
@@ -199,8 +191,7 @@ public class FeedUtils {
       final Element body = clean.body();
       if (keepTextOnly) {
         content = body.text();
-      }
-      else {
+      } else {
         content = body.html();
       }
     }
@@ -226,8 +217,7 @@ public class FeedUtils {
           rules.add(property + ":" + decl.getPropertyValue(property) + ";");
         }
       }
-    }
-    catch (final IOException e) {
+    } catch (final IOException e) {
       log.error(e.getMessage(), e);
     }
     return StringUtils.join(rules, "");
@@ -265,8 +255,7 @@ public class FeedUtils {
       if (!firstTagFound) {
         if (c == '<') {
           firstTagFound = true;
-        }
-        else {
+        } else {
           continue;
         }
       }
@@ -357,14 +346,11 @@ public class FeedUtils {
     for (char c : msg.toCharArray()) {
       if (c >= 'a' && c <= 'm') {
         c += 13;
-      }
-      else if (c >= 'n' && c <= 'z') {
+      } else if (c >= 'n' && c <= 'z') {
         c -= 13;
-      }
-      else if (c >= 'A' && c <= 'M') {
+      } else if (c >= 'A' && c <= 'M') {
         c += 13;
-      }
-      else if (c >= 'N' && c <= 'Z') {
+      } else if (c >= 'N' && c <= 'Z') {
         c -= 13;
       }
       message.append(c);
@@ -405,8 +391,7 @@ public class FeedUtils {
       }
 
       text = document.text();
-    }
-    else {
+    } else {
       text = input;
     }
 

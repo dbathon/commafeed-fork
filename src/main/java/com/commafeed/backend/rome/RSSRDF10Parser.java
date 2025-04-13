@@ -1,13 +1,11 @@
 package com.commafeed.backend.rome;
 
+import com.google.common.collect.Lists;
+import com.sun.syndication.io.impl.RSS10Parser;
 import java.util.List;
-
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
-
-import com.google.common.collect.Lists;
-import com.sun.syndication.io.impl.RSS10Parser;
 
 public class RSSRDF10Parser extends RSS10Parser {
 
@@ -18,7 +16,7 @@ public class RSSRDF10Parser extends RSS10Parser {
     super("rss_1.0", RSS_NS);
   }
 
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
   public boolean isMyType(Document document) {
     boolean ok = false;
@@ -37,8 +35,7 @@ public class RSSRDF10Parser extends RSS10Parser {
     if (ok) {
       if (additionalNSs == null) {
         ok = false;
-      }
-      else {
+      } else {
         ok = false;
         for (int i = 0; !ok && i < additionalNSs.size(); i++) {
           ok = getRSSNamespace().equals(additionalNSs.get(i));

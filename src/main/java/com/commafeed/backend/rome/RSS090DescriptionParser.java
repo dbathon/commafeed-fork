@@ -1,10 +1,9 @@
 package com.commafeed.backend.rome;
 
-import org.jdom.Element;
-
 import com.sun.syndication.feed.rss.Description;
 import com.sun.syndication.feed.rss.Item;
 import com.sun.syndication.io.impl.RSS090Parser;
+import org.jdom.Element;
 
 public class RSS090DescriptionParser extends RSS090Parser {
 

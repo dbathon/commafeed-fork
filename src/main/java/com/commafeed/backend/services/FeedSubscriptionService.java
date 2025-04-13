@@ -1,27 +1,19 @@
 package com.commafeed.backend.services;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.ejb.ApplicationException;
-import javax.inject.Inject;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.commafeed.backend.dao.FeedEntryDAO;
 import com.commafeed.backend.dao.FeedEntryStatusDAO;
 import com.commafeed.backend.dao.FeedSubscriptionDAO;
 import com.commafeed.backend.feeds.FeedRefreshTaskGiver;
 import com.commafeed.backend.feeds.FeedUtils;
-import com.commafeed.backend.model.Feed;
-import com.commafeed.backend.model.FeedCategory;
-import com.commafeed.backend.model.FeedEntry;
-import com.commafeed.backend.model.FeedEntryStatus;
-import com.commafeed.backend.model.FeedSubscription;
-import com.commafeed.backend.model.User;
+import com.commafeed.backend.model.*;
 import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Map;
+import javax.ejb.ApplicationException;
+import javax.inject.Inject;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FeedSubscriptionService {
 
@@ -90,8 +82,7 @@ public class FeedSubscriptionService {
           statuses.add(status);
         }
         feedEntryStatusDAO.saveOrUpdate(statuses);
-      }
-      catch (final Exception e) {
+      } catch (final Exception e) {
         log.error("could not fetch initial statuses when importing {} : {}", feed.getUrl(),
             e.getMessage());
       }

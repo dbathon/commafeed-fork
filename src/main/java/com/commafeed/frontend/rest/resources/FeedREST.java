@@ -1,52 +1,10 @@
 package com.commafeed.frontend.rest.resources;
 
-import java.io.StringWriter;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.commafeed.backend.StartupBean;
 import com.commafeed.backend.dao.FeedCategoryDAO;
 import com.commafeed.backend.dao.FeedEntryStatusDAO;
 import com.commafeed.backend.dao.FeedSubscriptionDAO;
-import com.commafeed.backend.feeds.FaviconFetcher;
-import com.commafeed.backend.feeds.FeedFetcher;
-import com.commafeed.backend.feeds.FeedRefreshTaskGiver;
-import com.commafeed.backend.feeds.FeedUtils;
-import com.commafeed.backend.feeds.FetchedFeed;
-import com.commafeed.backend.feeds.OPMLExporter;
-import com.commafeed.backend.feeds.OPMLImporter;
+import com.commafeed.backend.feeds.*;
 import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.FeedCategory;
 import com.commafeed.backend.model.FeedEntryStatus;
@@ -58,11 +16,7 @@ import com.commafeed.frontend.model.Entries;
 import com.commafeed.frontend.model.Entry;
 import com.commafeed.frontend.model.FeedInfo;
 import com.commafeed.frontend.model.Subscription;
-import com.commafeed.frontend.model.request.FeedInfoRequest;
-import com.commafeed.frontend.model.request.FeedModificationRequest;
-import com.commafeed.frontend.model.request.IDRequest;
-import com.commafeed.frontend.model.request.MarkRequest;
-import com.commafeed.frontend.model.request.SubscribeRequest;
+import com.commafeed.frontend.model.request.*;
 import com.commafeed.frontend.rest.Enums.ReadType;
 import com.commafeed.frontend.rest.RestSecurityCheck;
 import com.google.common.base.Preconditions;
@@ -76,6 +30,27 @@ import com.sun.syndication.io.WireFeedOutput;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
+import java.io.StringWriter;
+import java.net.URI;
+import java.util.*;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Path("/feed")
 @Api(value = "/feed", description = "Operations about feeds")
@@ -152,8 +127,7 @@ public class FeedREST extends AbstractREST {
         list =
             feedEntryStatusDAO.findUnreadBySubscriptions(Arrays.asList(subscription),
                 newerThanDate, offset, limit + 1, order, true);
-      }
-      else {
+      } else {
         list =
             feedEntryStatusDAO.findBySubscriptions(Arrays.asList(subscription), null,
                 newerThanDate, offset, limit + 1, order, true);
@@ -211,8 +185,7 @@ public class FeedREST extends AbstractREST {
     final StringWriter writer = new StringWriter();
     try {
       output.output(feed, writer);
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       writer.write("Could not get feed information");
       log.error(e.getMessage(), e);
     }
@@ -229,8 +202,7 @@ public class FeedREST extends AbstractREST {
       info.setUrl(feed.getFeed().getUrl());
       info.setTitle(feed.getTitle());
 
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       throw new WebApplicationException(e, Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(e.getMessage()).build());
     }
@@ -248,8 +220,7 @@ public class FeedREST extends AbstractREST {
     FeedInfo info = null;
     try {
       info = fetchFeedInternal(req.getUrl());
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     }
     return Response.ok(info).build();
@@ -308,7 +279,7 @@ public class FeedREST extends AbstractREST {
       unreadCount = new Long(0);
     }
     return Response.ok(
-        Subscription.build(sub, applicationSettingsService.get().getPublicUrl(), unreadCount))
+            Subscription.build(sub, applicationSettingsService.get().getPublicUrl(), unreadCount))
         .build();
   }
 
@@ -333,8 +304,7 @@ public class FeedREST extends AbstractREST {
       builder =
           Response.status(Status.MOVED_PERMANENTLY).location(
               URI.create(baseUrl + "/images/default_favicon.gif"));
-    }
-    else {
+    } else {
       builder = Response.ok(icon, "image/x-icon");
     }
 
@@ -370,8 +340,7 @@ public class FeedREST extends AbstractREST {
               .valueOf(req.getCategoryId()));
       final FeedInfo info = fetchFeedInternal(url);
       feedSubscriptionService.subscribe(getUser(), info.getUrl(), req.getTitle(), category);
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       log.info("Failed to subscribe to URL {}: {}", url, e.getMessage());
       return Response.status(Status.SERVICE_UNAVAILABLE)
           .entity("Failed to subscribe to URL " + url + ": " + e.getMessage()).build();
@@ -393,8 +362,7 @@ public class FeedREST extends AbstractREST {
 
       final FeedInfo info = fetchFeedInternal(url);
       feedSubscriptionService.subscribe(getUser(), info.getUrl(), info.getTitle(), null);
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       log.info("Could not subscribe to url {} : {}", url, e.getMessage());
     }
     return Response.temporaryRedirect(URI.create(applicationSettingsService.get().getPublicUrl()))
@@ -419,8 +387,7 @@ public class FeedREST extends AbstractREST {
     if (sub != null) {
       feedSubscriptionDAO.delete(sub);
       return Response.ok(Status.OK).build();
-    }
-    else {
+    } else {
       return Response.status(Status.NOT_FOUND).build();
     }
   }
@@ -464,8 +431,7 @@ public class FeedREST extends AbstractREST {
         subs.get(i).setPosition(i);
       }
       feedSubscriptionDAO.saveOrUpdate(subs);
-    }
-    else {
+    } else {
       feedSubscriptionDAO.saveOrUpdate(subscription);
     }
     return Response.ok(Status.OK).build();
@@ -496,8 +462,7 @@ public class FeedREST extends AbstractREST {
           break;
         }
       }
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(e.getMessage()).build());
     }
@@ -515,8 +480,7 @@ public class FeedREST extends AbstractREST {
     String opmlString = null;
     try {
       opmlString = output.outputString(opml);
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e).build();
     }
     return Response.ok(opmlString).build();

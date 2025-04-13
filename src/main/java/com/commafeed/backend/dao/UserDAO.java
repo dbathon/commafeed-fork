@@ -1,15 +1,13 @@
 package com.commafeed.backend.dao;
 
+import com.commafeed.backend.model.User;
+import com.commafeed.backend.model.User_;
 import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-
 import org.apache.commons.lang3.StringUtils;
-
-import com.commafeed.backend.model.User;
-import com.commafeed.backend.model.User_;
 
 @Stateless
 public class UserDAO extends GenericDAO<User> {
@@ -25,8 +23,7 @@ public class UserDAO extends GenericDAO<User> {
     User user = null;
     try {
       user = q.getSingleResult();
-    }
-    catch (final NoResultException e) {
+    } catch (final NoResultException e) {
       user = null;
     }
     return user;
@@ -42,8 +39,7 @@ public class UserDAO extends GenericDAO<User> {
     User user = null;
     try {
       user = q.getSingleResult();
-    }
-    catch (final NoResultException e) {
+    } catch (final NoResultException e) {
       user = null;
     }
     return user;
@@ -61,8 +57,7 @@ public class UserDAO extends GenericDAO<User> {
     User user = null;
     try {
       user = q.getSingleResult();
-    }
-    catch (final NoResultException e) {
+    } catch (final NoResultException e) {
       user = null;
     }
     return user;

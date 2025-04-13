@@ -1,15 +1,13 @@
 package com.commafeed.backend.services;
 
+import com.commafeed.backend.dao.FeedDAO;
+import com.commafeed.backend.feeds.FeedUtils;
+import com.commafeed.backend.model.Feed;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.inject.Inject;
-
 import org.apache.commons.codec.digest.DigestUtils;
-
-import com.commafeed.backend.dao.FeedDAO;
-import com.commafeed.backend.feeds.FeedUtils;
-import com.commafeed.backend.model.Feed;
 
 @Singleton
 public class FeedService {

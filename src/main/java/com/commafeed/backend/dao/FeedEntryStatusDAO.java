@@ -1,45 +1,24 @@
 package com.commafeed.backend.dao;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.SetJoin;
-
-import org.hibernate.Hibernate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.commafeed.backend.dao.SearchStringParser.ParsedSearch;
 import com.commafeed.backend.feeds.FeedUtils;
-import com.commafeed.backend.model.AbstractModel_;
-import com.commafeed.backend.model.FeedEntry;
-import com.commafeed.backend.model.FeedEntryContent;
-import com.commafeed.backend.model.FeedEntryContent_;
-import com.commafeed.backend.model.FeedEntryStatus;
-import com.commafeed.backend.model.FeedEntryStatus_;
-import com.commafeed.backend.model.FeedEntry_;
-import com.commafeed.backend.model.FeedSubscription;
-import com.commafeed.backend.model.User;
+import com.commafeed.backend.model.*;
 import com.commafeed.backend.model.UserSettings.ReadingOrder;
 import com.commafeed.backend.services.ApplicationSettingsService;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
+import java.util.*;
+import java.util.stream.Collectors;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
+import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Stateless
 public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
@@ -72,7 +51,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
   }
 
   public List<FeedEntryStatus> findStarred(User user, Date newerThan, int offset, int limit,
-      ReadingOrder order, boolean includeContent) {
+                                           ReadingOrder order, boolean includeContent) {
 
     final CriteriaQuery<FeedEntryStatus> query = builder.createQuery(getType());
     final Root<FeedEntryStatus> root = query.from(getType());
@@ -100,7 +79,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
     final SetMultimap<String, String> options = search.options;
     if (options.containsKey(CATEGORY_ID_SEARCH_OPTION)
         && (sub.getCategory() == null || !options.containsEntry(CATEGORY_ID_SEARCH_OPTION, sub
-            .getCategory().getId().toString()))) {
+        .getCategory().getId().toString()))) {
       return false;
     }
     if (options.containsKey(FEED_ID_SEARCH_OPTION)
@@ -111,8 +90,8 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
   }
 
   public List<FeedEntryStatus> findBySubscriptions(List<FeedSubscription> subscriptions,
-      String keywords, Date newerThan, int offset, int limit, ReadingOrder order,
-      boolean includeContent) {
+                                                   String keywords, Date newerThan, int offset, int limit, ReadingOrder order,
+                                                   boolean includeContent) {
 
     final ParsedSearch search = SearchStringParser.parse(keywords);
 
@@ -203,7 +182,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
   }
 
   public List<FeedEntryStatus> findUnreadBySubscriptions(List<FeedSubscription> subscriptions,
-      Date newerThan, int offset, int limit, ReadingOrder order, boolean includeContent) {
+                                                         Date newerThan, int offset, int limit, ReadingOrder order, boolean includeContent) {
 
     final CriteriaQuery<FeedEntryStatus> query = builder.createQuery(getType());
     final Root<FeedEntryStatus> root = query.from(getType());
@@ -229,7 +208,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
   }
 
   public List<FeedEntryStatus> findAllUnread(User user, Date newerThan, int offset, int limit,
-      ReadingOrder order, boolean includeContent) {
+                                             ReadingOrder order, boolean includeContent) {
 
     final CriteriaQuery<FeedEntryStatus> query = builder.createQuery(getType());
     final Root<FeedEntryStatus> root = query.from(getType());
@@ -272,7 +251,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
   }
 
   private List<FeedEntryStatus> lazyLoadContent(boolean includeContent,
-      List<FeedEntryStatus> results) {
+                                                List<FeedEntryStatus> results) {
     if (includeContent) {
       for (final FeedEntryStatus status : results) {
         Hibernate.initialize(status.getSubscription().getFeed());
@@ -283,7 +262,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
   }
 
   private void orderStatusesBy(CriteriaQuery<?> query, Path<FeedEntryStatus> statusJoin,
-      ReadingOrder order, Path<Long> id) {
+                               ReadingOrder order, Path<Long> id) {
     orderBy(query, statusJoin.get(FeedEntryStatus_.entryUpdated), order, id);
   }
 
@@ -291,8 +270,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
     if (order != null) {
       if (order == ReadingOrder.asc) {
         query.orderBy(builder.asc(date), builder.asc(id));
-      }
-      else {
+      } else {
         query.orderBy(builder.desc(date), builder.desc(id));
       }
     }
@@ -327,8 +305,7 @@ public class FeedEntryStatusDAO extends GenericDAO<FeedEntryStatus> {
           if (status.isStarred()) {
             status.setRead(true);
             list.add(status);
-          }
-          else {
+          } else {
             delete(status);
           }
 

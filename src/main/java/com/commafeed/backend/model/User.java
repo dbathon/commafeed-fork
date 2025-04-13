@@ -1,22 +1,11 @@
 package com.commafeed.backend.model;
 
+import com.google.common.collect.Sets;
 import java.util.Date;
 import java.util.Set;
-
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
+import javax.persistence.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import com.google.common.collect.Sets;
 
 @Entity
 @Table(name = "USERS")
@@ -55,7 +44,7 @@ public class User extends AbstractModel {
   @Temporal(TemporalType.TIMESTAMP)
   private Date recoverPasswordTokenDate;
 
-  @OneToMany(mappedBy = "user", cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
+  @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
   private Set<UserRole> roles = Sets.newHashSet();
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)

@@ -1,11 +1,10 @@
 package com.commafeed.backend.services;
 
-import javax.ejb.Singleton;
-import javax.inject.Inject;
-
 import com.commafeed.backend.dao.ApplicationSettingsDAO;
 import com.commafeed.backend.model.ApplicationSettings;
 import com.google.common.collect.Iterables;
+import javax.ejb.Singleton;
+import javax.inject.Inject;
 
 @Singleton
 public class ApplicationSettingsService {

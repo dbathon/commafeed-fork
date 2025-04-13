@@ -1,19 +1,16 @@
 package com.commafeed.backend.feeds;
 
+import com.commafeed.backend.HttpGetter;
+import com.commafeed.backend.HttpGetter.HttpResult;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.commafeed.backend.HttpGetter;
-import com.commafeed.backend.HttpGetter.HttpResult;
 
 /**
  * Inspired/Ported from https://github.com/potatolondon/getfavicon
@@ -45,8 +42,7 @@ public class FaviconFetcher {
     int doubleSlash = url.indexOf("//");
     if (doubleSlash == -1) {
       doubleSlash = 0;
-    }
-    else {
+    } else {
       doubleSlash += 2;
     }
     final int firstSlash = url.indexOf('/', doubleSlash);
@@ -73,8 +69,7 @@ public class FaviconFetcher {
       final HttpResult result = getter.getBinary(url, TIMEOUT);
       bytes = result.getContent();
       contentType = result.getContentType();
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       log.debug("Failed to retrieve iconAtRoot: " + e.getMessage(), e);
     }
 
@@ -119,8 +114,7 @@ public class FaviconFetcher {
     try {
       final HttpResult result = getter.getBinary(url, TIMEOUT);
       doc = Jsoup.parse(new String(result.getContent()), url);
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       log.debug("Failed to retrieve page to find icon");
       return null;
     }
@@ -146,8 +140,7 @@ public class FaviconFetcher {
       final HttpResult result = getter.getBinary(href, TIMEOUT);
       bytes = result.getContent();
       contentType = result.getContentType();
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       log.debug("Failed to retrieve icon found in page {}", href);
       return null;
     }

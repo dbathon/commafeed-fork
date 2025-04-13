@@ -1,31 +1,20 @@
 package com.commafeed.backend.services;
 
+import com.commafeed.backend.MetricsBean;
+import com.commafeed.backend.dao.FeedEntryDAO;
+import com.commafeed.backend.dao.FeedEntryStatusDAO;
+import com.commafeed.backend.model.*;
+import com.google.common.collect.Lists;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
+import javax.ejb.*;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.commafeed.backend.MetricsBean;
-import com.commafeed.backend.dao.FeedEntryDAO;
-import com.commafeed.backend.dao.FeedEntryStatusDAO;
-import com.commafeed.backend.model.Feed;
-import com.commafeed.backend.model.FeedEntry;
-import com.commafeed.backend.model.FeedEntryContent;
-import com.commafeed.backend.model.FeedEntryStatus;
-import com.commafeed.backend.model.FeedSubscription;
-import com.google.common.collect.Lists;
 
 @Stateless
 public class FeedUpdateService {
@@ -92,8 +81,7 @@ public class FeedUpdateService {
       feedEntryDAO.saveOrUpdate(entry);
 
       createAndSaveEntryStatuses(entry, subscriptions);
-    }
-    else {
+    } else {
       // just update the content if there are changes
       processContentChanges(existing, entry.getContent());
     }

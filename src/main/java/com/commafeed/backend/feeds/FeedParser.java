@@ -1,31 +1,24 @@
 package com.commafeed.backend.feeds;
 
-import java.io.StringReader;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.SystemUtils;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.xml.sax.InputSource;
-
 import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.FeedEntry;
 import com.commafeed.backend.model.FeedEntryContent;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
-import com.sun.syndication.feed.synd.SyndContent;
-import com.sun.syndication.feed.synd.SyndEnclosure;
-import com.sun.syndication.feed.synd.SyndEntry;
-import com.sun.syndication.feed.synd.SyndFeed;
-import com.sun.syndication.feed.synd.SyndLink;
-import com.sun.syndication.feed.synd.SyndLinkImpl;
+import com.sun.syndication.feed.synd.*;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
+import java.io.StringReader;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.List;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
+import org.jdom.Element;
+import org.jdom.Namespace;
+import org.xml.sax.InputSource;
 
 public class FeedParser {
 
@@ -114,8 +107,7 @@ public class FeedParser {
       feed.setLastPublishedDate(validateDate(publishedDate, true));
       feed.setLastEntryDate(lastEntryDate);
 
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       throw new FeedException(String.format("Could not parse feed from %s : %s", feedUrl,
           e.getMessage()), e);
     }
@@ -125,7 +117,7 @@ public class FeedParser {
   /**
    * Adds atom links for rss feeds
    */
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private void handleForeignMarkup(SyndFeed feed) {
     final Object foreignMarkup = feed.getForeignMarkup();
     if (foreignMarkup == null) {
@@ -184,8 +176,7 @@ public class FeedParser {
     String content = null;
     if (item.getContents().isEmpty()) {
       content = item.getDescription() == null ? null : item.getDescription().getValue();
-    }
-    else {
+    } else {
       content =
           StringUtils.join(Collections2.transform(item.getContents(), CONTENT_TO_STRING),
               SystemUtils.LINE_SEPARATOR);
@@ -199,8 +190,7 @@ public class FeedParser {
       final Date date = item.getPublishedDate();
       if (date != null) {
         title = DateFormat.getInstance().format(date);
-      }
-      else {
+      } else {
         title = "(no title)";
       }
     }

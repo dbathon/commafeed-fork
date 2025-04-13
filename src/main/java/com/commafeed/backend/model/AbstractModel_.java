@@ -6,7 +6,7 @@ import javax.persistence.metamodel.StaticMetamodel;
 @StaticMetamodel(AbstractModel.class)
 public abstract class AbstractModel_ {
 
-	public static volatile SingularAttribute<AbstractModel, Long> id;
+  public static volatile SingularAttribute<AbstractModel, Long> id;
 
 }
 

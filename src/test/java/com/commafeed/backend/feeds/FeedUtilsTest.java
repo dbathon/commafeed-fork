@@ -1,14 +1,12 @@
 package com.commafeed.backend.feeds;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-
+import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableSet;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class FeedUtilsTest {
 

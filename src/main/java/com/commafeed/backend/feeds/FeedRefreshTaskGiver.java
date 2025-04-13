@@ -1,22 +1,5 @@
 package com.commafeed.backend.feeds;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.time.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.commafeed.backend.MetricsBean;
 import com.commafeed.backend.dao.FeedDAO;
 import com.commafeed.backend.model.Feed;
@@ -24,6 +7,20 @@ import com.commafeed.backend.services.ApplicationSettingsService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class FeedRefreshTaskGiver {
@@ -62,8 +59,7 @@ public class FeedRefreshTaskGiver {
     while (!executor.isTerminated()) {
       try {
         Thread.sleep(100);
-      }
-      catch (final InterruptedException e) {
+      } catch (final InterruptedException e) {
         log.error("interrupted while waiting for threads to finish.");
       }
     }
@@ -72,8 +68,7 @@ public class FeedRefreshTaskGiver {
   private void sleep(int millis) {
     try {
       Thread.sleep(millis);
-    }
-    catch (final InterruptedException e) {
+    } catch (final InterruptedException e) {
       log.info("interrupted while sleeping");
     }
   }
@@ -89,13 +84,11 @@ public class FeedRefreshTaskGiver {
           if (feed != null) {
             metricsBean.feedRefreshed();
             worker.updateFeed(feed);
-          }
-          else {
+          } else {
             log.debug("nothing to do, sleeping for 15s");
             sleep(15000);
           }
-        }
-        catch (final Exception e2) {
+        } catch (final Exception e2) {
           log.error(e2.getMessage(), e2);
         }
       }
@@ -134,8 +127,7 @@ public class FeedRefreshTaskGiver {
     List<Feed> feeds = null;
     if (applicationSettingsService.get().isCrawlingPaused()) {
       feeds = Lists.newArrayList();
-    }
-    else {
+    } else {
       feeds = feedDAO.findNextUpdatable(count, getThreshold());
     }
 

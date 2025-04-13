@@ -1,16 +1,5 @@
 package com.commafeed.backend.services;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
-
 import com.commafeed.backend.dao.FeedCategoryDAO;
 import com.commafeed.backend.dao.UserDAO;
 import com.commafeed.backend.dao.UserSettingsDAO;
@@ -18,6 +7,14 @@ import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserRole;
 import com.commafeed.backend.model.UserRole.Role;
 import com.google.common.base.Preconditions;
+import java.util.Collection;
+import java.util.Date;
+import java.util.UUID;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 
 @Stateless
 public class UserService {
@@ -66,7 +63,7 @@ public class UserService {
   }
 
   public User register(String name, String password, String email, Collection<Role> roles,
-      boolean forceRegistration) {
+                       boolean forceRegistration) {
 
     Preconditions.checkNotNull(name);
     Preconditions.checkArgument(StringUtils.length(name) <= 32,

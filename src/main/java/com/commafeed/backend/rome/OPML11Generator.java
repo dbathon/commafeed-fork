@@ -1,8 +1,7 @@
 package com.commafeed.backend.rome;
 
-import org.jdom.Element;
-
 import com.sun.syndication.feed.opml.Opml;
+import org.jdom.Element;
 
 public class OPML11Generator extends com.sun.syndication.io.impl.OPML10Generator {
 

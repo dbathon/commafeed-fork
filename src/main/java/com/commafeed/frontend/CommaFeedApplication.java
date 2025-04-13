@@ -1,17 +1,15 @@
 package com.commafeed.frontend;
 
+import com.commafeed.frontend.pages.HomePage;
+import com.commafeed.frontend.pages.LogoutPage;
+import com.commafeed.frontend.pages.PagesSecurityCheck;
+import com.commafeed.frontend.pages.WelcomePage;
 import java.util.ResourceBundle;
-
 import javax.enterprise.inject.spi.BeanManager;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.http.Cookie;
-
-import org.apache.wicket.Application;
-import org.apache.wicket.Component;
-import org.apache.wicket.Page;
-import org.apache.wicket.RuntimeConfigurationType;
-import org.apache.wicket.Session;
+import org.apache.wicket.*;
 import org.apache.wicket.authentication.strategy.DefaultAuthenticationStrategy;
 import org.apache.wicket.authorization.Action;
 import org.apache.wicket.authorization.IAuthorizationStrategy;
@@ -28,11 +26,6 @@ import org.apache.wicket.request.component.IRequestableComponent;
 import org.apache.wicket.util.cookies.CookieUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.commafeed.frontend.pages.HomePage;
-import com.commafeed.frontend.pages.LogoutPage;
-import com.commafeed.frontend.pages.PagesSecurityCheck;
-import com.commafeed.frontend.pages.WelcomePage;
 
 public class CommaFeedApplication extends AuthenticatedWebApplication {
 
@@ -119,8 +112,7 @@ public class CommaFeedApplication extends AuthenticatedWebApplication {
           (BeanManager) new InitialContext().lookup("java:comp/BeanManager");
       new CdiConfiguration(beanManager).setPropagation(ConversationPropagation.NONE)
           .configure(this);
-    }
-    catch (final NamingException e) {
+    } catch (final NamingException e) {
       log.warn("Could not locate bean manager. CDI is disabled.");
     }
   }

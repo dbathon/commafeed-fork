@@ -1,22 +1,19 @@
 package com.commafeed.backend.dao;
 
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.commafeed.backend.model.Feed;
 import com.commafeed.backend.model.FeedEntry;
 import com.commafeed.backend.model.FeedEntry_;
 import com.commafeed.backend.services.ApplicationSettingsService;
 import com.google.common.collect.Iterables;
+import java.util.List;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Stateless
 public class FeedEntryDAO extends GenericDAO<FeedEntry> {
@@ -29,7 +26,7 @@ public class FeedEntryDAO extends GenericDAO<FeedEntry> {
   public FeedEntry findExisting(String guid, String url, Long feedId) {
     final TypedQuery<FeedEntry> q =
         em.createQuery("select e FROM FeedEntry e "
-            + "where e.feed.id = :feedId and e.guidHash = :guidHash and e.url = :url",
+                + "where e.feed.id = :feedId and e.guidHash = :guidHash and e.url = :url",
             FeedEntry.class);
     q.setParameter("guidHash", DigestUtils.sha1Hex(guid));
     q.setParameter("url", url);

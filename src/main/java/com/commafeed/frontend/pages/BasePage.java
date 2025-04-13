@@ -1,9 +1,13 @@
 package com.commafeed.frontend.pages;
 
-import java.util.Map;
-
+import com.commafeed.backend.StartupBean;
+import com.commafeed.backend.dao.*;
+import com.commafeed.backend.model.ApplicationSettings;
+import com.commafeed.backend.model.User;
+import com.commafeed.backend.model.UserSettings;
+import com.commafeed.backend.services.ApplicationSettingsService;
+import com.commafeed.frontend.CommaFeedSession;
 import javax.inject.Inject;
-
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -11,23 +15,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.filter.HeaderResponseContainer;
 import org.apache.wicket.markup.html.TransparentWebMarkupContainer;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
-
-import com.commafeed.backend.StartupBean;
-import com.commafeed.backend.dao.FeedCategoryDAO;
-import com.commafeed.backend.dao.FeedDAO;
-import com.commafeed.backend.dao.FeedEntryDAO;
-import com.commafeed.backend.dao.FeedEntryStatusDAO;
-import com.commafeed.backend.dao.FeedSubscriptionDAO;
-import com.commafeed.backend.dao.UserDAO;
-import com.commafeed.backend.dao.UserRoleDAO;
-import com.commafeed.backend.dao.UserSettingsDAO;
-import com.commafeed.backend.model.ApplicationSettings;
-import com.commafeed.backend.model.User;
-import com.commafeed.backend.model.UserSettings;
-import com.commafeed.backend.services.ApplicationSettingsService;
-import com.commafeed.frontend.CommaFeedSession;
 
 @SuppressWarnings("serial")
 public abstract class BasePage extends WebPage {

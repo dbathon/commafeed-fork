@@ -5,7 +5,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +29,7 @@ public class FeedRefreshExecutor {
                 final Task task = (Task) r;
                 if (task.isUrgent()) {
                   return offerFirst(r);
-                }
-                else {
+                } else {
                   return offerLast(r);
                 }
               }
@@ -42,12 +40,10 @@ public class FeedRefreshExecutor {
         final Task task = (Task) r;
         if (task.isUrgent()) {
           queue.putFirst(r);
-        }
-        else {
+        } else {
           queue.put(r);
         }
-      }
-      catch (final InterruptedException e1) {
+      } catch (final InterruptedException e1) {
         log.error(poolName + " interrupted while waiting for queue.", e1);
       }
     });
@@ -75,8 +71,7 @@ public class FeedRefreshExecutor {
     while (!pool.isTerminated()) {
       try {
         Thread.sleep(100);
-      }
-      catch (final InterruptedException e) {
+      } catch (final InterruptedException e) {
         log.error("{} interrupted while waiting for threads to finish.", poolName);
       }
     }

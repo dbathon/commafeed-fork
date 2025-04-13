@@ -1,19 +1,16 @@
 package com.commafeed.backend.services;
 
+import com.commafeed.backend.dao.UserDAO;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
-
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.commafeed.backend.dao.UserDAO;
 
 // http://www.javacodegeeks.com/2012/05/secure-password-storage-donts-dos-and.html
 @SuppressWarnings("serial")
@@ -27,8 +24,7 @@ public class PasswordEncryptionService implements Serializable {
     byte[] encryptedAttemptedPassword = null;
     try {
       encryptedAttemptedPassword = getEncryptedPassword(attemptedPassword, salt);
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       // should never happen
       log.error(e.getMessage(), e);
     }
@@ -59,8 +55,7 @@ public class PasswordEncryptionService implements Serializable {
       final SecretKeyFactory f = SecretKeyFactory.getInstance(algorithm);
       final SecretKey key = f.generateSecret(spec);
       bytes = key.getEncoded();
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       // should never happen
       log.error(e.getMessage(), e);
     }
@@ -77,8 +72,7 @@ public class PasswordEncryptionService implements Serializable {
       // Generate a 8 byte (64 bit) salt as recommended by RSA PKCS5
       salt = new byte[8];
       random.nextBytes(salt);
-    }
-    catch (final NoSuchAlgorithmException e) {
+    } catch (final NoSuchAlgorithmException e) {
       // should never happen
       log.error(e.getMessage(), e);
     }

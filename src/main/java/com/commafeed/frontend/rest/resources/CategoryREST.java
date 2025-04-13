@@ -1,27 +1,5 @@
 package com.commafeed.frontend.rest.resources;
 
-import java.io.StringWriter;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.commafeed.backend.dao.FeedCategoryDAO;
 import com.commafeed.backend.dao.FeedEntryStatusDAO;
 import com.commafeed.backend.dao.FeedSubscriptionDAO;
@@ -32,16 +10,8 @@ import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserRole.Role;
 import com.commafeed.backend.model.UserSettings.ReadingOrder;
 import com.commafeed.backend.services.FeedSubscriptionService;
-import com.commafeed.frontend.model.Category;
-import com.commafeed.frontend.model.Entries;
-import com.commafeed.frontend.model.Entry;
-import com.commafeed.frontend.model.Subscription;
-import com.commafeed.frontend.model.UnreadCount;
-import com.commafeed.frontend.model.request.AddCategoryRequest;
-import com.commafeed.frontend.model.request.CategoryModificationRequest;
-import com.commafeed.frontend.model.request.CollapseRequest;
-import com.commafeed.frontend.model.request.IDRequest;
-import com.commafeed.frontend.model.request.MarkRequest;
+import com.commafeed.frontend.model.*;
+import com.commafeed.frontend.model.request.*;
 import com.commafeed.frontend.rest.Enums.ReadType;
 import com.commafeed.frontend.rest.RestSecurityCheck;
 import com.google.common.base.Preconditions;
@@ -55,6 +25,20 @@ import com.sun.syndication.io.SyndFeedOutput;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
+import java.io.StringWriter;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Path("/category")
 @Api(value = "/category", description = "Operations about user categories")
@@ -110,8 +94,7 @@ public class CategoryREST extends AbstractREST {
         list =
             feedEntryStatusDAO.findAllUnread(getUser(), newerThanDate, offset, limit + 1, order,
                 true);
-      }
-      else {
+      } else {
         list =
             feedEntryStatusDAO.findBySubscriptions(subscriptions, null, newerThanDate, offset,
                 limit + 1, order, true);
@@ -122,8 +105,7 @@ public class CategoryREST extends AbstractREST {
                 applicationSettingsService.get().isImageProxyEnabled()));
       }
 
-    }
-    else if (STARRED.equals(id)) {
+    } else if (STARRED.equals(id)) {
       entries.setName("Starred");
       final List<FeedEntryStatus> starred =
           feedEntryStatusDAO.findStarred(getUser(), newerThanDate, offset, limit + 1, order, true);
@@ -132,8 +114,7 @@ public class CategoryREST extends AbstractREST {
             Entry.build(status, applicationSettingsService.get().getPublicUrl(),
                 applicationSettingsService.get().isImageProxyEnabled()));
       }
-    }
-    else {
+    } else {
       final FeedCategory parent = feedCategoryDAO.findById(getUser(), Long.valueOf(id));
       if (parent != null) {
         final List<FeedCategory> categories =
@@ -145,8 +126,7 @@ public class CategoryREST extends AbstractREST {
           list =
               feedEntryStatusDAO.findUnreadBySubscriptions(subs, newerThanDate, offset, limit + 1,
                   order, true);
-        }
-        else {
+        } else {
           list =
               feedEntryStatusDAO.findBySubscriptions(subs, null, newerThanDate, offset, limit + 1,
                   order, true);
@@ -206,8 +186,7 @@ public class CategoryREST extends AbstractREST {
     final StringWriter writer = new StringWriter();
     try {
       output.output(feed, writer);
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       writer.write("Could not get feed information");
       log.error(e.getMessage(), e);
     }
@@ -227,11 +206,9 @@ public class CategoryREST extends AbstractREST {
 
     if (ALL.equals(req.getId())) {
       feedEntryStatusDAO.markAllEntries(getUser(), olderThan);
-    }
-    else if (STARRED.equals(req.getId())) {
+    } else if (STARRED.equals(req.getId())) {
       feedEntryStatusDAO.markStarredEntries(getUser(), olderThan);
-    }
-    else {
+    } else {
       final FeedCategory parent = feedCategoryDAO.findById(getUser(), Long.valueOf(req.getId()));
       final List<FeedCategory> categories =
           feedCategoryDAO.findAllChildrenCategories(getUser(), parent);
@@ -289,8 +266,7 @@ public class CategoryREST extends AbstractREST {
 
       feedCategoryDAO.delete(cat);
       return Response.ok().build();
-    }
-    else {
+    } else {
       return Response.status(Status.NOT_FOUND).build();
     }
   }
@@ -335,8 +311,7 @@ public class CategoryREST extends AbstractREST {
         categories.get(i).setPosition(i);
       }
       feedCategoryDAO.saveOrUpdate(categories);
-    }
-    else {
+    } else {
       feedCategoryDAO.saveOrUpdate(category);
     }
 
@@ -393,7 +368,7 @@ public class CategoryREST extends AbstractREST {
   }
 
   private Category buildCategory(Long id, List<FeedCategory> categories,
-      List<FeedSubscription> subscriptions, Map<Long, Long> unreadCount) {
+                                 List<FeedSubscription> subscriptions, Map<Long, Long> unreadCount) {
     final Category category = new Category();
     category.setId(String.valueOf(id));
     category.setExpanded(true);
@@ -421,7 +396,7 @@ public class CategoryREST extends AbstractREST {
     for (final FeedSubscription subscription : subscriptions) {
       if ((id == null && subscription.getCategory() == null)
           || (subscription.getCategory() != null && ObjectUtils.equals(subscription.getCategory()
-              .getId(), id))) {
+          .getId(), id))) {
         final Long size = unreadCount.get(subscription.getId());
         final long unread = size == null ? 0 : size;
         final Subscription sub =

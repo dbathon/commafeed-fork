@@ -1,14 +1,14 @@
 /*
  * This class is adopted from crawler4j with the following copyright:
- * 
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
  * agreements. See the NOTICE file distributed with this work for additional information regarding
  * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License. You may obtain a
  * copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -17,12 +17,7 @@
 
 package com.commafeed.backend.feeds;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -31,7 +26,7 @@ import java.util.TreeMap;
 /**
  * See http://en.wikipedia.org/wiki/URL_normalization for a reference Note: some parts of the code
  * are adapted from: http://stackoverflow.com/a/4057470/405418
- * 
+ *
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
  */
 public class URLCanonicalizer {
@@ -83,8 +78,7 @@ public class URLCanonicalizer {
       if (params != null && params.size() > 0) {
         final String canonicalParams = canonicalize(params);
         queryString = (canonicalParams.isEmpty() ? "" : "?" + canonicalParams);
-      }
-      else {
+      } else {
         queryString = "";
       }
 
@@ -109,11 +103,9 @@ public class URLCanonicalizer {
       final URL result = new URL(protocol, host, port, pathAndQueryString);
       return result.toExternalForm();
 
-    }
-    catch (final MalformedURLException ex) {
+    } catch (final MalformedURLException ex) {
       return null;
-    }
-    catch (final URISyntaxException ex) {
+    } catch (final URISyntaxException ex) {
       return null;
     }
   }
@@ -121,7 +113,7 @@ public class URLCanonicalizer {
   /**
    * Takes a query string, separates the constituent name-value pairs, and stores them in a
    * SortedMap ordered by lexicographical order.
-   * 
+   *
    * @return Null if there is no query string.
    */
   private static SortedMap<String, String> createParameterMap(final String queryString) {
@@ -139,17 +131,16 @@ public class URLCanonicalizer {
 
       final String[] tokens = pair.split("=", 2);
       switch (tokens.length) {
-      case 1:
-        if (pair.charAt(0) == '=') {
-          params.put("", tokens[0]);
-        }
-        else {
-          params.put(tokens[0], "");
-        }
-        break;
-      case 2:
-        params.put(tokens[0], tokens[1]);
-        break;
+        case 1:
+          if (pair.charAt(0) == '=') {
+            params.put("", tokens[0]);
+          } else {
+            params.put(tokens[0], "");
+          }
+          break;
+        case 2:
+          params.put(tokens[0], tokens[1]);
+          break;
       }
     }
     return new TreeMap<>(params);
@@ -157,9 +148,8 @@ public class URLCanonicalizer {
 
   /**
    * Canonicalize the query string.
-   * 
-   * @param sortedParamMap
-   *          Parameter name-value pairs in lexicographical order.
+   *
+   * @param sortedParamMap Parameter name-value pairs in lexicographical order.
    * @return Canonical form of query string.
    */
   private static String canonicalize(final SortedMap<String, String> sortedParamMap) {
@@ -188,9 +178,8 @@ public class URLCanonicalizer {
   /**
    * Percent-encode values according the RFC 3986. The built-in Java URLEncoder does not encode
    * according to the RFC, so we make the extra replacements.
-   * 
-   * @param string
-   *          Decoded string.
+   *
+   * @param string Decoded string.
    * @return Encoded string per RFC 3986.
    */
   private static String percentEncodeRfc3986(String string) {
@@ -199,8 +188,7 @@ public class URLCanonicalizer {
       string = URLDecoder.decode(string, "UTF-8");
       string = URLEncoder.encode(string, "UTF-8");
       return string.replace("+", "%20").replace("*", "%2A").replace("%7E", "~");
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       return string;
     }
   }

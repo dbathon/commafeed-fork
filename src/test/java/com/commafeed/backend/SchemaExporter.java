@@ -1,20 +1,18 @@
 package com.commafeed.backend;
 
+import com.commafeed.backend.hibernate.CommafeedPostgreSQL9Dialect;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.hbm2ddl.SchemaExport.Type;
 import org.hibernate.tool.hbm2ddl.Target;
-
-import com.commafeed.backend.hibernate.CommafeedPostgreSQL9Dialect;
 
 public class SchemaExporter {
 
@@ -29,15 +27,14 @@ public class SchemaExporter {
         .filter(Matcher::matches).map(matcher -> {
           try {
             return Class.forName(packageName + "." + matcher.group(1));
-          }
-          catch (final ClassNotFoundException e) {
+          } catch (final ClassNotFoundException e) {
             throw new RuntimeException(e);
           }
         });
   }
 
   private static void exportSchema(final Class<? extends Dialect> dialectClass,
-      final String dialectName) {
+                                   final String dialectName) {
     final Configuration configuration = new Configuration();
     configuration.setProperty(AvailableSettings.DIALECT, dialectClass.getName());
     configuration.setProperty(AvailableSettings.USE_NEW_ID_GENERATOR_MAPPINGS, "true");

@@ -1,12 +1,12 @@
 /*
  * This class is adopted from Htmlunit with the following copyright:
- * 
+ *
  * Copyright (c) 2002-2012 Gargoyle Software Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -20,11 +20,9 @@ public final class UrlResolver {
   /**
    * Resolves a given relative URL against a base URL. See <a
    * href="http://www.faqs.org/rfcs/rfc1808.html">RFC1808</a> Section 4 for more details.
-   * 
-   * @param baseUrl
-   *          The base URL in which to resolve the specification.
-   * @param relativeUrl
-   *          The relative URL to resolve against the base URL.
+   *
+   * @param baseUrl     The base URL in which to resolve the specification.
+   * @param relativeUrl The relative URL to resolve against the base URL.
    * @return the resolved specification.
    */
   public static String resolveUrl(final String baseUrl, final String relativeUrl) {
@@ -43,18 +41,14 @@ public final class UrlResolver {
    * Returns the index within the specified string of the first occurrence of the specified search
    * character.
    *
-   * @param s
-   *          the string to search
-   * @param searchChar
-   *          the character to search for
-   * @param beginIndex
-   *          the index at which to start the search
-   * @param endIndex
-   *          the index at which to stop the search
+   * @param s          the string to search
+   * @param searchChar the character to search for
+   * @param beginIndex the index at which to start the search
+   * @param endIndex   the index at which to stop the search
    * @return the index of the first occurrence of the character in the string or <tt>-1</tt>
    */
   private static int indexOf(final String s, final char searchChar, final int beginIndex,
-      final int endIndex) {
+                             final int endIndex) {
     for (int i = beginIndex; i < endIndex; i++) {
       if (s.charAt(i) == searchChar) {
         return i;
@@ -73,8 +67,7 @@ public final class UrlResolver {
    * any surrounding text and copied to a "parse string". The rules are listed in the order in which
    * they would be applied by the parser.
    *
-   * @param spec
-   *          The specification to parse.
+   * @param spec The specification to parse.
    * @return the parsed specification.
    */
   private static Url parseUrl(final String spec) {
@@ -140,8 +133,7 @@ public final class UrlResolver {
       if (locationEndIndex >= 0) {
         startIndex = locationEndIndex;
       }
-    }
-    else {
+    } else {
       locationStartIndex = -1;
       locationEndIndex = -1;
     }
@@ -200,8 +192,7 @@ public final class UrlResolver {
       // The entire remaining parse string is assigned to the network
       // location/login (<net_loc>) of the URL.
       locationEndIndex = endIndex;
-    }
-    else if (startIndex < endIndex) {
+    } else if (startIndex < endIndex) {
       url.path_ = spec.substring(startIndex, endIndex);
     }
     // Set the network location/login (<net_loc>) of the URL.
@@ -241,10 +232,8 @@ public final class UrlResolver {
    * author, it does guarantee that any valid URL (relative or absolute) can be consistently
    * transformed to an absolute form given a valid base URL.
    *
-   * @param baseUrl
-   *          The base URL in which to resolve the specification.
-   * @param relativeUrl
-   *          The relative URL to resolve against the base URL.
+   * @param baseUrl     The base URL in which to resolve the specification.
+   * @param relativeUrl The relative URL to resolve against the base URL.
    * @return the resolved specification.
    */
   private static Url resolveUrl(final Url baseUrl, final String relativeUrl) {
@@ -320,8 +309,7 @@ public final class UrlResolver {
       if (lastSlashIndex >= 0) {
         path = basePath.substring(0, lastSlashIndex + 1);
       }
-    }
-    else {
+    } else {
       path = "/";
     }
     path = path.concat(url.path_);
@@ -402,13 +390,13 @@ public final class UrlResolver {
     /**
      * Creates a <tt>Url</tt> object.
      */
-    public Url() {}
+    public Url() {
+    }
 
     /**
      * Creates a <tt>Url</tt> object from the specified <tt>Url</tt> object.
      *
-     * @param url
-     *          a <tt>Url</tt> object.
+     * @param url a <tt>Url</tt> object.
      */
     public Url(final Url url) {
       scheme_ = url.scheme_;

@@ -1,9 +1,10 @@
 package com.commafeed.backend.dao;
 
+import com.commafeed.backend.model.AbstractModel;
+import com.google.common.reflect.TypeToken;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -12,17 +13,14 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.Attribute;
-
 import org.hibernate.Query;
 import org.hibernate.Session;
-
-import com.commafeed.backend.model.AbstractModel;
-import com.google.common.reflect.TypeToken;
 
 @SuppressWarnings("serial")
 public abstract class GenericDAO<T extends AbstractModel> {
 
-  private final TypeToken<T> type = new TypeToken<T>(getClass()) {};
+  private final TypeToken<T> type = new TypeToken<T>(getClass()) {
+  };
 
   @PersistenceContext
   protected EntityManager em;
@@ -92,8 +90,7 @@ public abstract class GenericDAO<T extends AbstractModel> {
 
     if (asc) {
       query.orderBy(builder.asc(root.get(orderBy)));
-    }
-    else {
+    } else {
       query.orderBy(builder.desc(root.get(orderBy)));
     }
 

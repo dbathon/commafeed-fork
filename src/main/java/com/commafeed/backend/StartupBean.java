@@ -1,22 +1,5 @@
 package com.commafeed.backend;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.annotation.PostConstruct;
-import javax.ejb.ConcurrencyManagement;
-import javax.ejb.ConcurrencyManagementType;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.inject.Inject;
-
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.commafeed.backend.dao.UserDAO;
 import com.commafeed.backend.feeds.FeedRefreshTaskGiver;
 import com.commafeed.backend.model.ApplicationSettings;
@@ -25,6 +8,20 @@ import com.commafeed.backend.services.ApplicationSettingsService;
 import com.commafeed.backend.services.FeedUpdateService;
 import com.commafeed.backend.services.UserService;
 import com.google.common.collect.Maps;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Properties;
+import javax.annotation.PostConstruct;
+import javax.ejb.ConcurrencyManagement;
+import javax.ejb.ConcurrencyManagementType;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+import javax.inject.Inject;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Startup
 @Singleton
@@ -72,11 +69,9 @@ public class StartupBean {
     try {
       is = getClass().getResourceAsStream("/i18n/languages.properties");
       props.load(new InputStreamReader(is, "UTF-8"));
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       log.error(e.getMessage(), e);
-    }
-    finally {
+    } finally {
       IOUtils.closeQuietly(is);
     }
     for (final Object key : props.keySet()) {
@@ -94,8 +89,7 @@ public class StartupBean {
     try {
       userService.register(USERNAME_ADMIN, "admin", "admin@commafeed.com",
           Arrays.asList(Role.ADMIN, Role.USER), true);
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       log.error(e.getMessage(), e);
     }
   }

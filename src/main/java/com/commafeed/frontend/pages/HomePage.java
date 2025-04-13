@@ -1,13 +1,12 @@
 package com.commafeed.frontend.pages;
 
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import com.commafeed.backend.model.UserRole.Role;
 import com.commafeed.backend.model.UserSettings;
 import com.commafeed.frontend.CommaFeedSession;
 import com.commafeed.frontend.resources.UserCustomCssReference;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 @SuppressWarnings("serial")
 @PagesSecurityCheck(Role.USER)

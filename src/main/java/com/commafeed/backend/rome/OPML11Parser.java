@@ -1,9 +1,8 @@
 package com.commafeed.backend.rome;
 
+import com.sun.syndication.io.impl.OPML10Parser;
 import org.jdom.Document;
 import org.jdom.Element;
-
-import com.sun.syndication.io.impl.OPML10Parser;
 
 public class OPML11Parser extends OPML10Parser {
 

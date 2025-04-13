@@ -1,14 +1,13 @@
 package com.commafeed.backend.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
-
 import com.commafeed.backend.dao.SearchStringParser.ParsedSearch;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.SetMultimap;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SearchStringParserTest {
 
@@ -19,7 +18,7 @@ public class SearchStringParserTest {
   }
 
   private void testWithOptions(String searchString, SetMultimap<String, String> options,
-      String... terms) {
+                               String... terms) {
     final ParsedSearch result = SearchStringParser.parse(searchString);
     assertEquals(ImmutableSet.copyOf(terms), result.terms);
     assertEquals(options, result.options);

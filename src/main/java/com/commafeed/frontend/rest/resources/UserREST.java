@@ -1,16 +1,5 @@
 package com.commafeed.frontend.rest.resources;
 
-import java.util.Arrays;
-
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import org.apache.commons.lang.StringUtils;
-
 import com.commafeed.backend.StartupBean;
 import com.commafeed.backend.dao.UserDAO;
 import com.commafeed.backend.dao.UserRoleDAO;
@@ -33,6 +22,14 @@ import com.google.common.base.Preconditions;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
+import java.util.Arrays;
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import org.apache.commons.lang.StringUtils;
 
 @Path("/user")
 @Api(value = "/user", description = "Operations about the user")
@@ -73,8 +70,7 @@ public class UserREST extends AbstractREST {
       s.setTheme(settings.getTheme());
       s.setCustomCss(settings.getCustomCss());
       s.setLanguage(settings.getLanguage());
-    }
-    else {
+    } else {
       s.setReadingMode(ReadingMode.unread.name());
       s.setReadingOrder(ReadingOrder.desc.name());
       s.setViewMode(ViewMode.title.name());
@@ -172,8 +168,7 @@ public class UserREST extends AbstractREST {
       userService.register(req.getName(), req.getPassword(), req.getEmail(),
           Arrays.asList(Role.USER));
       return Response.ok().build();
-    }
-    catch (final Exception e) {
+    } catch (final Exception e) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     }
 

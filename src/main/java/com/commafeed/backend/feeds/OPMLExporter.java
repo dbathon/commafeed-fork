@@ -1,11 +1,5 @@
 package com.commafeed.backend.feeds;
 
-import java.util.Date;
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import com.commafeed.backend.dao.FeedCategoryDAO;
 import com.commafeed.backend.dao.FeedSubscriptionDAO;
 import com.commafeed.backend.model.FeedCategory;
@@ -14,6 +8,10 @@ import com.commafeed.backend.model.User;
 import com.sun.syndication.feed.opml.Attribute;
 import com.sun.syndication.feed.opml.Opml;
 import com.sun.syndication.feed.opml.Outline;
+import java.util.Date;
+import java.util.List;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 
 @Stateless
 public class OPMLExporter {

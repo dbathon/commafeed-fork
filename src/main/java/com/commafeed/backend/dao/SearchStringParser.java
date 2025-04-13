@@ -1,15 +1,14 @@
 package com.commafeed.backend.dao;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.SetMultimap;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SearchStringParser {
 
@@ -29,7 +28,7 @@ public class SearchStringParser {
   }
 
   private static void processTerm(StringBuilder currentTerm, int firstQuoteIndex,
-      Set<String> terms, SetMultimap<String, String> options) {
+                                  Set<String> terms, SetMultimap<String, String> options) {
     final String term = currentTerm.toString();
     final Matcher optionMatcher = OPTION_PATTERN.matcher(term);
     if (optionMatcher.matches()) {
@@ -38,12 +37,10 @@ public class SearchStringParser {
       if (firstQuoteIndex >= 0 && firstQuoteIndex < optionKey.length() + 1) {
         // if a part of the key (including the colon) is quoted, then it is not an option
         terms.add(term);
-      }
-      else {
+      } else {
         options.put(optionKey, optionValue);
       }
-    }
-    else {
+    } else {
       // just a normal term
       terms.add(term);
     }
@@ -70,33 +67,28 @@ public class SearchStringParser {
       if (Character.isWhitespace(cur)) {
         if (inQuotes) {
           currentTerm.append(cur);
-        }
-        else if (currentTerm.length() > 0) {
+        } else if (currentTerm.length() > 0) {
           processTerm(currentTerm, firstQuoteIndex, terms, options);
 
           // reset
           currentTerm = new StringBuilder();
           firstQuoteIndex = -1;
         }
-      }
-      else if (cur == '"' || cur == '\'') {
+      } else if (cur == '"' || cur == '\'') {
         if (inQuotes) {
           if (cur == quoteChar) {
             if (next == cur) {
               // escaped quotation mark, add and skip next
               currentTerm.append(cur);
               ++i;
-            }
-            else {
+            } else {
               // end of quotes
               inQuotes = false;
             }
-          }
-          else {
+          } else {
             currentTerm.append(cur);
           }
-        }
-        else {
+        } else {
           // start of quotes
           quoteChar = cur;
           inQuotes = true;
@@ -104,8 +96,7 @@ public class SearchStringParser {
             firstQuoteIndex = currentTerm.length();
           }
         }
-      }
-      else {
+      } else {
         currentTerm.append(cur);
       }
     }

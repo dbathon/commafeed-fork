@@ -1,7 +1,6 @@
 package com.commafeed.frontend.resources;
 
 import java.io.IOException;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.apache.wicket.request.resource.IResource;
