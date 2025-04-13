@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import com.commafeed.frontend.pages.HomePage;
 import com.commafeed.frontend.pages.LogoutPage;
-import com.commafeed.frontend.pages.NextUnreadRedirectPage;
 import com.commafeed.frontend.pages.PagesSecurityCheck;
 import com.commafeed.frontend.pages.PasswordRecoveryCallbackPage;
 import com.commafeed.frontend.pages.PasswordRecoveryPage;
@@ -67,8 +66,6 @@ public class CommaFeedApplication extends AuthenticatedWebApplication {
 
     mountPage("logout", LogoutPage.class);
     mountPage("error", DisplayExceptionPage.class);
-
-    mountPage("next", NextUnreadRedirectPage.class);
 
     setupInjection();
     setupSecurity();
