@@ -4,7 +4,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -29,8 +28,6 @@ import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserSettings;
 import com.commafeed.backend.services.ApplicationSettingsService;
 import com.commafeed.frontend.CommaFeedSession;
-import com.commafeed.frontend.utils.WicketUtils;
-import com.google.common.collect.Maps;
 
 @SuppressWarnings("serial")
 public abstract class BasePage extends WebPage {
@@ -104,12 +101,5 @@ public abstract class BasePage extends WebPage {
     final String suffix = production ? "?" + startupBean.getStartupTime() : "";
     response.render(JavaScriptHeaderItem.forUrl("static/all.js" + suffix));
     response.render(CssHeaderItem.forUrl("static/all.css" + suffix));
-
-    if (StringUtils.isNotBlank(settings.getGoogleAnalyticsTrackingCode())) {
-      final Map<String, Object> vars = Maps.newHashMap();
-      vars.put("trackingCode", settings.getGoogleAnalyticsTrackingCode());
-      WicketUtils.loadJS(response, BasePage.class, "analytics", vars);
-    }
-
   }
 }
