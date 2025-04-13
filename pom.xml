@@ -17,7 +17,6 @@
     <production>false</production>
     <jpa.show_sql>false</jpa.show_sql>
     <jpa.datasource.name>java:jboss/datasources/CommafeedDS</jpa.datasource.name>
-    <jpa.table.encoding>utf8mb4</jpa.table.encoding>
   </properties>
 
   <build>
