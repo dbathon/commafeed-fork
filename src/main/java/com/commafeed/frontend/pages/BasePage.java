@@ -83,13 +83,6 @@ public abstract class BasePage extends WebPage {
 
     settings = applicationSettingsService.get();
     add(new HeaderResponseContainer("footer-container", "footer-container"));
-    add(new WebMarkupContainer("uservoice") {
-      @Override
-      protected void onConfigure() {
-        super.onConfigure();
-        setVisibilityAllowed(settings.isFeedbackButton());
-      }
-    });
   }
 
   @Override
