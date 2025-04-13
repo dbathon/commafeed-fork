@@ -24,3 +24,5 @@ deployments/ROOT.war
 
 # Macs
 *.DS_Store
+
+*.local
