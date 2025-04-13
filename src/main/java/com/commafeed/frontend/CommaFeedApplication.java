@@ -39,8 +39,6 @@ import org.slf4j.LoggerFactory;
 import com.commafeed.frontend.pages.HomePage;
 import com.commafeed.frontend.pages.LogoutPage;
 import com.commafeed.frontend.pages.PagesSecurityCheck;
-import com.commafeed.frontend.pages.PasswordRecoveryCallbackPage;
-import com.commafeed.frontend.pages.PasswordRecoveryPage;
 import com.commafeed.frontend.pages.WelcomePage;
 import com.commafeed.frontend.utils.exception.DisplayExceptionPage;
 
@@ -60,9 +58,6 @@ public class CommaFeedApplication extends AuthenticatedWebApplication {
     super.init();
 
     mountPage("welcome", WelcomePage.class);
-
-    mountPage("recover", PasswordRecoveryPage.class);
-    mountPage("recover2", PasswordRecoveryCallbackPage.class);
 
     mountPage("logout", LogoutPage.class);
     mountPage("error", DisplayExceptionPage.class);

@@ -28,7 +28,6 @@ import com.commafeed.backend.model.ApplicationSettings;
 import com.commafeed.backend.model.User;
 import com.commafeed.backend.model.UserSettings;
 import com.commafeed.backend.services.ApplicationSettingsService;
-import com.commafeed.backend.services.MailService;
 import com.commafeed.frontend.CommaFeedSession;
 import com.commafeed.frontend.utils.WicketUtils;
 import com.google.common.collect.Maps;
@@ -62,9 +61,6 @@ public abstract class BasePage extends WebPage {
 
   @Inject
   protected UserRoleDAO userRoleDAO;
-
-  @Inject
-  protected MailService mailService;
 
   @Inject
   protected ApplicationSettingsService applicationSettingsService;
