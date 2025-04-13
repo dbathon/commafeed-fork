@@ -12,7 +12,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.authentication.strategy.DefaultAuthenticationStrategy;
 import org.apache.wicket.authorization.Action;
 import org.apache.wicket.authorization.IAuthorizationStrategy;
@@ -21,17 +20,11 @@ import org.apache.wicket.authroles.authentication.AuthenticatedWebApplication;
 import org.apache.wicket.authroles.authorization.strategies.role.Roles;
 import org.apache.wicket.cdi.CdiConfiguration;
 import org.apache.wicket.cdi.ConversationPropagation;
-import org.apache.wicket.core.request.handler.PageProvider;
-import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
-import org.apache.wicket.core.request.handler.RenderPageRequestHandler.RedirectPolicy;
 import org.apache.wicket.markup.head.filter.JavaScriptFilteredIntoFooterHeaderResponse;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.request.component.IRequestableComponent;
-import org.apache.wicket.request.cycle.AbstractRequestCycleListener;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.cookies.CookieUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +33,6 @@ import com.commafeed.frontend.pages.HomePage;
 import com.commafeed.frontend.pages.LogoutPage;
 import com.commafeed.frontend.pages.PagesSecurityCheck;
 import com.commafeed.frontend.pages.WelcomePage;
-import com.commafeed.frontend.utils.exception.DisplayExceptionPage;
 
 public class CommaFeedApplication extends AuthenticatedWebApplication {
 
@@ -60,7 +52,6 @@ public class CommaFeedApplication extends AuthenticatedWebApplication {
     mountPage("welcome", WelcomePage.class);
 
     mountPage("logout", LogoutPage.class);
-    mountPage("error", DisplayExceptionPage.class);
 
     setupInjection();
     setupSecurity();
@@ -71,18 +62,6 @@ public class CommaFeedApplication extends AuthenticatedWebApplication {
 
     setHeaderResponseDecorator(response -> new JavaScriptFilteredIntoFooterHeaderResponse(response,
         "footer-container"));
-
-    getRequestCycleListeners().add(new AbstractRequestCycleListener() {
-      @Override
-      public IRequestHandler onException(RequestCycle cycle, Exception ex) {
-        final AjaxRequestTarget target = cycle.find(AjaxRequestTarget.class);
-        // redirect to the error page if ajax request, render error on
-        // current page otherwise
-        final RedirectPolicy policy =
-            target == null ? RedirectPolicy.NEVER_REDIRECT : RedirectPolicy.AUTO_REDIRECT;
-        return new RenderPageRequestHandler(new PageProvider(new DisplayExceptionPage(ex)), policy);
-      }
-    });
   }
 
   private void setupSecurity() {
