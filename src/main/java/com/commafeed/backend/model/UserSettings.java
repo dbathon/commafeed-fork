@@ -7,7 +7,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -62,8 +61,7 @@ public class UserSettings extends AbstractModel {
   @Column(length = 32)
   private String theme;
 
-  @Lob
-  @Column(length = Integer.MAX_VALUE)
+  @Column(length = Integer.MAX_VALUE, columnDefinition = "text")
   private String customCss;
 
   public ReadingMode getReadingMode() {

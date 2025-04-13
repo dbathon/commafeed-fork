@@ -6,7 +6,6 @@ import java.util.TreeSet;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Cache;
@@ -27,15 +26,13 @@ public class FeedEntryContent extends AbstractModel {
   @Column(length = 2048)
   private String title;
 
-  @Lob
-  @Column(length = Integer.MAX_VALUE)
+  @Column(length = Integer.MAX_VALUE, columnDefinition = "text")
   private String content;
 
   /**
    * The "words" extracted from title and content for full text search.
    */
-  @Lob
-  @Column(length = Integer.MAX_VALUE)
+  @Column(length = Integer.MAX_VALUE, columnDefinition = "text")
   private String searchText;
 
   @Column(length = 2048)
