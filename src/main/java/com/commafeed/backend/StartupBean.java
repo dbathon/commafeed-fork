@@ -33,7 +33,6 @@ public class StartupBean {
 
   private static Logger log = LoggerFactory.getLogger(StartupBean.class);
   public static final String USERNAME_ADMIN = "admin";
-  public static final String USERNAME_DEMO = "demo";
 
   @Inject
   private UserDAO userDAO;
@@ -95,8 +94,6 @@ public class StartupBean {
     try {
       userService.register(USERNAME_ADMIN, "admin", "admin@commafeed.com",
           Arrays.asList(Role.ADMIN, Role.USER), true);
-      userService.register(USERNAME_DEMO, "demo", "demo@commafeed.com", Arrays.asList(Role.USER),
-          true);
     }
     catch (final Exception e) {
       log.error(e.getMessage(), e);

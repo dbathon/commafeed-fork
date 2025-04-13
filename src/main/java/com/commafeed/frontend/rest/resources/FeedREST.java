@@ -484,10 +484,6 @@ public class FeedREST extends AbstractREST {
           .entity("Set the public URL in the admin section.").build());
     }
 
-    if (StartupBean.USERNAME_DEMO.equals(getUser().getName())) {
-      return Response.status(Status.FORBIDDEN).entity("Import is disabled for the demo account")
-          .build();
-    }
     try {
       final FileItemFactory factory = new DiskFileItemFactory(1000000, null);
       final ServletFileUpload upload = new ServletFileUpload(factory);

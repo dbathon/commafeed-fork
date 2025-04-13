@@ -36,7 +36,6 @@ import org.apache.wicket.util.cookies.CookieUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.commafeed.frontend.pages.DemoLoginPage;
 import com.commafeed.frontend.pages.HomePage;
 import com.commafeed.frontend.pages.LogoutPage;
 import com.commafeed.frontend.pages.NextUnreadRedirectPage;
@@ -62,7 +61,6 @@ public class CommaFeedApplication extends AuthenticatedWebApplication {
     super.init();
 
     mountPage("welcome", WelcomePage.class);
-    mountPage("demo", DemoLoginPage.class);
 
     mountPage("recover", PasswordRecoveryPage.class);
     mountPage("recover2", PasswordRecoveryCallbackPage.class);

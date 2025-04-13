@@ -149,10 +149,6 @@ public class UserREST extends AbstractREST {
       Preconditions.checkArgument(u == null || user.getId().equals(u.getId()));
     }
 
-    if (StartupBean.USERNAME_DEMO.equals(user.getName())) {
-      return Response.status(Status.FORBIDDEN).build();
-    }
-
     user.setEmail(StringUtils.trimToNull(request.getEmail()));
     if (StringUtils.isNotBlank(request.getPassword())) {
       final byte[] password =
@@ -187,8 +183,7 @@ public class UserREST extends AbstractREST {
   @POST
   @ApiOperation(value = "Delete the user account")
   public Response delete() {
-    if (StartupBean.USERNAME_ADMIN.equals(getUser().getName())
-        || StartupBean.USERNAME_DEMO.equals(getUser().getName())) {
+    if (StartupBean.USERNAME_ADMIN.equals(getUser().getName())) {
       return Response.status(Status.FORBIDDEN).build();
     }
     userService.unregister(getUser());
