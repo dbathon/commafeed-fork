@@ -38,7 +38,6 @@ public class ServerREST extends AbstractREST {
     infos.setAnnouncement(applicationSettingsService.get().getAnnouncement());
     infos.getSupportedLanguages().putAll(startupBean.getSupportedLanguages());
     infos.setVersion(properties.getVersion());
-    infos.setGitCommit(properties.getGitCommit());
     return Response.ok(infos).build();
   }
 

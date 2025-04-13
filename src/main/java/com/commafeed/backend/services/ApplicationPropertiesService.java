@@ -24,10 +24,6 @@ public class ApplicationPropertiesService {
     return bundle.getString("version");
   }
 
-  public String getGitCommit() {
-    return bundle.getString("git.commit");
-  }
-
   public boolean isProduction() {
     return Boolean.valueOf(bundle.getString("production"));
   }
